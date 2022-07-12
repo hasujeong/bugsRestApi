@@ -1,10 +1,12 @@
 package com.diquest.rest.nhn.service.error;
 
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.diquest.ir.common.msg.ext.body.common.ErrorMessage;
 import com.diquest.ir.rest.common.exception.InvalidParameterException;
-import com.diquest.ir.rest.common.object.RestHttpRequest;
-import com.diquest.ir.rest.server.log.ServerLogManager;
-import com.diquest.rest.nhn.service.filter.FilterSetService;
 
 public class ErrorMessageService {
 	private static ErrorMessageService instance = null;
@@ -15,38 +17,40 @@ public class ErrorMessageService {
 		}
 		return instance;
 	}
+	
+	private static final Logger logger = LoggerFactory.getLogger(logMessageService.class);
 
 	public void minusReturnCodeLog(int returnCode, ErrorMessage exception, String req) {
-		ServerLogManager.getInstance().error("-------------------Command Search Request Error Log Start-------------------");
-		ServerLogManager.getInstance().error("-------------------Error Request -------------------");
-		ServerLogManager.getInstance().error(req);
-		ServerLogManager.getInstance().error("-------------------Error Request End-------------------");
-		ServerLogManager.getInstance().error("-------------------Error Message Start-------------------");
-		ServerLogManager.getInstance().error("returnCode : " + returnCode);
-		ServerLogManager.getInstance().error(exception.getStackTrace());
-		ServerLogManager.getInstance().error("-------------------Error Message End-------------------");
-		ServerLogManager.getInstance().error("-------------------Command Search Request Error Log End-------------------");
+		logger.error("-------------------Command Search Request Error Log Start-------------------");
+		logger.error("-------------------Error Request -------------------");
+		logger.error(req);
+		logger.error("-------------------Error Request End-------------------");
+		logger.error("-------------------Error Message Start-------------------");
+		logger.error("returnCode : " + returnCode);
+		logger.error(exception.getStackTrace());
+		logger.error("-------------------Error Message End-------------------");
+		logger.error("-------------------Command Search Request Error Log End-------------------");
 	}
 
 	public void invalidParameterLog(String req, InvalidParameterException e) {
-		ServerLogManager.getInstance().error("-------------------Invalid Parameter Error Log Start-------------------");
-		ServerLogManager.getInstance().error("-------------------Error Request -------------------");
-		ServerLogManager.getInstance().error(req);
-		ServerLogManager.getInstance().error("-------------------Error Request End-------------------");
-		ServerLogManager.getInstance().error("-------------------Error Message Start-------------------");
-		ServerLogManager.getInstance().error("", e);
-		ServerLogManager.getInstance().error("-------------------Error Message End-------------------");
-		ServerLogManager.getInstance().error("-------------------Invalid Parameter Error Log End-------------------");
+		logger.error("-------------------Invalid Parameter Error Log Start-------------------");
+		logger.error("-------------------Error Request -------------------");
+		logger.error(req);
+		logger.error("-------------------Error Request End-------------------");
+		logger.error("-------------------Error Message Start-------------------");
+		logger.error("", e);
+		logger.error("-------------------Error Message End-------------------");
+		logger.error("-------------------Invalid Parameter Error Log End-------------------");
 	}
 
 	public void InternalServerErrorLog(String req, Exception e) {
-		ServerLogManager.getInstance().error("-------------------Internal Server Error Log Start-------------------");
-		ServerLogManager.getInstance().error("-------------------Error Request -------------------");
-		ServerLogManager.getInstance().error(req);
-		ServerLogManager.getInstance().error("-------------------Error Request End-------------------");
-		ServerLogManager.getInstance().error("-------------------Error Message Start-------------------");
-		ServerLogManager.getInstance().error("", e);
-		ServerLogManager.getInstance().error("-------------------Error Message End-------------------");
-		ServerLogManager.getInstance().error("-------------------Internal Server Error Log End-------------------");
+		logger.error("-------------------Internal Server Error Log Start-------------------");
+		logger.error("-------------------Error Request -------------------");
+		logger.error(req);
+		logger.error("-------------------Error Request End-------------------");
+		logger.error("-------------------Error Message Start-------------------");
+		logger.error("", e);
+		logger.error("-------------------Error Message End-------------------");
+		logger.error("-------------------Internal Server Error Log End-------------------");
 	}
 }

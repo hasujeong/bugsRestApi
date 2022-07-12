@@ -1,10 +1,14 @@
 package com.diquest.service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.stereotype.Service;
 
@@ -19,13 +23,20 @@ import com.diquest.ir.common.msg.protocol.query.QuerySet;
 import com.diquest.ir.common.msg.protocol.query.SelectSet;
 import com.diquest.ir.common.msg.protocol.query.WhereSet;
 import com.diquest.ir.common.msg.protocol.result.Result;
+import com.diquest.ir.rest.common.constant.HttpStatus;
 import com.diquest.ir.rest.common.exception.InvalidParameterException;
 import com.diquest.ir.rest.common.object.RestHttpRequest;
+import com.diquest.ir.rest.json.gson.GsonLoader;
+import com.diquest.ir.rest.json.object.JsonUnknownUriResult;
+import com.diquest.ir.rest.json.reponse.ResponseMaker;
+import com.diquest.ir.rest.server.log.ServerLogManager;
 import com.diquest.ir.rest.util.RestUtils;
 import com.diquest.rest.nhn.filter.parse.FilterValueParser;
 import com.diquest.rest.nhn.filter.result.FilterFieldParseResult;
+import com.diquest.rest.nhn.result.NhnError;
 import com.diquest.rest.nhn.result.NhnResult;
 import com.diquest.rest.nhn.service.error.ErrorMessageService;
+import com.diquest.rest.nhn.service.error.logMessageService;
 import com.diquest.rest.nhn.service.filter.FilterSetService;
 import com.diquest.rest.nhn.service.option.ProductQoption;
 import com.diquest.rest.nhn.service.orderby.OrderBySetService;
@@ -39,6 +50,8 @@ public class BugsRestService {
 	
 	protected HashMap<String, Integer> idxScoreMap = new HashMap<String, Integer>();
 	
+	protected static String currTimezone = new SimpleDateFormat("XXX").format(new Date()).replace(":", "");
+	
 	public BugsRestService() {
 		idxScoreMap.put("NAME", 100);
 		idxScoreMap.put("CATEGORY_2_NAME", 50);
@@ -47,7 +60,26 @@ public class BugsRestService {
 		idxScoreMap.put("SHOPPING_IDX", 10);
 	}
 	
-	public String search(Map<String, String> params) {
+	public String search(Map<String, String> params, Map<String, Object> reqHeader, HttpServletRequest request) {
+		
+		String req = "";
+		req += "Host: " + (String) reqHeader.get("host") + "\n";
+		req += "Connection: " + (String) reqHeader.get("connection") + "\n";
+		req += "Upgrade-Insecure-Requests: " + (String) reqHeader.get("upgrade-insecure-requests") + "\n";
+		req += "User-Agent: " + (String) reqHeader.get("user-agent") + "\n";
+		req += "Accept: " + (String) reqHeader.get("accept") + "\n";
+		req += "Accept-Encoding: " + (String) reqHeader.get("accept-encoding") + "\n";
+		req += "Accept-Language: " + (String) reqHeader.get("accept-language");
+		
+		if(params.get("q") != null) {
+			if(params.get("q").isEmpty()){
+				return makeEmptyNhnData(params);
+			}
+		} else {
+			return makeEmptyNhnData(params);
+		}
+		
+		logMessageService.requestReceived(reqHeader, request);
 		
 		String ret = "";
 		
@@ -65,7 +97,7 @@ public class BugsRestService {
 			query.setWhere(parseWhere(params, filterFieldParseResult));
 			query.setGroupBy(parseGroupBy(params));
 			query.setOrderby(parseOrderBy(params));
-			query.setFrom(getCollection());
+			query.setFrom(getCollection(params));
 			query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
 			query.setSearchKeyword(parseQ(params));
 			query.setFaultless(true);
@@ -78,40 +110,57 @@ public class BugsRestService {
 			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 			query.setPrintQuery(true);
 			
-			parseTrigger(params, query, getCollection());
+			parseTrigger(params, query, getCollection(params));
 			query.setQueryModifier("diver");
 			query.setResultModifier("typo");
 			querySet.addQuery(query);
 			
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest("133.186.171.19", 15555);
+			
 			int returnCode = commandSearchRequest.request(querySet);
+
 			if (returnCode <= -100) {
-//				ErrorMessageService.getInstance().minusReturnCodeLog(returnCode, commandSearchRequest.getException(), params.toString());
-//				return commandSearchRequestErrorResponse(req, commandSearchRequest.getException().getErrorMessage());
+				ErrorMessageService.getInstance().minusReturnCodeLog(returnCode, commandSearchRequest.getException(), req);
+				return commandSearchRequestErrorResponse(commandSearchRequest.getException().getErrorMessage());
+			} else {
+				logMessageService.messageReceived(reqHeader, request);
 			}
 			
-			System.out.println(returnCode);
-			System.out.println(commandSearchRequest.getResultSet().getResult(0).getTotalSize());
+//			System.out.println(returnCode);
+//			System.out.println(commandSearchRequest.getResultSet().getResult(0).getTotalSize());
 			
 			String resultJson = gson.toJson(makeResult(commandSearchRequest.getResultSet().getResult(0), query, params));
 			ret = resultJson;
 			
-			System.out.println(ret);
+			logMessageService.receiveEnd(reqHeader, request);
+			
+//			System.out.println(ret);
+			
 			
 		} catch (InvalidParameterException e) {
-//			ErrorMessageService.getInstance().invalidParameterLog(req, e);
-//			return invalidParameterResponse(req, e);
+			ErrorMessageService.getInstance().invalidParameterLog(req, e);
+			logMessageService.receiveEnd(reqHeader, request);
+			return invalidParameterResponse(e);
 		} catch (Exception e) {
-//			ErrorMessageService.getInstance().InternalServerErrorLog(req, e);
-//			return internalServerResponse(req, e);
+			ErrorMessageService.getInstance().InternalServerErrorLog(req, e);
+			logMessageService.receiveEnd(reqHeader, request);
+			return internalServerResponse(e);
 		}
 		
 		return ret;
 		
 	}
 	
-	protected String getCollection() {
-		return "BRANDI_PRODUCT";
+	private String makeEmptyNhnData(Map<String, String> params) {
+//		JsonUnknownUriResult result = new JsonUnknownUriResult(HttpStatus.OK, NhnResult.makeEmptyResult());
+		String emptyData = GsonLoader.getInstance().toJson(NhnResult.makeEmptyResult());
+		return emptyData;
+	}
+	
+	protected String getCollection(Map<String, String> params) {
+//		System.out.println("----------------" + params.get("collection"));
+		return params.get("collection");
+//		return "BRANDI_PRODUCT";
 	}
 	
 	private FilterFieldParseResult parseFilterParams(Map<String, String> params) {
@@ -160,7 +209,7 @@ public class BugsRestService {
 	}
 	
 	protected OrderBySet[] parseOrderBy(Map<String, String> params) {
-		return new OrderBySet[] { OrderBySetService.getInstance().getOrderBySet(RestUtils.getParam(params, "sort"), getCollection()) };
+		return new OrderBySet[] { OrderBySetService.getInstance().getOrderBySet(RestUtils.getParam(params, "sort"), getCollection(params)) };
 	}
 	
 	protected int parseStart(Map<String, String> params) {
@@ -209,6 +258,27 @@ public class BugsRestService {
 	
 	protected String parseQ(Map<String, String> params) {
 		return RestUtils.getParam(params, "q");
+	}
+	
+	protected String commandSearchRequestErrorResponse(String message) {
+		NhnError searchError = NhnError.makeError(false, -500, "Internal Server Error", message, currTimezone);
+		String ErrorStr = GsonLoader.getInstance().toJson(searchError);
+		
+		return ErrorStr;
+	}
+	
+	protected String invalidParameterResponse(InvalidParameterException e) {
+		NhnError invalidError = NhnError.makeError(false, -400, "Invalid Parameter", e.getMessage(), currTimezone);
+		String ErrorStr = GsonLoader.getInstance().toJson(invalidError);
+		
+		return ErrorStr;
+	}
+	
+	protected String internalServerResponse(Exception e) {
+		NhnError internalError = NhnError.makeError(false, -500, "Internal Server Error", e.getMessage(), currTimezone);
+		String ErrorStr = GsonLoader.getInstance().toJson(internalError);
+		
+		return ErrorStr;
 	}
 
 }
