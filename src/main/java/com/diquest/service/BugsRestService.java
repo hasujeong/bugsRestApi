@@ -19,6 +19,7 @@ import com.diquest.ir.common.msg.protocol.query.FilterSet;
 import com.diquest.ir.common.msg.protocol.query.GroupBySet;
 import com.diquest.ir.common.msg.protocol.query.OrderBySet;
 import com.diquest.ir.common.msg.protocol.query.Query;
+import com.diquest.ir.common.msg.protocol.query.QueryParser;
 import com.diquest.ir.common.msg.protocol.query.QuerySet;
 import com.diquest.ir.common.msg.protocol.query.SelectSet;
 import com.diquest.ir.common.msg.protocol.query.WhereSet;
@@ -38,7 +39,7 @@ import com.diquest.rest.nhn.result.NhnResult;
 import com.diquest.rest.nhn.service.error.ErrorMessageService;
 import com.diquest.rest.nhn.service.error.logMessageService;
 import com.diquest.rest.nhn.service.filter.FilterSetService;
-import com.diquest.rest.nhn.service.option.ProductQoption;
+import com.diquest.rest.nhn.service.option.trackQoption;
 import com.diquest.rest.nhn.service.orderby.OrderBySetService;
 import com.diquest.rest.nhn.service.select.SelectSetService;
 import com.diquest.rest.nhn.service.trigger.TriggerFieldService;
@@ -53,11 +54,11 @@ public class BugsRestService {
 	protected static String currTimezone = new SimpleDateFormat("XXX").format(new Date()).replace(":", "");
 	
 	public BugsRestService() {
-		idxScoreMap.put("NAME", 100);
-		idxScoreMap.put("CATEGORY_2_NAME", 50);
-		idxScoreMap.put("CATEGORY_3_NAME", 50);
-		idxScoreMap.put("SELLER_TAGS_NAME", 20);
-		idxScoreMap.put("SHOPPING_IDX", 10);
+		idxScoreMap.put("TRACK_TITLE", 100);
+//		idxScoreMap.put("CATEGORY_2_NAME", 50);
+//		idxScoreMap.put("CATEGORY_3_NAME", 50);
+//		idxScoreMap.put("SELLER_TAGS_NAME", 20);
+//		idxScoreMap.put("SHOPPING_IDX", 10);
 	}
 	
 	public String search(Map<String, String> params, Map<String, Object> reqHeader, HttpServletRequest request) {
@@ -88,14 +89,15 @@ public class BugsRestService {
 		QuerySet querySet = new QuerySet(1);
 		Query query = new Query();
 		
+		QueryParser parser = new QueryParser();
+		
 		try {
 			
 			FilterFieldParseResult filterFieldParseResult = parseFilterParams(params);
-			
 			query.setSelect(parseSelect(params));
 			query.setFilter(parseFilter(params, filterFieldParseResult));
 			query.setWhere(parseWhere(params, filterFieldParseResult));
-			query.setGroupBy(parseGroupBy(params));
+//			query.setGroupBy(parseGroupBy(params));
 			query.setOrderby(parseOrderBy(params));
 			query.setFrom(getCollection(params));
 			query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
@@ -104,23 +106,25 @@ public class BugsRestService {
 			query.setThesaurusOption((byte) (Protocol.ThesaurusOption.EQUIV_SYNONYM | Protocol.ThesaurusOption.QUASI_SYNONYM));
 			query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
 			query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
-			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));
+			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
 			query.setUserName(getUserName(params));
 			query.setExtData(RestUtils.getParam(params, "pr"));
 			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
-			query.setPrintQuery(true);
-			
+			query.setPrintQuery(true);		
 			parseTrigger(params, query, getCollection(params));
 			query.setQueryModifier("diver");
 			query.setResultModifier("typo");
 			querySet.addQuery(query);
 			
-			CommandSearchRequest commandSearchRequest = new CommandSearchRequest("133.186.171.19", 15555);
-			
+//			String queryStr = parser.queryToString(query);
+						
+			CommandSearchRequest commandSearchRequest = new CommandSearchRequest("alp-search.bugs.co.kr", 5555);
+					
 			int returnCode = commandSearchRequest.request(querySet);
-
+	
 			if (returnCode <= -100) {
 				ErrorMessageService.getInstance().minusReturnCodeLog(returnCode, commandSearchRequest.getException(), req);
+				logMessageService.receiveEnd(reqHeader, request);
 				return commandSearchRequestErrorResponse(commandSearchRequest.getException().getErrorMessage());
 			} else {
 				logMessageService.messageReceived(reqHeader, request);
@@ -160,7 +164,6 @@ public class BugsRestService {
 	protected String getCollection(Map<String, String> params) {
 //		System.out.println("----------------" + params.get("collection"));
 		return params.get("collection");
-//		return "BRANDI_PRODUCT";
 	}
 	
 	private FilterFieldParseResult parseFilterParams(Map<String, String> params) {
@@ -182,7 +185,7 @@ public class BugsRestService {
 	protected List<WhereSet> makeBaseWhereSet(Map<String, String> params) throws InvalidParameterException {
 		List<WhereSet> result = new ArrayList<WhereSet>();
 		String keyword = parseQ(params);
-		ProductQoption qOption = new ProductQoption(RestUtils.getParam(params, "q_option"));
+		trackQoption qOption = new trackQoption(RestUtils.getParam(params, "q_option"));
 		for (Entry<String, Integer> e : idxScoreMap.entrySet()) {
 			if (result.size() > 0) {
 				result.add(new WhereSet(Protocol.WhereSet.OP_OR));

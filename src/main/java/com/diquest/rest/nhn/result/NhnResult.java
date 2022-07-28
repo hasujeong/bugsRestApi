@@ -21,7 +21,7 @@ import com.diquest.rest.nhn.service.trigger.TriggerFieldService;
 
 public class NhnResult {
 	private static String currTimezone = new SimpleDateFormat("XXX").format(new Date()).replace(":", "");
-	private static RestCommandExtractor restCommandExtractor = new RestCommandExtractor("133.186.171.19", 15555);
+	private static RestCommandExtractor restCommandExtractor = new RestCommandExtractor("alp-search.bugs.co.kr", 5555);
 	Header header;
 	NhnData data;
 
@@ -53,9 +53,9 @@ public class NhnResult {
 		int totalCount;
 		int itemCount;
 		List<Item> items;
-		List<Group> category_1;
-		List<Group> category_12;
-		List<Group> category_123;
+//		List<Group> category_1;
+//		List<Group> category_12;
+//		List<Group> category_123;
 		
 		public ProductData(){
 			this.start = 1;
@@ -73,9 +73,9 @@ public class NhnResult {
 			this.start = q.getResultStart() + 1;
 			this.totalCount = result.getTotalSize();
 			this.terms = makeTerms(String.valueOf(q.getSearchKeyword()));
-			this.category_1 = makeCategory1(q, result);
-			this.category_12 = makeCategory12(q, result);
-			this.category_123 = makeCategory123(q, result);
+//			this.category_1 = makeCategory1(q, result);
+//			this.category_12 = makeCategory12(q, result);
+//			this.category_123 = makeCategory123(q, result);
 		}
 
 		private List<Group> makeCategory123(Query q, Result result) {

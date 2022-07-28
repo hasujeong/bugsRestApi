@@ -21,7 +21,7 @@ public class BugsRestController {
 	
 	private BugsRestService bugsRestService;
 	
-	public static String APP_KEY_BRANDI_PRODUCT = "LiJAa3OQERKgqwt";
+	public static String APP_KEY_TRACK = "lZjTO0HlFg91HwD";
 	public static String APP_KEY_BRANDI_STORE = "FQbDmOzB8r6y0JA";
 	
 	public BugsRestController(BugsRestService bugsRestService) {
@@ -35,8 +35,8 @@ public class BugsRestController {
 		
 		long time = System.currentTimeMillis();
 		
-		if (appKey.equals(APP_KEY_BRANDI_PRODUCT)) {
-			params.put("collection","BRANDI_PRODUCT");
+		if (appKey.equals(APP_KEY_TRACK)) {
+			params.put("collection","TRACK");
 			
 			return bugsRestService.search(params, requestHeader, request);
 		} else {

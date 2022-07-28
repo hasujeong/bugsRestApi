@@ -16,24 +16,25 @@ public class OrderBySetService {
 	}
 
 	public OrderBySet getOrderBySet(String value, String collection) {
-		if(collection.endsWith("SELLER")){ // 스토어 관련 정렬은 다 가중치순임.. 나중에 상속받을 수 있게 리팩토링 해야 함..
+	
+		String[] ArrayValue = value.split(":");
+		
+		if (ArrayValue[0].equalsIgnoreCase("track_title")) {
+			if(ArrayValue[1].equalsIgnoreCase("asc")) {
+				return new OrderBySet(true, "TRACK_TITLE", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
+			} else {
+				return new OrderBySet(false, "TRACK_TITLE", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
+			}
+		} else if (ArrayValue[0].equalsIgnoreCase("release_ymd")) {
+			if(ArrayValue[1].equalsIgnoreCase("asc")) {
+				return new OrderBySet(false, "RELEASE_YMD", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
+			} else {
+				return new OrderBySet(true, "RELEASE_YMD", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
+			}
+		} else if (ArrayValue[0].equalsIgnoreCase("popular")) {
 			return new OrderBySet(false, "WEIGHT");
-		}
-
-		if (value.equalsIgnoreCase("alias:relevance")) {
+		} else if (ArrayValue[0].equalsIgnoreCase("relevance")) {
 			return new OrderBySet(false, "WEIGHT");
-		} else if (value.equalsIgnoreCase("alias:recent")) {
-			return new OrderBySet(true, "RECENT");
-		} else if (value.equalsIgnoreCase("alias:review")) {
-			return new OrderBySet(true, "REVIEW");
-		} else if (value.equalsIgnoreCase("alias:price")) {
-			return new OrderBySet(true, "SELLER_IS_PENALTY,_IS_RECENTLY_REG_20DAYS:desc,_SALE_PRICE:asc,CREATED_TIME", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
-		} else if (value.equalsIgnoreCase("alias:order")) {
-			return new OrderBySet(true, "ORDER");
-		} else if (value.equalsIgnoreCase("alias:price_within24")) {
-			if(collection.equalsIgnoreCase("BRANDI_PRODUCT")) {
-				return new OrderBySet(true, "SELLER_IS_PENALTY,_IS_RECENTLY_REG_20DAYS:desc,_SALE_PRICE_WITHIN24:asc,CREATED_TIME", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
-			} 
 		}
 		return new OrderBySet(false, "WEIGHT");
 	}
