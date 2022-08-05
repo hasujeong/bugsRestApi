@@ -22,8 +22,16 @@ public class BugsRestController {
 	private BugsRestService bugsRestService;
 	
 	public static String APP_KEY_TRACK = "lZjTO0HlFg91HwD";
-	public static String APP_KEY_BRANDI_STORE = "FQbDmOzB8r6y0JA";
-	
+	public static String APP_KEY_ALBUM = "vbmKja0BuYy35Ok";
+	public static String APP_KEY_ARTIST = "7S4pV1yEaFoWJsj";
+	public static String APP_KEY_MV = "58IHeEjp2lyoR4M";
+	public static String APP_KEY_MCAST = "7ZEz9GaqpMRc5DH";
+	public static String APP_KEY_MPD = "6Jfys7XEvdQ0KuU";
+	public static String APP_KEY_MPOST = "SVmCkyjdYM9n3go";
+	public static String APP_KEY_CLASSIC = "0WleItZOyGJbrVF";
+	public static String APP_KEY_ENTITY = "H2wEkSvKZY9bdhl";
+	public static String APP_KEY_TOTAL = "2KJnuc31oL0rgjt";
+
 	public BugsRestController(BugsRestService bugsRestService) {
 		this.bugsRestService = bugsRestService;
 	}
@@ -37,7 +45,30 @@ public class BugsRestController {
 		
 		if (appKey.equals(APP_KEY_TRACK)) {
 			params.put("collection","TRACK");
-			
+			return bugsRestService.search(params, requestHeader, request);
+		} else if (appKey.equals(APP_KEY_ALBUM)) {
+			params.put("collection","ALBUM");
+			return bugsRestService.search(params, requestHeader, request);
+		} else if (appKey.equals(APP_KEY_ARTIST)) {
+			params.put("collection","ARTIST");
+			return bugsRestService.search(params, requestHeader, request);
+		} else if (appKey.equals(APP_KEY_MV)) {
+			params.put("collection","MV");
+			return bugsRestService.search(params, requestHeader, request);
+		} else if (appKey.equals(APP_KEY_MCAST)) {
+			params.put("collection","MUSICCAST");
+			return bugsRestService.search(params, requestHeader, request);
+		} else if (appKey.equals(APP_KEY_MPD)) {
+			params.put("collection","MUSICPD");
+			return bugsRestService.search(params, requestHeader, request);
+		} else if (appKey.equals(APP_KEY_MPOST)) {
+			params.put("collection","MUSICPOST");
+			return bugsRestService.search(params, requestHeader, request);
+		} else if (appKey.equals(APP_KEY_CLASSIC)) {
+			params.put("collection","CLASSIC");
+			return bugsRestService.search(params, requestHeader, request);
+		} else if (appKey.equals(APP_KEY_ENTITY)) {
+			params.put("collection","ENTITY");
 			return bugsRestService.search(params, requestHeader, request);
 		} else {
 			return unknownRequest(params, time);

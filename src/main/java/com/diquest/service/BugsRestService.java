@@ -54,7 +54,7 @@ public class BugsRestService {
 	protected static String currTimezone = new SimpleDateFormat("XXX").format(new Date()).replace(":", "");
 	
 	public BugsRestService() {
-		idxScoreMap.put("TRACK_TITLE", 100);
+//		idxScoreMap.put("TRACK_TITLE", 100);
 //		idxScoreMap.put("CATEGORY_2_NAME", 50);
 //		idxScoreMap.put("CATEGORY_3_NAME", 50);
 //		idxScoreMap.put("SELLER_TAGS_NAME", 20);
@@ -112,11 +112,11 @@ public class BugsRestService {
 			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 			query.setPrintQuery(true);		
 			parseTrigger(params, query, getCollection(params));
-			query.setQueryModifier("diver");
+//			query.setQueryModifier("diver");
 			query.setResultModifier("typo");
 			querySet.addQuery(query);
 			
-//			String queryStr = parser.queryToString(query);
+//			String queryStr = parser.qodueryToString(query);
 						
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest("alp-search.bugs.co.kr", 5555);
 					
@@ -179,6 +179,58 @@ public class BugsRestService {
 	}
 	
 	protected WhereSet[] parseWhere(Map<String, String> params, FilterFieldParseResult filterFieldParseResult) throws InvalidParameterException {
+		String collection = getCollection(params);
+		
+		idxScoreMap = new HashMap<String, Integer>();
+
+		if(collection.equalsIgnoreCase("TRACK")) {
+			idxScoreMap.put("TRACK_TITLE", 100);
+		} else if(collection.equalsIgnoreCase("ALBUM")) {
+			idxScoreMap.put("ALBUM_IDX", 100);
+			idxScoreMap.put("ARTIST_IDX", 50);
+		} else if(collection.equalsIgnoreCase("ARTIST")) {
+			idxScoreMap.put("ARTIST_NM", 100);
+			idxScoreMap.put("KOR_NM", 50);
+			idxScoreMap.put("DISP_NM", 50);
+			idxScoreMap.put("ENG_NM", 50);
+			idxScoreMap.put("SEARCH_NM", 20);
+			idxScoreMap.put("SYNONYM_NM", 20);
+		} else if(collection.equalsIgnoreCase("MV")) {
+			idxScoreMap.put("MV_TITLE", 100);
+			idxScoreMap.put("ARTIST_NM", 50);
+			idxScoreMap.put("TRACK_TITLE", 50);
+			idxScoreMap.put("DISP_NM", 50);
+			idxScoreMap.put("TITLE", 50);
+			idxScoreMap.put("SEARCH_TITLE", 20);
+			idxScoreMap.put("SEARCH_NM", 20);
+		} else if(collection.equalsIgnoreCase("MUSICCAST")) {
+			idxScoreMap.put("TITLE", 100);
+		} else if(collection.equalsIgnoreCase("MUSICPD")) {
+			idxScoreMap.put("TITLE", 100);
+			idxScoreMap.put("NICKNAME", 30);
+			idxScoreMap.put("ALBUM_TITLE", 50);
+			idxScoreMap.put("ARTIST_NM", 50);
+			idxScoreMap.put("TRACK_TITLE", 50);
+			idxScoreMap.put("TAG", 30);
+		} else if(collection.equalsIgnoreCase("MUSICPOST")) {
+			idxScoreMap.put("TITLE", 100);
+			idxScoreMap.put("ARTIST_NM", 50);
+		} else if(collection.equalsIgnoreCase("CLASSIC")) {
+			idxScoreMap.put("TITLE", 100);
+			idxScoreMap.put("TITLE_KOR", 80);
+			idxScoreMap.put("OPUS", 50);
+			idxScoreMap.put("SEARCH_TITLE", 20);
+			idxScoreMap.put("SYNONYM_TITLE", 20);
+			idxScoreMap.put("TITLE_KOR_SEC", 40);
+			idxScoreMap.put("TITLE_ENG", 40);
+			idxScoreMap.put("SEARCH_TITLE_SEC", 20);
+			idxScoreMap.put("ARTIST_NM", 30);
+			idxScoreMap.put("KOR_NM", 30);
+			idxScoreMap.put("DISP_NM", 30);
+		} else if(collection.equalsIgnoreCase("ENTITY")) {
+		}
+		 
+//		System.out.println("----------------- " + idxScoreMap);
 		return WhereSetService.getInstance().makeWhereSet(params, filterFieldParseResult, makeBaseWhereSet(params));
 	}
 	
@@ -186,6 +238,7 @@ public class BugsRestService {
 		List<WhereSet> result = new ArrayList<WhereSet>();
 		String keyword = parseQ(params);
 		trackQoption qOption = new trackQoption(RestUtils.getParam(params, "q_option"));
+			
 		for (Entry<String, Integer> e : idxScoreMap.entrySet()) {
 			if (result.size() > 0) {
 				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
