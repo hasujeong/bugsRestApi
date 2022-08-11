@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.diquest.mapper.AdminMapper">
+	<select id="fieldSelector" resultType="FieldSelector">
+		SELECT
+			QUERY,
+			SELECTED_FIELD AS SELECTED
+		FROM
+			BUGSMUSIC.MANUAL_FIELD_SELECTOR 
+		WHERE 
+			STATUS='OK'
+	</select>
+</mapper>

@@ -8,8 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.diquest.ir.client.command.CommandSearchRequest;
@@ -32,6 +35,8 @@ import com.diquest.ir.rest.json.object.JsonUnknownUriResult;
 import com.diquest.ir.rest.json.reponse.ResponseMaker;
 import com.diquest.ir.rest.server.log.ServerLogManager;
 import com.diquest.ir.rest.util.RestUtils;
+import com.diquest.mapper.AdminMapper;
+import com.diquest.mapper.domain.FieldSelector;
 import com.diquest.rest.nhn.filter.parse.FilterValueParser;
 import com.diquest.rest.nhn.filter.result.FilterFieldParseResult;
 import com.diquest.rest.nhn.result.NhnError;
@@ -49,6 +54,12 @@ import com.google.gson.Gson;
 @Service
 public class BugsRestService {
 	
+	@Resource
+	private BugsRestService self;
+	
+	@Autowired
+	AdminMapper adminMapper;
+	
 	protected HashMap<String, Integer> idxScoreMap = new HashMap<String, Integer>();
 	
 	protected static String currTimezone = new SimpleDateFormat("XXX").format(new Date()).replace(":", "");
@@ -61,7 +72,27 @@ public class BugsRestService {
 //		idxScoreMap.put("SHOPPING_IDX", 10);
 	}
 	
+	@Cacheable("fieldSelectorMap")
+	public Map<String, String> fieldSelector() {
+		
+		Map<String, String> fieldSelectorMap = new HashMap<String, String>();
+		
+		List<FieldSelector> fsList = adminMapper.fieldSelector();
+		
+		System.out.println("::::::::::::::::::::::::");
+		
+		for (FieldSelector fs : fsList) {
+			fieldSelectorMap.put(fs.getQuery(), fs.getSelected());
+		}
+		
+		return fieldSelectorMap;
+		
+	}
+	
 	public String search(Map<String, String> params, Map<String, Object> reqHeader, HttpServletRequest request) {
+		
+		Map<String, String> fieldSelectorMap = self.fieldSelector();
+		System.out.println(":::::::::::::::::::" + fieldSelectorMap);
 		
 		String req = "";
 		req += "Host: " + (String) reqHeader.get("host") + "\n";

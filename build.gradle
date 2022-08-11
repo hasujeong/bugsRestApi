@@ -24,13 +24,16 @@ war.enabled = true
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.4'
+	implementation 'com.google.code.gson:gson:2.9.0' 
+	implementation 'com.oracle.ojdbc:orai18n:19.3.0.0'
+	implementation fileTree(dir: 'libs', include: ['*.jar'])
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	annotationProcessor 'org.projectlombok:lombok'
 	compileOnly 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	implementation 'com.google.code.gson:gson:2.9.0' 
-	implementation fileTree(dir: 'libs', include: ['*.jar'])
-	
+	runtimeOnly 'com.oracle.database.jdbc:ojdbc8'
 	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 }
 
