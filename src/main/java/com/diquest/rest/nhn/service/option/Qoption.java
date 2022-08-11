@@ -14,7 +14,7 @@ public abstract class Qoption {
     private final byte option;
     private float nofmPercent;
 
-    public Qoption(String parameter) throws InvalidParameterException {
+    public Qoption(String parameter, String collection) throws InvalidParameterException {
         // q_option 파라미터가 없을 경우, NHN 과 동일하게 기본으로 맞춘다.
         if (StringUtil.isEmpty(parameter)) {
             this.indexField = getUseIndexField();
@@ -27,7 +27,7 @@ public abstract class Qoption {
             String operator = parameter.split(OPTION_DELIM)[0];
             String indexField = parameter.split(OPTION_DELIM)[1];
 
-            validIndexFieldName(indexField);
+            validIndexFieldName(indexField, collection);
             validOperator(operator);
 
             this.indexField = indexField;
@@ -91,10 +91,13 @@ public abstract class Qoption {
     }
 
     // 상품 검색의 필드 이름은 SHOPPING_IDX 만 지원한다, 다른 이름이 들어왔을 경우 에러
-    private void validIndexFieldName(String indexField) throws InvalidParameterException {
-        if (!indexField.equalsIgnoreCase(getUseIndexField())) {
-            throw new InvalidParameterException("not exist index : (" + indexField + ")");
-        }
+    private void validIndexFieldName(String indexField, String collection) throws InvalidParameterException {
+    	
+    	if(collection.equalsIgnoreCase("TRACK")) {
+	        if (!indexField.equalsIgnoreCase("track_idx") && !indexField.equalsIgnoreCase("album_idx") && !indexField.equalsIgnoreCase("artist_idx") && !indexField.equalsIgnoreCase(getUseIndexField())) {
+	            throw new InvalidParameterException("not exist index : (" + indexField + ")");
+	        }
+    	}
     }
 
     public byte getOption() {
