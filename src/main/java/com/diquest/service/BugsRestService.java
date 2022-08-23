@@ -44,7 +44,7 @@ import com.diquest.rest.nhn.result.NhnResult;
 import com.diquest.rest.nhn.service.error.ErrorMessageService;
 import com.diquest.rest.nhn.service.error.logMessageService;
 import com.diquest.rest.nhn.service.filter.FilterSetService;
-import com.diquest.rest.nhn.service.option.trackQoption;
+import com.diquest.rest.nhn.service.option.searchQoption;
 import com.diquest.rest.nhn.service.orderby.OrderBySetService;
 import com.diquest.rest.nhn.service.select.SelectSetService;
 import com.diquest.rest.nhn.service.trigger.TriggerFieldService;
@@ -63,6 +63,10 @@ public class BugsRestService {
 	protected HashMap<String, Integer> idxScoreMap = new HashMap<String, Integer>();
 	
 	protected static String currTimezone = new SimpleDateFormat("XXX").format(new Date()).replace(":", "");
+
+	protected static int track_score = 100;
+	protected static int album_score = 10;
+	protected static int artist_score = 10;
 	
 	public BugsRestService() {
 //		idxScoreMap.put("TRACK_TITLE", 100);
@@ -79,7 +83,7 @@ public class BugsRestService {
 		
 		List<FieldSelector> fsList = adminMapper.fieldSelector();
 		
-		System.out.println("::::::::::::::::::::::::");
+//		System.out.println("::::::::::::::::::::::::");
 		
 		for (FieldSelector fs : fsList) {
 			fieldSelectorMap.put(fs.getQuery(), fs.getSelected());
@@ -92,7 +96,7 @@ public class BugsRestService {
 	public String search(Map<String, String> params, Map<String, Object> reqHeader, HttpServletRequest request) {
 		
 		Map<String, String> fieldSelectorMap = self.fieldSelector();
-		System.out.println(":::::::::::::::::::" + fieldSelectorMap);
+//		System.out.println(":::::::::::::::::::" + fieldSelectorMap);
 		
 		String req = "";
 		req += "Host: " + (String) reqHeader.get("host") + "\n";
@@ -107,7 +111,37 @@ public class BugsRestService {
 			if(params.get("q").isEmpty()){
 				return makeEmptyNhnData(params);
 			}
-		} else {
+			String paramQ = parseQ(params);
+			String qValue = paramQ.replaceAll("\\s", "");
+			String col = getCollection(params);
+			
+			if(col.equalsIgnoreCase("TRACK")) {
+				if(fieldSelectorMap.containsKey(qValue) == true) {
+//					System.out.println(":::::qValue:::::::" + qValue);
+					
+					String selectedValue = fieldSelectorMap.get(qValue);
+//					System.out.println("==================" + selectedValue);
+					
+					if(selectedValue.equalsIgnoreCase("track")) {
+						track_score = 1000;
+						album_score = 10;
+						artist_score = 10;
+					} else if(selectedValue.equalsIgnoreCase("album")) {
+						track_score = 10;
+						album_score = 1000;
+						artist_score = 10;
+					} else {
+						track_score = 10;
+						album_score = 10;
+						artist_score = 1000;
+					}
+				} else {
+					track_score = 100;
+					album_score = 10;
+					artist_score = 10;
+				}
+			}
+		} else {			
 			return makeEmptyNhnData(params);
 		}
 		
@@ -138,8 +172,8 @@ public class BugsRestService {
 			query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
 			query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
-			query.setUserName(getUserName(params));
-			query.setExtData(RestUtils.getParam(params, "pr"));
+			query.setUserName(getUserName(params));										// 로그인 사용자 기록
+			query.setExtData(RestUtils.getParam(params, "pr"));							// pr (app,web,pc)
 			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 			query.setPrintQuery(true);		
 			parseTrigger(params, query, getCollection(params));
@@ -148,7 +182,7 @@ public class BugsRestService {
 			querySet.addQuery(query);
 			
 			String queryStr = parser.queryToString(query);
-//			System.out.println(" :::::::::: query ::::::: " + queryStr);
+			System.out.println(" :::::::::: query ::::::: " + queryStr);
 						
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest("alp-search.bugs.co.kr", 5555);
 					
@@ -219,7 +253,7 @@ public class BugsRestService {
 		List<WhereSet> result = new ArrayList<WhereSet>();
 		String keyword = parseQ(params);
 		String collection = getCollection(params);
-		trackQoption qOption = new trackQoption(RestUtils.getParam(params, "q_option"), collection);
+		searchQoption qOption = new searchQoption(RestUtils.getParam(params, "q_option"), collection);
 		
 		String idxField = qOption.getIndexField();
 		
@@ -227,70 +261,67 @@ public class BugsRestService {
 
 		if(collection.equalsIgnoreCase("TRACK")) {
 			if(idxField.equalsIgnoreCase("track_idx")) {
-				idxScoreMap.put("TRACK_TITLE", 100);
-				idxScoreMap.put("SEARCH_TITLE", 1);
+				idxScoreMap.put("TRACK_IDX", 100);
+				idxScoreMap.put("SYN_TRACK_IDX", 1);
 			} else if(idxField.equalsIgnoreCase("artist_idx")) {
-				idxScoreMap.put("ARTIST_NM", 100);
-				idxScoreMap.put("DISP_NM", 100);
-				idxScoreMap.put("ENG_NM", 100);
-				idxScoreMap.put("KOR_NM", 100);
-				idxScoreMap.put("SYNONYM_NM", 1);
-				idxScoreMap.put("SEARCH_NM", 1);
-			}  else if(idxField.equalsIgnoreCase("album_idx")) {
-				idxScoreMap.put("ALBUM_TITLE", 100);
+				idxScoreMap.put("ARTIST_IDX", 100);
+				idxScoreMap.put("SYN_ARTIST_IDX", 1);
+			} else if(idxField.equalsIgnoreCase("album_idx")) {
+				idxScoreMap.put("ALBUM_IDX", 100);
+				idxScoreMap.put("SYN_ALBUM_IDX", 1);
 			} else {
-				idxScoreMap.put("TRACK_TITLE", 100);
-				idxScoreMap.put("ARTIST_NM", 100);
-				idxScoreMap.put("DISP_NM", 100);
-				idxScoreMap.put("ENG_NM", 100);
-				idxScoreMap.put("KOR_NM", 100);
-				idxScoreMap.put("ALBUM_TITLE", 100);
-				idxScoreMap.put("SEARCH_TITLE", 1);
-				idxScoreMap.put("SYNONYM_NM", 1);
-				idxScoreMap.put("SEARCH_NM", 1);
+				idxScoreMap.put("TRACK_IDX", track_score);
+				idxScoreMap.put("ARTIST_IDX", artist_score);
+				idxScoreMap.put("ALBUM_IDX", album_score);
+				idxScoreMap.put("TRACK_ARTIST_ALBUM_IDX", 100);
+				idxScoreMap.put("SYN_TRACK_ARTIST_ALBUM_IDX", 1);
 			}
 		} else if(collection.equalsIgnoreCase("ALBUM")) {
-			idxScoreMap.put("ALBUM_IDX", 100);
-			idxScoreMap.put("ARTIST_IDX", 50);
+			if(idxField.equalsIgnoreCase("album_idx")) {
+				idxScoreMap.put("ALBUM_IDX", 100);
+				idxScoreMap.put("SYN_ALBUM_IDX", 1);
+			} else if(idxField.equalsIgnoreCase("artist_idx")) {
+				idxScoreMap.put("ARTIST_IDX", 100);
+				idxScoreMap.put("SYN_ARTIST_IDX", 1);
+			} else {
+				idxScoreMap.put("ARTIST_ALBUM_IDX", 100);
+				idxScoreMap.put("SYN_ARTIST_ALBUM_IDX", 1);
+			}
 		} else if(collection.equalsIgnoreCase("ARTIST")) {
-			idxScoreMap.put("ARTIST_NM", 100);
-			idxScoreMap.put("KOR_NM", 50);
-			idxScoreMap.put("DISP_NM", 50);
-			idxScoreMap.put("ENG_NM", 50);
-			idxScoreMap.put("SEARCH_NM", 20);
-			idxScoreMap.put("SYNONYM_NM", 20);
+			if(idxField.equalsIgnoreCase("artist_idx")) {
+				idxScoreMap.put("ARTIST_IDX", 100);
+				idxScoreMap.put("SYN_ARTIST_IDX", 1);
+				idxScoreMap.put("GRP_NM_IDX", 50);
+				idxScoreMap.put("SYN_GRP_NM_IDX", 50);
+				idxScoreMap.put("GRP_SEARCH_NM_IDX", 1);
+				idxScoreMap.put("SYN_GRP_SEARCH_NM", 1);
+			} else if(idxField.equalsIgnoreCase("exact_artist_idx")) {
+				idxScoreMap.put("ARTIST_IDX", 100);
+				idxScoreMap.put("SYN_ARTIST_IDX", 1);
+			} else {
+				idxScoreMap.put("ARTIST_IDX", 100);
+				idxScoreMap.put("SYN_ARTIST_IDX", 1);
+				idxScoreMap.put("GRP_NM_IDX", 50);
+				idxScoreMap.put("SYN_GRP_NM_IDX", 50);
+				idxScoreMap.put("GRP_SEARCH_NM_IDX", 1);
+				idxScoreMap.put("SYN_GRP_SEARCH_NM", 1);
+			}
 		} else if(collection.equalsIgnoreCase("MV")) {
-			idxScoreMap.put("MV_TITLE", 100);
-			idxScoreMap.put("ARTIST_NM", 50);
-			idxScoreMap.put("TRACK_TITLE", 50);
-			idxScoreMap.put("DISP_NM", 50);
-			idxScoreMap.put("TITLE", 50);
-			idxScoreMap.put("SEARCH_TITLE", 20);
-			idxScoreMap.put("SEARCH_NM", 20);
+			idxScoreMap.put("MV_TRACK_ARTIST_ALBUM_IDX", 100);
+			idxScoreMap.put("SYN_MV_TRACK_ARTIST_ALBUM_IDX", 1);
 		} else if(collection.equalsIgnoreCase("MUSICCAST")) {
-			idxScoreMap.put("TITLE", 100);
+			idxScoreMap.put("MUSICCAST_IDX", 100);
 		} else if(collection.equalsIgnoreCase("MUSICPD")) {
-			idxScoreMap.put("TITLE", 100);
-			idxScoreMap.put("NICKNAME", 30);
-			idxScoreMap.put("ALBUM_TITLE", 50);
-			idxScoreMap.put("ARTIST_NM", 50);
-			idxScoreMap.put("TRACK_TITLE", 50);
-			idxScoreMap.put("TAG", 30);
+			if(idxField.equalsIgnoreCase("musicpd_album_idx")) {
+				idxScoreMap.put("MUSICPD_ALBUM_IDX", 100);
+			} else {
+				idxScoreMap.put("MUSICPD_ALBUM_IDX", 100);
+			}
 		} else if(collection.equalsIgnoreCase("MUSICPOST")) {
-			idxScoreMap.put("TITLE", 100);
-			idxScoreMap.put("ARTIST_NM", 50);
+			idxScoreMap.put("MUSICPOST_IDX", 100);
 		} else if(collection.equalsIgnoreCase("CLASSIC")) {
-			idxScoreMap.put("TITLE", 100);
-			idxScoreMap.put("TITLE_KOR", 80);
-			idxScoreMap.put("OPUS", 50);
-			idxScoreMap.put("SEARCH_TITLE", 20);
-			idxScoreMap.put("SYNONYM_TITLE", 20);
-			idxScoreMap.put("TITLE_KOR_SEC", 40);
-			idxScoreMap.put("TITLE_ENG", 40);
-			idxScoreMap.put("SEARCH_TITLE_SEC", 20);
-			idxScoreMap.put("ARTIST_NM", 30);
-			idxScoreMap.put("KOR_NM", 30);
-			idxScoreMap.put("DISP_NM", 30);
+			idxScoreMap.put("CLASSIC_IDX", 100);
+			idxScoreMap.put("SYN_CLASSIC_IDX", 100);
 		} else if(collection.equalsIgnoreCase("ENTITY")) {
 		}
 		 

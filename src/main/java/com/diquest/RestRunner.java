@@ -25,7 +25,7 @@ public class RestRunner {
 		
 		bugsRestService.fieldSelector();
 		
-		log.info("EventListener :: fieldSelector loading.");
+//		log.info("EventListener :: fieldSelector loading.");
 		
 	}
 

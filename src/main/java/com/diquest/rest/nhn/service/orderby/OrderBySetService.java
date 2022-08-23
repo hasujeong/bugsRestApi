@@ -33,9 +33,13 @@ public class OrderBySetService {
 					return new OrderBySet(true, "RELEASE_YMD", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
 				}
 			} else if (ArrayValue[0].equalsIgnoreCase("popular")) {
-				return new OrderBySet(false, "WEIGHT");
+				if(ArrayValue[1].equalsIgnoreCase("asc")) {
+					return new OrderBySet(false, "SCORE", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
+				} else {
+					return new OrderBySet(true, "SCORE", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
+				}
 			} else {
-				return new OrderBySet(false, "WEIGHT");
+				return new OrderBySet(true, "SCORE", Protocol.TriggerSet.OrderBy.OP_PREWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase("ALBUM")) {
 			if (ArrayValue[0].equalsIgnoreCase("title")) {			// 앨범명순
@@ -51,9 +55,13 @@ public class OrderBySetService {
 					return new OrderBySet(true, "RELEASE_YMD", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
 				}
 			} else if (ArrayValue[0].equalsIgnoreCase("popular")) {			// 인기순
-				return new OrderBySet(false, "WEIGHT");
+				if(ArrayValue[1].equalsIgnoreCase("asc")) {
+					return new OrderBySet(false, "SCORE", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
+				} else {
+					return new OrderBySet(true, "SCORE", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
+				}
 			} else {													// 정확도순
-				return new OrderBySet(false, "WEIGHT");
+				return new OrderBySet(true, "SCORE", Protocol.TriggerSet.OrderBy.OP_PREWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase("ARTIST")) {
 			if (ArrayValue[0].equalsIgnoreCase("disp_nm")) {			// 이름순
@@ -63,7 +71,7 @@ public class OrderBySetService {
 					return new OrderBySet(false, "DISP_NM", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
 				}
 			} else {													// 정확도순
-				return new OrderBySet(false, "WEIGHT");
+				return new OrderBySet(true, "DISP_NM", Protocol.TriggerSet.OrderBy.OP_PREWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase("MV")) {
 			if (ArrayValue[0].equalsIgnoreCase("mv_title")) {			// 영상명순
@@ -79,13 +87,13 @@ public class OrderBySetService {
 					return new OrderBySet(true, "RELEASE_YMD", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
 				}
 			} else {													// 정확도순
-				return new OrderBySet(false, "WEIGHT");
+				return new OrderBySet(true, "MV_TITLE", Protocol.TriggerSet.OrderBy.OP_PREWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase("MUSICCAST")) {
 			if (ArrayValue[0].equalsIgnoreCase("release_ymd")) {			// 최신순
 				return new OrderBySet(false, "UPD_DT", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
 			} else {													// 정확도순
-				return new OrderBySet(false, "WEIGHT");
+				return new OrderBySet(false, "UPD_DT", Protocol.TriggerSet.OrderBy.OP_PREWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase("MUSICPD")) {
 			if (ArrayValue[0].equalsIgnoreCase("title")) {			// 뮤직pd앨범명순
@@ -95,9 +103,13 @@ public class OrderBySetService {
 					return new OrderBySet(false, "TITLE", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
 				}
 			} else if (ArrayValue[0].equalsIgnoreCase("popular")) {			// 인기순
-				return new OrderBySet(false, "WEIGHT");
+				if(ArrayValue[1].equalsIgnoreCase("asc")) {
+					return new OrderBySet(false, "SCORE", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
+				} else {
+					return new OrderBySet(true, "SCORE", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
+				}
 			} else {													// 정확도순
-				return new OrderBySet(false, "WEIGHT");
+				return new OrderBySet(true, "SCORE", Protocol.TriggerSet.OrderBy.OP_PREWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase("MUSICPOST")) {
 			if (ArrayValue[0].equalsIgnoreCase("release_ymd")) {			// 발매일순
@@ -107,10 +119,18 @@ public class OrderBySetService {
 					return new OrderBySet(true, "RELEASE_YMD", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
 				}
 			} else {													// 정확도순
-				return new OrderBySet(false, "WEIGHT");
+				return new OrderBySet(true, "RELEASE_YMD", Protocol.TriggerSet.OrderBy.OP_PREWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase("CLASSIC")) {
-
+			if (ArrayValue[0].equalsIgnoreCase("popular")) {			// 인기순
+				if(ArrayValue[1].equalsIgnoreCase("asc")) {
+					return new OrderBySet(false, "SCORE", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
+				} else {
+					return new OrderBySet(true, "SCORE", Protocol.TriggerSet.OrderBy.OP_POSTWEIGHT);
+				}
+			} else {													// 정확도순
+				return new OrderBySet(true, "SCORE", Protocol.TriggerSet.OrderBy.OP_PREWEIGHT);
+			}
 		} else if(collection.equalsIgnoreCase("ENTITY")) {
 		}
 		

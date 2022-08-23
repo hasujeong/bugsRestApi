@@ -22,6 +22,7 @@ public class BugsRestController {
 	private BugsRestService bugsRestService;
 	
 	public static String APP_KEY_TRACK = "lZjTO0HlFg91HwD";
+	public static String APP_KEY_LYRICS = "lyrics";
 	public static String APP_KEY_ALBUM = "vbmKja0BuYy35Ok";
 	public static String APP_KEY_ARTIST = "7S4pV1yEaFoWJsj";
 	public static String APP_KEY_MV = "58IHeEjp2lyoR4M";
@@ -45,6 +46,9 @@ public class BugsRestController {
 		
 		if (appKey.equals(APP_KEY_TRACK)) {
 			params.put("collection","TRACK");
+			return bugsRestService.search(params, requestHeader, request);
+		} else if (appKey.equals(APP_KEY_LYRICS)) {
+			params.put("collection","LYRICS");
 			return bugsRestService.search(params, requestHeader, request);
 		} else if (appKey.equals(APP_KEY_ALBUM)) {
 			params.put("collection","ALBUM");

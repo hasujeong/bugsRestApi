@@ -17,7 +17,7 @@ public abstract class Qoption {
     public Qoption(String parameter, String collection) throws InvalidParameterException {
         // q_option 파라미터가 없을 경우, NHN 과 동일하게 기본으로 맞춘다.
         if (StringUtil.isEmpty(parameter)) {
-            this.indexField = getUseIndexField();
+            this.indexField = getUseIndexField(collection);
             this.option = Protocol.WhereSet.OP_HASALL;
             return;
         }
@@ -35,11 +35,11 @@ public abstract class Qoption {
             this.nofmPercent = getNofmPercent(operator);
             return;
         }
-
+        
         // 구분자 없이 들어올 경우, operator 로 간주한다
         String operator = parameter;
         validOperator(operator);
-        this.indexField = getUseIndexField();
+        this.indexField = getUseIndexField(collection);
         this.option = getMarinerOption(operator);
         this.nofmPercent = getNofmPercent(operator);
     }
@@ -90,14 +90,26 @@ public abstract class Qoption {
         }
     }
 
-    // 상품 검색의 필드 이름은 SHOPPING_IDX 만 지원한다, 다른 이름이 들어왔을 경우 에러
+    // 다른 idx 이름이 들어왔을 경우 에러
     private void validIndexFieldName(String indexField, String collection) throws InvalidParameterException {
-    	
     	if(collection.equalsIgnoreCase("TRACK")) {
-	        if (!indexField.equalsIgnoreCase("track_idx") && !indexField.equalsIgnoreCase("album_idx") && !indexField.equalsIgnoreCase("artist_idx") && !indexField.equalsIgnoreCase(getUseIndexField())) {
+	        if (!indexField.equalsIgnoreCase("track_idx") && !indexField.equalsIgnoreCase("album_idx") && !indexField.equalsIgnoreCase("artist_idx") && !indexField.equalsIgnoreCase(getUseIndexField(collection))) {
+	            throw new InvalidParameterException("not exist index : (" + indexField + ")");
+	        }
+    	} else if(collection.equalsIgnoreCase("ALBUM")) {
+	        if (!indexField.equalsIgnoreCase("album_idx") && !indexField.equalsIgnoreCase("artist_idx") && !indexField.equalsIgnoreCase(getUseIndexField(collection))) {
+	            throw new InvalidParameterException("not exist index : (" + indexField + ")");
+	        }
+    	} else if(collection.equalsIgnoreCase("ARTIST")) {
+	        if (!indexField.equalsIgnoreCase("exact_artist_idx") && !indexField.equalsIgnoreCase(getUseIndexField(collection))) {
+	            throw new InvalidParameterException("not exist index : (" + indexField + ")");
+	        }
+      	} else {
+	        if (!indexField.equalsIgnoreCase(getUseIndexField(collection))) {
 	            throw new InvalidParameterException("not exist index : (" + indexField + ")");
 	        }
     	}
+    	
     }
 
     public byte getOption() {
@@ -116,5 +128,29 @@ public abstract class Qoption {
         return option == Protocol.WhereSet.OP_N_OF_M;
     }
 
-    abstract String getUseIndexField();
+    public String getUseIndexField(String collection) {
+    	String field = "";
+    	
+    	if(collection.equalsIgnoreCase("TRACK")) {
+    		field = "track_artist_album_idx";
+    	} else if(collection.equalsIgnoreCase("ALBUM")) {
+    		field = "artist_album_idx";
+    	} else if(collection.equalsIgnoreCase("ARTIST")) {
+    		field = "artist_idx";
+    	} else if(collection.equalsIgnoreCase("MV")) {
+    		field = "mv_track_artist_album_idx";
+    	} else if(collection.equalsIgnoreCase("MUSICCAST")) {
+    		field = "musiccast_idx";
+    	} else if(collection.equalsIgnoreCase("MUSICPD")) {
+    		field = "musicpd_album_idx";
+    	} else if(collection.equalsIgnoreCase("MUSICPOST")) {
+    		field = "musicpost_idx";
+    	} else if(collection.equalsIgnoreCase("CLASSIC")) {
+    		field = "classic_idx";
+    	} else {
+    		field = "track_artist_album_idx";
+    	}
+    	
+    	return field;
+    }
 }
