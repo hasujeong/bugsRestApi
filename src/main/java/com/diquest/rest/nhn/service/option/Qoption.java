@@ -133,6 +133,8 @@ public abstract class Qoption {
     	
     	if(collection.equalsIgnoreCase("TRACK")) {
     		field = "track_artist_album_idx";
+    	} else if(collection.equalsIgnoreCase("LYRICS")) {
+    		field = "lyrics_idx";
     	} else if(collection.equalsIgnoreCase("ALBUM")) {
     		field = "artist_album_idx";
     	} else if(collection.equalsIgnoreCase("ARTIST")) {
@@ -146,6 +148,8 @@ public abstract class Qoption {
     	} else if(collection.equalsIgnoreCase("MUSICPOST")) {
     		field = "musicpost_idx";
     	} else if(collection.equalsIgnoreCase("CLASSIC")) {
+    		field = "classic_idx";
+    	}  else if(collection.equalsIgnoreCase("CLASSIC")) {
     		field = "classic_idx";
     	} else {
     		field = "track_artist_album_idx";

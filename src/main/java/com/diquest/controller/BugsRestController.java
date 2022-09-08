@@ -32,13 +32,14 @@ public class BugsRestController {
 	public static String APP_KEY_CLASSIC = "0WleItZOyGJbrVF";
 	public static String APP_KEY_ENTITY = "H2wEkSvKZY9bdhl";
 	public static String APP_KEY_TOTAL = "2KJnuc31oL0rgjt";
+	public static String APP_KEY_AUTO = "autocomplete";
 
 	public BugsRestController(BugsRestService bugsRestService) {
 		this.bugsRestService = bugsRestService;
 	}
 	
 	@GetMapping("/api/v1.0/appkeys/{appKey}/search/advanced.search")
-	public String test(@PathVariable("appKey") String appKey, @RequestParam Map<String, String> params, @RequestHeader Map<String, Object> requestHeader, HttpServletRequest request) {
+	public String colSearch(@PathVariable("appKey") String appKey, @RequestParam Map<String, String> params, @RequestHeader Map<String, Object> requestHeader, HttpServletRequest request) {
 		
 		params.put("requestHeader.sid", (requestHeader.get("sid")==null?"":requestHeader.get("sid").toString()));
 		
@@ -79,6 +80,63 @@ public class BugsRestController {
 		}
 		
 //		return "appKey::" + appKey;
+	}
+	
+	/*
+	 * 통합검색 API 
+	 */
+	@GetMapping("/api/v1.0/appkeys/{appKey}/search/fusion.search")
+	public String totalSearch(@PathVariable("appKey") String appKey, @RequestParam Map<String, String> params, @RequestHeader Map<String, Object> requestHeader, HttpServletRequest request) {
+		
+		params.put("requestHeader.sid", (requestHeader.get("sid")==null?"":requestHeader.get("sid").toString()));
+		
+		long time = System.currentTimeMillis();
+		
+		if (appKey.equals(APP_KEY_TOTAL)) {
+			params.put("collection","TOTAL");
+
+			return bugsRestService.Totalsearch(params, requestHeader, request);
+		} else {
+			return unknownRequest(params, time);
+		}
+	}
+	
+	/*
+	 * 자동완성 API (검색어) 
+	 */
+	@GetMapping("/api/v1.0/appkeys/{appKey}/autocomplete/prefix")
+	public String autoCompleteSearch(@PathVariable("appKey") String appKey, @RequestParam Map<String, String> params, @RequestHeader Map<String, Object> requestHeader, HttpServletRequest request) {
+		
+		params.put("requestHeader.sid", (requestHeader.get("sid")==null?"":requestHeader.get("sid").toString()));
+		
+		long time = System.currentTimeMillis();
+		
+		if (appKey.equals(APP_KEY_AUTO)) {
+			params.put("collection","AUTO_TOTAL");
+			
+			return bugsRestService.Autosearch(params, requestHeader, request);
+		} else {
+			return unknownRequest(params, time);
+		}
+	}
+	
+	/*
+	 * 자동완성 API (태그) 
+	 */
+	@GetMapping("/api/v1.0/appkeys/{appKey}/autocomplete/prefix_tag")
+	public String autoTagSearch(@PathVariable("appKey") String appKey, @RequestParam Map<String, String> params, @RequestHeader Map<String, Object> requestHeader, HttpServletRequest request) {
+		
+		params.put("requestHeader.sid", (requestHeader.get("sid")==null?"":requestHeader.get("sid").toString()));
+		
+		long time = System.currentTimeMillis();
+		
+		if (appKey.equals(APP_KEY_AUTO)) {
+			params.put("collection","AUTO_TAG");
+			
+			return bugsRestService.Autosearch(params, requestHeader, request);
+		} else {
+			return unknownRequest(params, time);
+		}
 	}
 	
 	@GetMapping("/health_check")

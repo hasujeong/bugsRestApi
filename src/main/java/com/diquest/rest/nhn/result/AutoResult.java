@@ -12,43 +12,59 @@ import java.util.TreeMap;
 
 import com.diquest.ir.common.exception.IRException;
 import com.diquest.ir.common.msg.protocol.query.Query;
+import com.diquest.ir.common.msg.protocol.query.QuerySet;
 import com.diquest.ir.common.msg.protocol.query.SelectSet;
 import com.diquest.ir.common.msg.protocol.result.Result;
+import com.diquest.ir.common.msg.protocol.result.ResultSet;
 import com.diquest.rest.nhn.service.select.SelectSetService;
 import com.diquest.rest.nhn.service.trigger.TriggerFieldService;
 
-public class NhnResult {
+public class AutoResult {
 	private static String currTimezone = new SimpleDateFormat("XXX").format(new Date()).replace(":", "");
 	private static RestCommandExtractor restCommandExtractor = new RestCommandExtractor("alp-search.bugs.co.kr", 5555);
 	Header header;
-	NhnData result;
+	List<AutoData> result;
 
-	public NhnResult(Header header, NhnData result) {
+	public AutoResult(Header header, List<AutoData> result) {
 		this.header = header;
 		this.result = result;
 	}
 	
-	public NhnResult(NhnData result) {
-		this.result = result;
+	public static AutoResult makeEmptyResult() {
+		List<AutoData> autoData = new ArrayList<>();
+		
+		return new AutoResult(new Header(true, currTimezone, "43"), autoData);
 	}
+
+	public static AutoResult makeAutoResult(QuerySet query, ResultSet result, Map<String, String> map) throws IRException {
+		System.out.println("@@@@@@@@@@ " + result.resultSize());
+		System.out.println("@@@@@@@@@@ " + result.getResult(0).getRealSize());
+		
+		List<AutoData> autoData = makeTotalList(query,result, map); 
+		
+		return new AutoResult(new Header(true, currTimezone, "43"), autoData);
+	}
+
+//	public static TotalResult makeBugsResult(Query query, Result result, Map<String, String> map) throws IRException {
+//		return new TotalResult(new Header(true, currTimezone, "43"), new BugsData(query, result, map));
+//	}
 	
-	public static NhnResult makeEmptyResult() {
-		return new NhnResult(new Header(true, currTimezone, "43"), new BugsData());
+	private static List<AutoData> makeTotalList(QuerySet query, ResultSet result, Map<String, String> map) throws IRException {
+		List<AutoData> tot = new ArrayList<AutoData>();
+
+//		tot.add(new AutoData(query, result));
+		
+		for(int r = 0; r < result.resultSize(); r++) {
+			for (int i = 0; i < result.getResult(r).getRealSize(); i++) {
+				tot.add(new AutoData(query.getQuery(i), result.getResult(i), map));
+			}
+		}
+		
+		return tot;
 	}
 
-	public static NhnResult makeProductResult(Query query, Result result, Map<String, String> map) throws IRException {
-		return new NhnResult(new Header(true, currTimezone, "43"), new ProductData(query, result, map));
-	}
 
-	public static NhnResult makeStoreResult(Query query, Result result, Map<String, String> map) throws IRException {
-		return new NhnResult(new Header(true, currTimezone, "43"), new BugsData(query, result, map));
-	}
-	
-	private static class NhnData {
-
-	}
-
-	private static class ProductData extends NhnData {
+	private static class AutoData {
 		Status status;
 		int start;
 		String query;
@@ -56,8 +72,9 @@ public class NhnResult {
 		int total;
 		int itemCount;
 		itemList itemList;
+		String domain;
 		
-		public ProductData(){
+		public AutoData(){
 			List<Item> items = new ArrayList<>();
 			
 			this.status = new Status();
@@ -68,84 +85,36 @@ public class NhnResult {
 			this.itemCount = 0;
 			this.itemList = new itemList(items);
 		}
-
-		public ProductData(Query q, Result result, Map<String, String> params) throws IRException {
-			List<Item> items = makeItems(result, q.getSelectFields(), params); 
-			
-			this.status = new Status();
-			this.itemCount = result.getRealSize();
-			this.itemList = new itemList(items);
-			this.query = String.valueOf(q.getSearchKeyword());
-			this.start = q.getResultStart() + 1;
-			this.total = result.getTotalSize();
-			this.terms = makeTerms(String.valueOf(q.getSearchKeyword()));
-		}
-
-		private List<String> makeTerms(String searchKeyword) throws IRException {
-			List<String> terms = new ArrayList<String>();
-			String[][] result = restCommandExtractor.request("KOREAN", "", searchKeyword);
-			for (String[] innerRst : result) {
-				if (innerRst != null) {
-					terms.addAll(Arrays.asList(innerRst));
-				}
-			}
-
-			return terms;
-		}
-
-		private List<Item> makeItems(Result result, SelectSet[] selectSet, Map<String, String> params) {
-			List<Item> items = new ArrayList<Item>();
-			for (int i = 0; i < result.getRealSize(); i++) {
-				items.add(new Item(result, selectSet, params, i));
-			}
-			return items;
-		}
-
-	}
-
-	private static class BugsData extends NhnData {
-		Status status;
-		int start;
-		String query;
-		List<String> terms;
-		int total;
-		int itemCount;
-		itemList itemList;
-//		List<Item> items;
-		
-		public BugsData(){
-			List<Item> items = new ArrayList<>();
-			
-			this.status = new Status();
-			this.start = 1;
-			this.query = "";
-			this.terms = new ArrayList<>();
-			this.total = 0;
-			this.itemCount = 0;
-			this.itemList = new itemList(items);
-		}
-
-		public BugsData(Query q, Result result, Map<String, String> map) throws IRException {
+				
+		public AutoData(Query q, Result result, Map<String, String> map) throws IRException {
 			List<Item> items = makeItems(result, q.getSelectFields(), map); 
 			
-			this.status = new Status();
+			this.status = new Status(result);
 			this.itemCount = result.getRealSize();
 			this.itemList = new itemList(items);
 			this.query = String.valueOf(q.getSearchKeyword());
 			this.start = q.getResultStart() + 1;
 			this.total = result.getTotalSize();
 			this.terms = makeTerms(String.valueOf(q.getSearchKeyword()));
+			this.domain = String.valueOf(q.getFromField());			// 컬렉션명
 		}
 
-		private List<Status> makeStatus() {
-			List<Status> status = new ArrayList<Status>();
-			status.add(new Status());
+		public AutoData(QuerySet querys, ResultSet results) throws IRException {
+			int domainCnt = 0;
+			int totalCnt = 0;
 			
-			return status;
+			for(int i=0; i < results.resultSize() ; i++) {
+				totalCnt += results.getResult(i).getTotalSize();
+			}
+			
+			this.itemCount = results.getResult(0).getRealSize();
+			this.query = String.valueOf(querys.getQuery(0).getSearchKeyword());
+			this.start = querys.getQuery(0).getResultStart() + 1;
+			this.total = totalCnt;
+//			this.domainCnt = querys.querySize();
 		}
 		
 		private List<String> makeTerms(String searchKeyword) throws IRException {
-
 			List<String> terms = new ArrayList<String>();
 			String[][] result = restCommandExtractor.request("KOREAN", "", searchKeyword);
 			for (String[] innerRst : result) {
@@ -165,6 +134,36 @@ public class NhnResult {
 			return items;
 		}
 
+	}
+
+	private static class TotalSumData {
+		int itemCount;
+		int start;
+		int total;
+		String query;
+		int domainCont;
+		
+//		public TotalSumData(){
+//			this.start = 1;
+//			this.query = "";
+//			this.total = 0;
+//			this.itemCount = 0;
+//			this.domainCont = 0;
+//		}
+				
+		public TotalSumData(QuerySet querys, ResultSet results) throws IRException {
+			int totalCnt = 0;
+			
+			for(int i=0; i < results.resultSize() ; i++) {
+				totalCnt += results.getResult(i).getTotalSize();
+			}
+			
+			this.itemCount = results.getResult(0).getRealSize();
+			this.query = String.valueOf(querys.getQuery(0).getSearchKeyword());
+			this.start = querys.getQuery(0).getResultStart() + 1;
+			this.total = totalCnt;
+			this.domainCont = querys.querySize();
+		}
 	}
 
 	public static class Header {
@@ -252,12 +251,20 @@ public class NhnResult {
 	}
 	
 	public static class Status {
-		String code;
+		int code;
 		String message;
 
 		public Status() {
-			this.code = "0";
+			this.code = 0;
 			this.message = "OK";
+		}
+		public Status(Result result) {
+			this.code = result.getErrorCode();
+			if(code == 0) {
+				this.message = "OK";
+			} else {
+				this.message = "ERROR";
+			}
 		}
 	}
 	
