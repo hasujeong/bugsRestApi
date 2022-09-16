@@ -23,45 +23,101 @@ public class TotalResult {
 	private static String currTimezone = new SimpleDateFormat("XXX").format(new Date()).replace(":", "");
 	private static RestCommandExtractor restCommandExtractor = new RestCommandExtractor("alp-search.bugs.co.kr", 5555);
 	Header header;
-	List<TotalData> result;
+	resultData result;
 
-	public TotalResult(Header header, List<TotalData> result) {
+	public TotalResult(Header header, resultData result) {
 		this.header = header;
 		this.result = result;
 	}
 	
-	public static TotalResult makeEmptyResult() {
-		List<TotalData> totaldata = new ArrayList<>();
-		
-		return new TotalResult(new Header(true, currTimezone, "43"), totaldata);
+	public static TotalResult makeEmptyResult() {		
+		return new TotalResult(new Header(true, currTimezone, "43"), new TotalData());
 	}
 
 	public static TotalResult makeTotalResult(QuerySet query, ResultSet result, Map<String, String> map) throws IRException {
-		List<TotalData> totaldata = makeTotalList(query,result, map); 
-		
-		return new TotalResult(new Header(true, currTimezone, "43"), totaldata);
+		return new TotalResult(new Header(true, currTimezone, "43"), new TotalData(query,result, map));
 	}
 
-//	public static TotalResult makeBugsResult(Query query, Result result, Map<String, String> map) throws IRException {
-//		return new TotalResult(new Header(true, currTimezone, "43"), new BugsData(query, result, map));
-//	}
-	
-	private static List<TotalData> makeTotalList(QuerySet query, ResultSet result, Map<String, String> map) throws IRException {
-		List<TotalData> tot = new ArrayList<TotalData>();
+	private static class resultData {
 
-//		tot.add(new TotalData(query, result));
+	}
+
+	private static class TotalData extends resultData {
+		int itemCount;
+		int start;
+		int total;
+		String query;
+		int domainCount;
+		Status status;
+		itemList2 itemList;
 		
-		for(int r = 0; r < result.resultSize(); r++) {
-			for (int i = 0; i < result.getResult(r).getRealSize(); i++) {
-				tot.add(new TotalData(query.getQuery(i), result.getResult(i), map));
+		public TotalData(){
+			List<TotalItem> items = new ArrayList<>();
+			
+			this.itemCount = 0;
+			this.start = 1;
+			this.total = 0;
+			this.query = "";
+			this.domainCount = 0;
+			this.status = new Status();
+			this.itemList = new itemList2(items);
+		}
+				
+		public TotalData(QuerySet q, ResultSet result, Map<String, String> map) throws IRException {
+			List<TotalItem> items = makeTotalItems(q, result, map); 
+			
+			int totalCnt = 0;
+			
+			for(int i=0; i < result.resultSize() ; i++) {
+				totalCnt += result.getResult(i).getTotalSize();
 			}
+			
+			this.itemCount = 10; //default 출력 count
+			this.start = 1;
+			this.total = totalCnt;
+			this.query = String.valueOf(q.getQuery(0).getSearchKeyword());
+			this.domainCount = q.querySize();
+			this.status = new Status();
+			this.itemList = new itemList2(items);			
 		}
 		
-		return tot;
+		private List<String> makeTerms(String searchKeyword) throws IRException {
+			List<String> terms = new ArrayList<String>();
+			String[][] result = restCommandExtractor.request("KOREAN", "", searchKeyword);
+			for (String[] innerRst : result) {
+				if (innerRst != null) {
+					terms.addAll(Arrays.asList(innerRst));
+				}
+			}
+
+			return terms;
+		}
+		
+		private List<TotalItem> makeTotalItems(QuerySet q, ResultSet result, Map<String, String> map) throws IRException {
+			List<TotalItem> items = new ArrayList<TotalItem>();
+			
+			for (int i = 0; i < result.resultSize(); i++) {
+				items.add(new TotalItem(q.getQuery(i), result.getResult(i), map));
+			}
+			return items;
+		}
+
 	}
 
+	public static class Header {
+		boolean isSuccessful;
+		String timezone;
+		String version;
 
-	private static class TotalData {
+		public Header(boolean isSuccessful, String timezone, String version) {
+			this.isSuccessful = isSuccessful;
+			this.timezone = timezone;
+			this.version = version;
+		}
+
+	}
+	
+	private static class TotalItem {
 		Status status;
 		int start;
 		String query;
@@ -70,20 +126,8 @@ public class TotalResult {
 		int itemCount;
 		itemList itemList;
 		String domain;
-		
-		public TotalData(){
-			List<Item> items = new ArrayList<>();
-			
-			this.status = new Status();
-			this.start = 1;
-			this.query = "";
-			this.terms = new ArrayList<>();
-			this.total = 0;
-			this.itemCount = 0;
-			this.itemList = new itemList(items);
-		}
-				
-		public TotalData(Query q, Result result, Map<String, String> map) throws IRException {
+
+		public TotalItem(Query q, Result result, Map<String, String> map) throws IRException {
 			List<Item> items = makeItems(result, q.getSelectFields(), map); 
 			
 			this.status = new Status(result);
@@ -96,21 +140,6 @@ public class TotalResult {
 			this.domain = String.valueOf(q.getFromField());			// 컬렉션명
 		}
 
-		public TotalData(QuerySet querys, ResultSet results) throws IRException {
-			int domainCnt = 0;
-			int totalCnt = 0;
-			
-			for(int i=0; i < results.resultSize() ; i++) {
-				totalCnt += results.getResult(i).getTotalSize();
-			}
-			
-			this.itemCount = results.getResult(0).getRealSize();
-			this.query = String.valueOf(querys.getQuery(0).getSearchKeyword());
-			this.start = querys.getQuery(0).getResultStart() + 1;
-			this.total = totalCnt;
-//			this.domainCnt = querys.querySize();
-		}
-		
 		private List<String> makeTerms(String searchKeyword) throws IRException {
 			List<String> terms = new ArrayList<String>();
 			String[][] result = restCommandExtractor.request("KOREAN", "", searchKeyword);
@@ -130,55 +159,6 @@ public class TotalResult {
 			}
 			return items;
 		}
-
-	}
-
-	private static class TotalSumData {
-		int itemCount;
-		int start;
-		int total;
-		String query;
-		int domainCont;
-		
-//		public TotalSumData(){
-//			this.start = 1;
-//			this.query = "";
-//			this.total = 0;
-//			this.itemCount = 0;
-//			this.domainCont = 0;
-//		}
-				
-		public TotalSumData(QuerySet querys, ResultSet results) throws IRException {
-			int totalCnt = 0;
-			
-			for(int i=0; i < results.resultSize() ; i++) {
-				totalCnt += results.getResult(i).getTotalSize();
-			}
-			
-			this.itemCount = results.getResult(0).getRealSize();
-			this.query = String.valueOf(querys.getQuery(0).getSearchKeyword());
-			this.start = querys.getQuery(0).getResultStart() + 1;
-			this.total = totalCnt;
-			this.domainCont = querys.querySize();
-		}
-	}
-
-	public static class Header {
-		boolean isSuccessful;
-//		int resultCode;
-//		String resultMessage;
-		String timezone;
-		String version;
-
-//		public Header(boolean isSuccessful, int resultCode, String resultMessage, String timezone) {
-		public Header(boolean isSuccessful, String timezone, String version) {
-			this.isSuccessful = isSuccessful;
-//			this.resultCode = resultCode;
-//			this.resultMessage = resultMessage;
-			this.timezone = timezone;
-			this.version = version;
-		}
-
 	}
 
 	private static class Item {
@@ -269,6 +249,14 @@ public class TotalResult {
 		List<Item> item;
 		
 		public itemList(List<Item> item) {
+			this.item = item;
+		}
+	}
+	
+	public static class itemList2 {
+		List<TotalItem> item;
+		
+		public itemList2(List<TotalItem> item) {
 			this.item = item;
 		}
 	}

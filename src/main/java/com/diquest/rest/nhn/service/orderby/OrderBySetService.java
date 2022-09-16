@@ -150,6 +150,10 @@ public class OrderBySetService {
 				return new OrderBySet(true, "SCORE", Protocol.TriggerSet.OrderBy.OP_PREWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase("ENTITY")) {
+		} else if(collection.equalsIgnoreCase("AUTO_TAG")) {
+			return new OrderBySet(true, "ESALBUM_CNT", Protocol.TriggerSet.OrderBy.OP_PREWEIGHT);
+		} else if(collection.equalsIgnoreCase("AUTO_TOTAL")) {
+			return new OrderBySet(true, "SCORE", Protocol.TriggerSet.OrderBy.OP_PREWEIGHT);
 		}
 		
 		return new OrderBySet(false, "WEIGHT");
