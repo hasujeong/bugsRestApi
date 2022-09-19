@@ -56,6 +56,7 @@ import com.diquest.rest.nhn.service.select.SelectSetService;
 import com.diquest.rest.nhn.service.trigger.TriggerFieldService;
 import com.diquest.rest.nhn.service.where.WhereSetService;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 @Service
 public class BugsRestService {
@@ -458,10 +459,13 @@ public class BugsRestService {
 			String resultJson = "";
 			
 			if(colStr.equalsIgnoreCase("AUTO_TOTAL")) {
-				resultJson += gson.toJson(makeAutoResult(commandSearchRequest.getResultSet(), querySet, params));
-				
+//				resultJson = gson.toJson(makeAutoResult(commandSearchRequest.getResultSet(), querySet, params));
+				JsonObject jsonElement = gson.toJsonTree(makeAutoResult(commandSearchRequest.getResultSet(), querySet, params)).getAsJsonObject();
+				resultJson = gson.toJson(jsonElement.getAsJsonObject("meta").get("result"));
 			} else {
-				resultJson = gson.toJson(makeAutoTagResult(commandSearchRequest.getResultSet().getResult(0), query, params));
+//				resultJson = gson.toJson(makeAutoTagResult(commandSearchRequest.getResultSet().getResult(0), query, params));
+				JsonObject jsonElement = gson.toJsonTree(makeAutoTagResult(commandSearchRequest.getResultSet().getResult(0), query, params)).getAsJsonObject();
+				resultJson = gson.toJson(jsonElement.get("result"));
 			}
 			
 			ret = resultJson;
