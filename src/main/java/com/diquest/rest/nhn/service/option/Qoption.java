@@ -3,6 +3,7 @@ package com.diquest.rest.nhn.service.option;
 import com.diquest.ir.common.msg.protocol.Protocol;
 import com.diquest.ir.rest.common.exception.InvalidParameterException;
 import com.diquest.ir.util.common.StringUtil;
+import com.diquest.rest.nhn.common.Collections;
 
 public abstract class Qoption {
     private static final String OR = "or";
@@ -92,15 +93,15 @@ public abstract class Qoption {
 
     // 다른 idx 이름이 들어왔을 경우 에러
     private void validIndexFieldName(String indexField, String collection) throws InvalidParameterException {
-    	if(collection.equalsIgnoreCase("TRACK")) {
+    	if(collection.equalsIgnoreCase(Collections.TRACK)) {
 	        if (!indexField.equalsIgnoreCase("track_idx") && !indexField.equalsIgnoreCase("album_idx") && !indexField.equalsIgnoreCase("artist_idx") && !indexField.equalsIgnoreCase(getUseIndexField(collection))) {
 	            throw new InvalidParameterException("not exist index : (" + indexField + ")");
 	        }
-    	} else if(collection.equalsIgnoreCase("ALBUM")) {
+    	} else if(collection.equalsIgnoreCase(Collections.ALBUM)) {
 	        if (!indexField.equalsIgnoreCase("album_idx") && !indexField.equalsIgnoreCase("artist_idx") && !indexField.equalsIgnoreCase(getUseIndexField(collection))) {
 	            throw new InvalidParameterException("not exist index : (" + indexField + ")");
 	        }
-    	} else if(collection.equalsIgnoreCase("ARTIST")) {
+    	} else if(collection.equalsIgnoreCase(Collections.ARTIST)) {
 	        if (!indexField.equalsIgnoreCase("exact_artist_idx") && !indexField.equalsIgnoreCase(getUseIndexField(collection))) {
 	            throw new InvalidParameterException("not exist index : (" + indexField + ")");
 	        }

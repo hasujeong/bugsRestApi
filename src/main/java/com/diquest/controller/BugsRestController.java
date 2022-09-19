@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.diquest.ir.rest.json.gson.GsonLoader;
 import com.diquest.ir.rest.json.object.JsonUnknownUriResult;
 import com.diquest.ir.rest.json.reponse.ResponseMaker;
+import com.diquest.rest.nhn.common.Collections;
 import com.diquest.ir.rest.common.constant.HttpStatus;
 import com.diquest.service.BugsRestService;
 
@@ -33,6 +34,7 @@ public class BugsRestController {
 	public static String APP_KEY_ENTITY = "H2wEkSvKZY9bdhl";
 	public static String APP_KEY_TOTAL = "2KJnuc31oL0rgjt";
 	public static String APP_KEY_AUTO = "autocomplete";
+	public static String APP_KEY_HOT = "trends";
 
 	public BugsRestController(BugsRestService bugsRestService) {
 		this.bugsRestService = bugsRestService;
@@ -46,34 +48,34 @@ public class BugsRestController {
 		long time = System.currentTimeMillis();
 		
 		if (appKey.equals(APP_KEY_TRACK)) {
-			params.put("collection","TRACK");
+			params.put("collection",Collections.TRACK);
 			return bugsRestService.search(params, requestHeader, request);
 		} else if (appKey.equals(APP_KEY_LYRICS)) {
-			params.put("collection","LYRICS");
+			params.put("collection",Collections.LYRICS);
 			return bugsRestService.search(params, requestHeader, request);
 		} else if (appKey.equals(APP_KEY_ALBUM)) {
-			params.put("collection","ALBUM");
+			params.put("collection",Collections.ALBUM);
 			return bugsRestService.search(params, requestHeader, request);
 		} else if (appKey.equals(APP_KEY_ARTIST)) {
-			params.put("collection","ARTIST");
+			params.put("collection",Collections.ARTIST);
 			return bugsRestService.search(params, requestHeader, request);
 		} else if (appKey.equals(APP_KEY_MV)) {
-			params.put("collection","MV");
+			params.put("collection",Collections.MV);
 			return bugsRestService.search(params, requestHeader, request);
 		} else if (appKey.equals(APP_KEY_MCAST)) {
-			params.put("collection","MUSICCAST");
+			params.put("collection",Collections.MUSICCAST);
 			return bugsRestService.search(params, requestHeader, request);
 		} else if (appKey.equals(APP_KEY_MPD)) {
-			params.put("collection","MUSICPD");
+			params.put("collection",Collections.MUSICPD);
 			return bugsRestService.search(params, requestHeader, request);
 		} else if (appKey.equals(APP_KEY_MPOST)) {
-			params.put("collection","MUSICPOST");
+			params.put("collection",Collections.MUSICPOST);
 			return bugsRestService.search(params, requestHeader, request);
 		} else if (appKey.equals(APP_KEY_CLASSIC)) {
-			params.put("collection","CLASSIC");
+			params.put("collection",Collections.CLASSIC);
 			return bugsRestService.search(params, requestHeader, request);
 		} else if (appKey.equals(APP_KEY_ENTITY)) {
-			params.put("collection","ENTITY");
+			params.put("collection",Collections.ENTITY);
 			return bugsRestService.search(params, requestHeader, request);
 		} else {
 			return unknownRequest(params, time);
@@ -93,7 +95,7 @@ public class BugsRestController {
 		long time = System.currentTimeMillis();
 		
 		if (appKey.equals(APP_KEY_TOTAL)) {
-			params.put("collection","TOTAL");
+			params.put("collection",Collections.TOTAL);
 
 			return bugsRestService.Totalsearch(params, requestHeader, request);
 		} else {
@@ -112,7 +114,7 @@ public class BugsRestController {
 		long time = System.currentTimeMillis();
 		
 		if (appKey.equals(APP_KEY_AUTO)) {
-			params.put("collection","AUTO_TOTAL");
+			params.put("collection",Collections.AUTO_TOTAL);
 			
 			return bugsRestService.Autosearch(params, requestHeader, request);
 		} else {
@@ -131,13 +133,33 @@ public class BugsRestController {
 		long time = System.currentTimeMillis();
 		
 		if (appKey.equals(APP_KEY_AUTO)) {
-			params.put("collection","AUTO_TAG");
+			params.put("collection",Collections.AUTO_TAG);
 			
 			return bugsRestService.Autosearch(params, requestHeader, request);
 		} else {
 			return unknownRequest(params, time);
 		}
 	}
+	
+	/*
+	 * 인기검색어 API 
+	 */
+	@GetMapping("/api/v1.0/appkeys/{appKey}/hotkeyword")
+	public String HotKwdSearch(@PathVariable("appKey") String appKey, @RequestParam Map<String, String> params, @RequestHeader Map<String, Object> requestHeader, HttpServletRequest request) {
+		
+		params.put("requestHeader.sid", (requestHeader.get("sid")==null?"":requestHeader.get("sid").toString()));
+		
+		long time = System.currentTimeMillis();
+		
+		if (appKey.equals(APP_KEY_HOT)) {
+			params.put("collection",Collections.HOTKEYWORD);
+			
+			return bugsRestService.hotKeyword(params, requestHeader, request);
+		} else {
+			return unknownRequest(params, time);
+		}
+	}
+	
 	
 	@GetMapping("/health_check")
 	public String handleRequest() {

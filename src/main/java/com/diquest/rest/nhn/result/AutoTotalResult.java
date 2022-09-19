@@ -2,8 +2,8 @@ package com.diquest.rest.nhn.result;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,19 +19,13 @@ public class AutoTotalResult {
 	private static RestCommandExtractor restCommandExtractor = new RestCommandExtractor("alp-search.bugs.co.kr", 5555);
 
 	Meta meta;
-
-//	public AutoTotalResult(resultData result) {
-//		this.meta = result;
-//	}
 	
 	public AutoTotalResult(QuerySet q, ResultSet result, Map<String, String> map) throws IRException {
-		List<Item> items = makeTotalItems(q, result, map); 
-		List<ArtItem> artitems = makeArtistItems(q, result, map); 
+		List<Map<String, Object>> items = makeTotalItems(q, result, map); 
+		Map<String, Object> artitems = makeArtistItems(q, result, map); 
+		items.add(0, artitems);
 		
-//		System.out.println("@@@@@@@ items @@@@@ " + getValue(result.getResult(0), 0));
-		
-//		this.meta = new Meta(artitems, items, "");
-		this.meta = new Meta(artitems, items, "");
+		this.meta = new Meta(items);
 	}
 	
 	public static AutoTotalResult makeAutoTotalResult(QuerySet query, ResultSet result, Map<String, String> map) throws IRException {
@@ -47,78 +41,39 @@ public class AutoTotalResult {
 		return AutoTotalSelectSet.getInstance().getValue(result, resultIdx);
 	}
 	
-	private List<Item> makeTotalItems(QuerySet q, ResultSet result, Map<String, String> map) throws IRException {
-		List<Item> items = new ArrayList<Item>();
-		
-		System.out.println("--------- start1 --------- ");
-		
-//		for (int i = 0; i < result.resultSize(); i++) {
-//			items.add(new Item(q.getQuery(i), result.getResult(i), map, i));
-//		}
+	private List<Map<String, Object>> makeTotalItems(QuerySet q, ResultSet result, Map<String, String> map) throws IRException {
+		List<Map<String, Object>> items = new ArrayList<Map<String, Object>>();
 		
 		for (int i = 0; i < result.getResult(1).getRealSize() ; i++) {
-			items.add(new Item(q.getQuery(1), result.getResult(1), map, i));
+			Map<String, Object> temp = new HashMap<>();
+			temp.put("meta", new Item(q.getQuery(1), result.getResult(1), map, i));
+			temp.put("value", new Item(q.getQuery(1), result.getResult(1), map, i).value);
+			
+			items.add(temp);
 		}
 		
-		System.out.println("-------- end ----------- ");
 		return items;
 	}
 	
-	private List<ArtItem> makeArtistItems(QuerySet q, ResultSet result, Map<String, String> map) throws IRException {
+	private Map<String, Object> makeArtistItems(QuerySet q, ResultSet result, Map<String, String> map) throws IRException {
 		List<ArtItem> items = new ArrayList<ArtItem>();
 		
-		System.out.println("--------- start2 --------- ");
+		Map<String, Object> temp = new HashMap<>();
+		String firstValue = "";
 		
 		for (int i = 0; i < result.getResult(0).getRealSize(); i++) {
 			items.add(new ArtItem(q.getQuery(0), result.getResult(0), map, i));
+			
+			if (i == 0) {
+				firstValue = new ArtItem(q.getQuery(0), result.getResult(0), map, i).value;
+			}
 		}
 		
-		System.out.println("-------- end ----------- ");
-		return items;
+		temp.put("meta", items);
+		temp.put("value", firstValue);
+		
+		return temp;
 	}
-	
-//	private static class AutoData extends resultData {
-//		Meta meta;
-//		String value;
-//		
-////		public AutoData(){
-////			List<Item> items = new ArrayList<>();
-////			
-////			this.itemCount = 0;
-////			this.start = 1;
-////			this.total = 0;
-////			this.query = "";
-////			this.domainCount = 0;
-////			this.status = new Status();
-////			this.itemList = new itemList2(items);
-////		}
-//				
-//		public AutoData(QuerySet q, ResultSet result, Map<String, String> map) throws IRException {
-//			List<Item> items = makeTotalItems(q, result, map); 
-//			
-//			System.out.println("@@@@@@@ items @@@@@ " + items);
-//			
-//			this.meta = new Meta(items, "");
-//		}
-//		
-//		private String getValue(Result result, int resultIdx) {
-//			return AutoTotalSelectSet.getInstance().getValue(result, resultIdx);
-//		}
-//		
-//		private List<Item> makeTotalItems(QuerySet q, ResultSet result, Map<String, String> map) throws IRException {
-//			List<Item> items = new ArrayList<Item>();
-//			
-//			System.out.println("@@@@@@@ start @@@@@ ");
-//			
-//			for (int i = 0; i < result.resultSize(); i++) {
-//				items.add(new Item(q.getQuery(i), result.getResult(i), map, i));
-//			}
-//			
-//			System.out.println("@@@@@@@ end @@@@@ ");
-//			return items;
-//		}
-//
-//	}
 
 	private static class Item {
 		String type;
@@ -200,8 +155,6 @@ public class AutoTotalResult {
 		String value;
 		
 		public ArtItem(Query q, Result result, Map<String, String> map, int resultIdx) {
-			System.out.println("############### " + resultIdx);
-			
 			this.type = "EA"; //getType(result, resultIdx);
 			this.ranking = getRanking(result, resultIdx);
 			this.artist_id = getArtist(result, resultIdx);
@@ -239,14 +192,10 @@ public class AutoTotalResult {
 	}
 	
 	public static class Meta {
-		List<ArtItem> artitems;
-		List<Item> meta;
-		String value;
+		List<Map<String, Object>> result;
 		
-		public Meta(List<ArtItem> artitems, List<Item> item, String value) {
-			this.artitems = artitems;
-			this.meta = item;
-			this.value = value;
+		public Meta(List<Map<String, Object>> item) {
+			this.result = item;
 		}
 	}
 

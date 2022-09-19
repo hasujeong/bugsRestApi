@@ -13,11 +13,12 @@ import com.diquest.ir.common.msg.protocol.query.QuerySet;
 import com.diquest.ir.common.msg.protocol.query.SelectSet;
 import com.diquest.ir.common.msg.protocol.result.Result;
 import com.diquest.ir.common.msg.protocol.result.ResultSet;
+import com.diquest.rest.nhn.common.Connection;
 import com.diquest.rest.nhn.service.select.AutoTagSelectSet;
 
 public class AutoResult {
 	private static String currTimezone = new SimpleDateFormat("XXX").format(new Date()).replace(":", "");
-	private static RestCommandExtractor restCommandExtractor = new RestCommandExtractor("alp-search.bugs.co.kr", 5555);
+	private static RestCommandExtractor restCommandExtractor = new RestCommandExtractor(Connection.IP, Connection.PORT);
 
 	List<Item> result;
 

@@ -3,6 +3,7 @@ package com.diquest.rest.nhn.service.filter;
 import com.diquest.ir.common.msg.protocol.Protocol;
 import com.diquest.ir.common.msg.protocol.query.FilterSet;
 import com.diquest.ir.rest.common.exception.InvalidParameterException;
+import com.diquest.rest.nhn.common.Collections;
 import com.diquest.rest.nhn.filter.result.FilterFieldParseResult;
 import com.diquest.rest.nhn.filter.result.FilterNormalValueResult;
 import com.diquest.rest.nhn.filter.result.FilterRangeValueResult;
@@ -25,10 +26,10 @@ public class FilterSetService {
         return instance;
     }
 
-    public FilterSet[] parseFilter(Map<String, String> params, FilterFieldParseResult filterFieldParseResult) throws InvalidParameterException {
+    public FilterSet[] parseFilter(Map<String, String> params, FilterFieldParseResult filterFieldParseResult, String collection) throws InvalidParameterException {
         List<FilterSet> filters = new ArrayList<>();
 //        filters.addAll(makeTriggerFilterFields(TriggerFieldService.getInstance().getTriggerFieldNames(params), filterFieldParseResult));
-        filters.addAll(makeFilterFields(filterFieldParseResult, params));
+        filters.addAll(makeFilterFields(filterFieldParseResult, collection));
         return filters.toArray(new FilterSet[filters.size()]);
     }
 
@@ -57,22 +58,18 @@ public class FilterSetService {
 
     }
 
-    private List<FilterSet> makeFilterFields(FilterFieldParseResult filterFieldParseResult, Map<String, String> params) throws InvalidParameterException {
+    private List<FilterSet> makeFilterFields(FilterFieldParseResult filterFieldParseResult, String collection) throws InvalidParameterException {
         List<FilterSet> filters = new ArrayList<>();
-//        List<FilterRangeValueResult> rangeFields = filterFieldParseResult.getFilterRangeValueResults();
-//        for (FilterRangeValueResult tnf : rangeFields) {
-//            assertNormalRange(tnf);
-//            filters.add(new FilterSet(Protocol.FilterSet.OP_RANGE, tnf.getFieldName(), new String[]{tnf.getLeft().getValue(), tnf.getRight().getValue()}));
-//        }
         
+        if(collection.equalsIgnoreCase(Collections.TRACK)) {
+        	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "COVER_YN", "N", 100));
+        	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "MR_YN", "N", 100));
+        } 
         
         List<FilterNormalValueResult> normalFields = filterFieldParseResult.getFilterNormalValueResults();
        
         for (FilterNormalValueResult tnf : normalFields) {
-//            filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), tnf.getFieldName(), tnf.getValues(), 100));
         	 for (FieldValue v : tnf.getValues()) {
-//        		 System.out.println("################ " + v.getValue());
-//        		 filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), tnf.getFieldName(), v.getValue(), 100));
         		 filters.add(new FilterSet(Protocol.FilterSet.OP_MATCH, tnf.getFieldName(), v.getValue()));
         	 }
         }

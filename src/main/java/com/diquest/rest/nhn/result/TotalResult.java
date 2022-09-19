@@ -16,12 +16,13 @@ import com.diquest.ir.common.msg.protocol.query.QuerySet;
 import com.diquest.ir.common.msg.protocol.query.SelectSet;
 import com.diquest.ir.common.msg.protocol.result.Result;
 import com.diquest.ir.common.msg.protocol.result.ResultSet;
+import com.diquest.rest.nhn.common.Connection;
 import com.diquest.rest.nhn.service.select.SelectSetService;
 import com.diquest.rest.nhn.service.trigger.TriggerFieldService;
 
 public class TotalResult {
 	private static String currTimezone = new SimpleDateFormat("XXX").format(new Date()).replace(":", "");
-	private static RestCommandExtractor restCommandExtractor = new RestCommandExtractor("alp-search.bugs.co.kr", 5555);
+	private static RestCommandExtractor restCommandExtractor = new RestCommandExtractor(Connection.IP, Connection.PORT);
 	Header header;
 	resultData result;
 
