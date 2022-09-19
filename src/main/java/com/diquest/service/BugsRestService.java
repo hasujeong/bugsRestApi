@@ -460,7 +460,7 @@ public class BugsRestService {
 			}
 					
 			String resultJson = "";
-			
+
 			if(colStr.equalsIgnoreCase(Collections.AUTO_TOTAL)) {
 //				resultJson = gson.toJson(makeAutoResult(commandSearchRequest.getResultSet(), querySet, params));
 				JsonObject jsonElement = gson.toJsonTree(makeAutoResult(commandSearchRequest.getResultSet(), querySet, params)).getAsJsonObject();
