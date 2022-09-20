@@ -44,6 +44,11 @@ public class AutoTotalSelectSet {
 		fixedTotalFieldMap.put(ALBUMID, 3);
 		fixedTotalFieldMap.put(ARTISTID, 4);
 		fixedTotalFieldMap.put(VALUE, 5);
+		
+		fixedTotalFieldMap.put(NATIONCD, 6);
+		fixedTotalFieldMap.put(GENRECD, 7);
+		fixedTotalFieldMap.put(GRP_CD, 8);
+		fixedTotalFieldMap.put(SEX_CD, 9);
 	}
 
 	private static AutoTotalSelectSet instance = null;
@@ -146,6 +151,23 @@ public class AutoTotalSelectSet {
 	
 	public String getValuetotal(Result result, int resultIdx) {
 		return new String(result.getResult(resultIdx, fixedTotalFieldMap.get(VALUE)));
+	}
+	
+	
+	public String getNationtotal(Result result, int resultIdx) {
+		return new String(result.getResult(resultIdx, fixedTotalFieldMap.get(NATIONCD)));
+	}
+	
+	public String getGenretotal(Result result, int resultIdx) {
+		return new String(result.getResult(resultIdx, fixedTotalFieldMap.get(GENRECD)));
+	}
+	
+	public String getGrpcdtotal(Result result, int resultIdx) {
+		return new String(result.getResult(resultIdx, fixedTotalFieldMap.get(GRP_CD)));
+	}
+	
+	public String getSexcdtotal(Result result, int resultIdx) {
+		return new String(result.getResult(resultIdx, fixedTotalFieldMap.get(SEX_CD)));
 	}
 	 
 	public Entry<String, Object> getSourceData(String key, String value) {

@@ -13,6 +13,7 @@ import com.diquest.ir.common.msg.protocol.query.SelectSet;
 import com.diquest.ir.common.msg.protocol.result.Result;
 import com.diquest.rest.nhn.common.Connection;
 import com.diquest.rest.nhn.service.select.HotKwdSelectSet;
+import com.diquest.rest.nhn.service.select.SelectSetService;
 
 public class HotKwdResult {
 	private static String currTimezone = new SimpleDateFormat("XXX").format(new Date()).replace(":", "");
@@ -120,17 +121,17 @@ public class HotKwdResult {
 
 	private static class Item {
 		int ranking;
-		int prevrack;
+		int prevrank;
 		int count;
 		String keyword;
 
 		public Item(Result result, SelectSet[] selectSet, Map<String, String> params, int resultIdx) {
 			this.ranking = getRank(result, resultIdx);
-			this.prevrack = getPrevRank(result, resultIdx);
+			this.prevrank = getPrevRank(result, resultIdx);
 			this.count = getCount(result, resultIdx);
 			this.keyword = getKeyword(result, resultIdx);
 		}
-
+		
 		private String getKeyword(Result result, int resultIdx) {
 			return HotKwdSelectSet.getInstance().getKeyword(result, resultIdx);
 		}

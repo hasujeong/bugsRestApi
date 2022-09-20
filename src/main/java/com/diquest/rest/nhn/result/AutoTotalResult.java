@@ -32,11 +32,7 @@ public class AutoTotalResult {
 		
 		return new AutoTotalResult(query,result, map);
 	}
-	
-	private static class resultData {
-
-	}
-	
+		
 	private String getValue(Result result, int resultIdx) {
 		return AutoTotalSelectSet.getInstance().getValue(result, resultIdx);
 	}
@@ -111,7 +107,14 @@ public class AutoTotalResult {
 				this.artist_id = getArtisttotal(result, resultIdx);
 				this.value = getValuetotal(result, resultIdx);
 			} else if(tp.equalsIgnoreCase("AR")) {
-				
+				this.type = getTypetotal(result, resultIdx);
+				this.ranking = getRankingtotal(result, resultIdx);
+				this.artist_id = getArtisttotal(result, resultIdx);
+				this.nation_cd = getNationtotal(result, resultIdx);
+				this.genre_cd = getGenretotal(result, resultIdx);
+				this.grp_cd = getGrpcdtotal(result, resultIdx);
+				this.sex_cd = getSexcdtotal(result, resultIdx);
+				this.value = getValuetotal(result, resultIdx);
 			} else {
 				this.type = getTypetotal(result, resultIdx);
 				this.ranking = getRankingtotal(result, resultIdx);
@@ -119,7 +122,6 @@ public class AutoTotalResult {
 				this.artist_id = getArtisttotal(result, resultIdx);
 				this.value = getValuetotal(result, resultIdx);
 			} 
-				
 		}
 		
 		private String getTypetotal(Result result, int resultIdx) {
@@ -139,6 +141,19 @@ public class AutoTotalResult {
 		}
 		private String getValuetotal(Result result, int resultIdx) {
 			return AutoTotalSelectSet.getInstance().getValuetotal(result, resultIdx);
+		}
+
+		private String getNationtotal(Result result, int resultIdx) {
+			return AutoTotalSelectSet.getInstance().getNationtotal(result, resultIdx);
+		}
+		private String getGenretotal(Result result, int resultIdx) {
+			return AutoTotalSelectSet.getInstance().getGenretotal(result, resultIdx);
+		}
+		private String getGrpcdtotal(Result result, int resultIdx) {
+			return AutoTotalSelectSet.getInstance().getGrpcdtotal(result, resultIdx);
+		}
+		private String getSexcdtotal(Result result, int resultIdx) {
+			return AutoTotalSelectSet.getInstance().getSexcdtotal(result, resultIdx);
 		}
 	}
 	

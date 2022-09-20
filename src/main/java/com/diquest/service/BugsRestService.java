@@ -195,7 +195,7 @@ public class BugsRestService {
 			querySet.addQuery(query);
 		
 			String queryStr = parser.queryToString(query);
-			System.out.println(" :::::::::: query ::::::: " + queryStr);
+//			System.out.println(" :::::::::: query ::::::: " + queryStr);
 									
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 					
@@ -444,7 +444,7 @@ public class BugsRestService {
 				querySet.addQuery(query);
 			
 				String queryStr = parser.queryToString(query);
-				System.out.println(" :::::::::: query ::::::: " + queryStr);
+//				System.out.println(" :::::::::: query ::::::: " + queryStr);
 			}
 									
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
@@ -503,14 +503,6 @@ public class BugsRestService {
 		req += "Accept-Encoding: " + (String) reqHeader.get("accept-encoding") + "\n";
 		req += "Accept-Language: " + (String) reqHeader.get("accept-language");
 		
-//		if(params.get("q") != null) {
-//			if(params.get("q").isEmpty()){
-//				return makeEmptyNhnData(params);
-//			}
-//		} else {			
-//			return makeEmptyNhnData(params);
-//		}
-		
 		logMessageService.requestReceived(reqHeader, request);
 		
 		String ret = "";
@@ -523,7 +515,7 @@ public class BugsRestService {
 		Query query = new Query();
 		
 		try {
-			query.setSelect(parseSelect(params));
+			query.setSelect(parseHotSelect(params));
 			query.setOrderby(parseOrderBy(params, getCollection(params)));
 			query.setFrom(getCollection(params));
 			query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
@@ -540,7 +532,7 @@ public class BugsRestService {
 			querySet.addQuery(query);
 		
 			String queryStr = parser.queryToString(query);
-			System.out.println(" :::::::::: query ::::::: " + queryStr);
+//			System.out.println(" :::::::::: query ::::::: " + queryStr);
 									
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 					
@@ -847,14 +839,23 @@ public class BugsRestService {
 	// 자동완성 사이즈
 	protected int parseAutoSize(Map<String, String> params, int num) {
 		String size = RestUtils.getParam(params, "size");
+		String collection = getCollection(params);
 		
-		if(num == 0) {
-			return 3;
-		} else {
+		if(collection.equalsIgnoreCase(Collections.AUTO_TAG)) {
 			if (size.equals("")) {
 				return 10;
 			} else {
 				return Integer.parseInt(size);
+			}
+		} else {
+			if(num == 0) {
+				return 3;
+			} else {
+				if (size.equals("")) {
+					return 10;
+				} else {
+					return Integer.parseInt(size);
+				}
 			}
 		}
 	}

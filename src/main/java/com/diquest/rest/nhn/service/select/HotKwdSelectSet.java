@@ -13,10 +13,11 @@ import com.diquest.ir.util.common.StringUtil;
 import com.diquest.rest.nhn.service.trigger.TriggerFieldService;
 
 public class HotKwdSelectSet {
+	public static String RANKING = "RANKING";
+	public static String PREV_RANK = "PREV_RANK";
 	public static String COUNT = "COUNT";
 	public static String KEYWORD = "KEYWORD";
-	public static String PREV_RANK = "PREV_RANK";
-	public static String RANKING = "RANKING";
+
 	public static LinkedHashMap<String, Integer> fixedFieldMap = new LinkedHashMap<String, Integer>();
 	static {
 		fixedFieldMap.put(RANKING, 0);
@@ -65,22 +66,22 @@ public class HotKwdSelectSet {
 		return sets;
 	}
 
-	public String getKeyword(Result result, int resultIdx) {
-		return new String(result.getResult(resultIdx, fixedFieldMap.get(KEYWORD)));
-	}
-
-	public int getPrevRank(Result result, int resultIdx) {
-		return Integer.parseInt(String.valueOf(result.getResult(resultIdx, fixedFieldMap.get(PREV_RANK))));
-	}
-
-	public int getCount(Result result, int resultIdx) {
-		return Integer.parseInt(String.valueOf(result.getResult(resultIdx, fixedFieldMap.get(COUNT))));
-	}
-
 	public int getRank(Result result, int resultIdx) {
 		return Integer.parseInt(String.valueOf(result.getResult(resultIdx, fixedFieldMap.get(RANKING))));
 	}
-
+	
+	public int getCount(Result result, int resultIdx) {
+		return Integer.parseInt(String.valueOf(result.getResult(resultIdx, fixedFieldMap.get(COUNT))));
+	}
+	
+	public int getPrevRank(Result result, int resultIdx) {
+		return Integer.parseInt(String.valueOf(result.getResult(resultIdx, fixedFieldMap.get(PREV_RANK))));
+	}
+	
+	public String getKeyword(Result result, int resultIdx) {
+		return new String(result.getResult(resultIdx, fixedFieldMap.get(KEYWORD)));
+	}
+	
 	public Entry<String, Object> getSourceData(String key, String value) {
 		return new KeyValEntry(key.toLowerCase(), value);
 	}
