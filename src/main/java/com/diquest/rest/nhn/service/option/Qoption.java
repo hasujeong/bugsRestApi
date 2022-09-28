@@ -105,6 +105,15 @@ public abstract class Qoption {
 	        if (!indexField.equalsIgnoreCase("exact_artist_idx") && !indexField.equalsIgnoreCase(getUseIndexField(collection))) {
 	            throw new InvalidParameterException("not exist index : (" + indexField + ")");
 	        }
+      	} else if(collection.equalsIgnoreCase(Collections.ENTITY)) {
+	        if (!indexField.equalsIgnoreCase("track_idx") && !indexField.equalsIgnoreCase("album_idx") && 
+	        	!indexField.equalsIgnoreCase("artist_idx") && !indexField.equalsIgnoreCase("arranger_idx") && 
+	        	!indexField.equalsIgnoreCase("composer_idx") && !indexField.equalsIgnoreCase("featuring_idx") && 
+	        	!indexField.equalsIgnoreCase("lyricist_idx") && !indexField.equalsIgnoreCase("genre_idx") && 
+	        	!indexField.equalsIgnoreCase("artist_role_idx")&& !indexField.equalsIgnoreCase(getUseIndexField(collection))) {
+	        	
+	            throw new InvalidParameterException("not exist index : (" + indexField + ")");
+	        }
       	} else {
 	        if (!indexField.equalsIgnoreCase(getUseIndexField(collection))) {
 	            throw new InvalidParameterException("not exist index : (" + indexField + ")");
@@ -132,26 +141,26 @@ public abstract class Qoption {
     public String getUseIndexField(String collection) {
     	String field = "";
     	
-    	if(collection.equalsIgnoreCase("TRACK")) {
+    	if(collection.equalsIgnoreCase(Collections.TRACK)) {
     		field = "track_artist_album_idx";
-    	} else if(collection.equalsIgnoreCase("LYRICS")) {
+    	} else if(collection.equalsIgnoreCase(Collections.LYRICS)) {
     		field = "lyrics_idx";
-    	} else if(collection.equalsIgnoreCase("ALBUM")) {
+    	} else if(collection.equalsIgnoreCase(Collections.ALBUM)) {
     		field = "artist_album_idx";
-    	} else if(collection.equalsIgnoreCase("ARTIST")) {
+    	} else if(collection.equalsIgnoreCase(Collections.ARTIST)) {
     		field = "artist_idx";
-    	} else if(collection.equalsIgnoreCase("MV")) {
+    	} else if(collection.equalsIgnoreCase(Collections.MV)) {
     		field = "mv_track_artist_album_idx";
-    	} else if(collection.equalsIgnoreCase("MUSICCAST")) {
+    	} else if(collection.equalsIgnoreCase(Collections.MUSICCAST)) {
     		field = "musiccast_idx";
-    	} else if(collection.equalsIgnoreCase("MUSICPD")) {
+    	} else if(collection.equalsIgnoreCase(Collections.MUSICPD)) {
     		field = "musicpd_album_idx";
-    	} else if(collection.equalsIgnoreCase("MUSICPOST")) {
+    	} else if(collection.equalsIgnoreCase(Collections.MUSICPOST)) {
     		field = "musicpost_idx";
-    	} else if(collection.equalsIgnoreCase("CLASSIC")) {
+    	} else if(collection.equalsIgnoreCase(Collections.CLASSIC)) {
     		field = "classic_idx";
-    	}  else if(collection.equalsIgnoreCase("CLASSIC")) {
-    		field = "classic_idx";
+    	}  else if(collection.equalsIgnoreCase(Collections.ENTITY)) {
+    		field = "track_idx";
     	} else {
     		field = "track_artist_album_idx";
     	}

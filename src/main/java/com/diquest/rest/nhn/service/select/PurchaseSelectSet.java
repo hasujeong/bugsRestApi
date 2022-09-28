@@ -13,7 +13,7 @@ import com.diquest.ir.util.common.StringUtil;
 import com.diquest.rest.nhn.common.Collections;
 import com.diquest.rest.nhn.service.trigger.TriggerFieldService;
 
-public class SelectSetService {
+public class PurchaseSelectSet {
 	public static String _RANK = "_RANK";
 	public static String _DOCID = "_DOCID";
 	public static String WEIGHT = "WEIGHT";
@@ -26,53 +26,31 @@ public class SelectSetService {
 		fixedFieldMap.put(ID, 3);
 	}
 
-	private static SelectSetService instance = null;
+	private static PurchaseSelectSet instance = null;
 
-	public static SelectSetService getInstance() {
+	public static PurchaseSelectSet getInstance() {
 		if (instance == null) {
-			instance = new SelectSetService();
+			instance = new PurchaseSelectSet();
 		}
 		return instance;
 	}
 
-	public SelectSet[] makeSelectSet(Map<String, String> params) {
+	public SelectSet[] makeSelectSet(List<String> returns) {
 		ArrayList<SelectSet> list = new ArrayList<SelectSet>();
 		list.addAll(getFixedSelectList());
-		list.addAll(getReturnParamSelectList(params));
-		list.addAll(getTriggerSelectList(params));
+		list.addAll(getReturnParamSelectList(returns));
+//		list.addAll(getTriggerSelectList(params));
 		return list.toArray(new SelectSet[list.size()]);
 	}
 
-	private List<SelectSet> getTriggerSelectList(Map<String, String> params) {
-		return TriggerFieldService.getInstance().makeSelectSet(params);
-	}
-
-	private List<SelectSet> getReturnParamSelectList(Map<String, String> params) {
+	private List<SelectSet> getReturnParamSelectList(List<String> returns) {
 		ArrayList<SelectSet> list = new ArrayList<SelectSet>();
-		String ret = RestUtils.getParam(params, "return");
+//		String ret = RestUtils.getParam(returns, "return");
 		
-		if(ret.equalsIgnoreCase("_ALL")) {
-			String collection = params.get("collection");
-			
-			if(collection.equalsIgnoreCase(Collections.TRACK)) {
-				ret = "TRACK_ID,TRACK_TITLE,ALBUM_ID,ALBUM_TITLE,ARTIST_NM,DISP_NM,ENG_NM,INST_YN,KOR_NM,MASTER_STR_RIGHTS_YN,RELEASE_YMD,SCORE,SEARCH_EXCLUDE_YN,SEARCH_NM,SEARCH_TITLE,STATUS,SYNONYM_NM";
-			} else if(collection.equalsIgnoreCase(Collections.ARTIST)) {
-				ret = "ARTIST_ID,ARTIST_NM,ARTIST_TYPE,DISP_NM,ENG_NM,GRP_NM,GRP_SEARCH_NM, KOR_NM,SCORE,SEARCH_EXCLUDE_YN,SEARCH_NM,STATUS,SYNONYM_NM";
-			} else if(collection.equalsIgnoreCase(Collections.MV)) {
-				ret = "ARTIST_NM,DISP_NM,MASTER_MV_STR_RIGHTS_YN,MV_ID,MV_TITLE,RELEASE_YMD,SCORE,SEARCH_EXCLUDE_YN,SEARCH_NM,SEARCH_TITLE,STATUS,SVC_FULLHD_YN,TITLE,TRACK_TITLE";
-			} else if(collection.equalsIgnoreCase(Collections.MUSICCAST)) {
-				ret = "RELEASE_YMD,STATUS,TITLE,UNICONTENT_ID,UNICONTENT_R_ID,UPD_DT";
-			}
-			
-			for (String r : ret.split(",")) {
-				if (!StringUtil.isEmpty(r)) {
-					list.add(new SelectSet(r.toUpperCase()));
-				}
-			}
-		} else {
-			for (String r : ret.split(",")) {
-				if (!StringUtil.isEmpty(r)) {
-					list.add(new SelectSet(r.toUpperCase()));
+		for (int i=0 ; i < returns.size() ; i++) {
+			if (!StringUtil.isEmpty(returns.get(i))) {
+				if(!returns.get(i).equalsIgnoreCase("_ID")) {
+					list.add(new SelectSet(returns.get(i).toUpperCase()));
 				}
 			}
 		}
@@ -129,7 +107,6 @@ public class SelectSetService {
 			this.value = value;
 			return value;
 		}
-
 	}
 
 	public int getFixFieldSize() {

@@ -13,7 +13,7 @@ import com.diquest.ir.util.common.StringUtil;
 import com.diquest.rest.nhn.common.Collections;
 import com.diquest.rest.nhn.service.trigger.TriggerFieldService;
 
-public class SelectSetService {
+public class EntitySelectSet {
 	public static String _RANK = "_RANK";
 	public static String _DOCID = "_DOCID";
 	public static String WEIGHT = "WEIGHT";
@@ -26,56 +26,52 @@ public class SelectSetService {
 		fixedFieldMap.put(ID, 3);
 	}
 
-	private static SelectSetService instance = null;
+	private static EntitySelectSet instance = null;
 
-	public static SelectSetService getInstance() {
+	public static EntitySelectSet getInstance() {
 		if (instance == null) {
-			instance = new SelectSetService();
+			instance = new EntitySelectSet();
 		}
 		return instance;
 	}
 
-	public SelectSet[] makeSelectSet(Map<String, String> params) {
+	public SelectSet[] makeSelectSet(boolean return_all) {
 		ArrayList<SelectSet> list = new ArrayList<SelectSet>();
 		list.addAll(getFixedSelectList());
-		list.addAll(getReturnParamSelectList(params));
-		list.addAll(getTriggerSelectList(params));
+		list.addAll(getReturnParamSelectList(return_all));
 		return list.toArray(new SelectSet[list.size()]);
 	}
 
-	private List<SelectSet> getTriggerSelectList(Map<String, String> params) {
-		return TriggerFieldService.getInstance().makeSelectSet(params);
-	}
-
-	private List<SelectSet> getReturnParamSelectList(Map<String, String> params) {
+	private List<SelectSet> getReturnParamSelectList(boolean return_all) {
 		ArrayList<SelectSet> list = new ArrayList<SelectSet>();
-		String ret = RestUtils.getParam(params, "return");
 		
-		if(ret.equalsIgnoreCase("_ALL")) {
-			String collection = params.get("collection");
-			
-			if(collection.equalsIgnoreCase(Collections.TRACK)) {
-				ret = "TRACK_ID,TRACK_TITLE,ALBUM_ID,ALBUM_TITLE,ARTIST_NM,DISP_NM,ENG_NM,INST_YN,KOR_NM,MASTER_STR_RIGHTS_YN,RELEASE_YMD,SCORE,SEARCH_EXCLUDE_YN,SEARCH_NM,SEARCH_TITLE,STATUS,SYNONYM_NM";
-			} else if(collection.equalsIgnoreCase(Collections.ARTIST)) {
-				ret = "ARTIST_ID,ARTIST_NM,ARTIST_TYPE,DISP_NM,ENG_NM,GRP_NM,GRP_SEARCH_NM, KOR_NM,SCORE,SEARCH_EXCLUDE_YN,SEARCH_NM,STATUS,SYNONYM_NM";
-			} else if(collection.equalsIgnoreCase(Collections.MV)) {
-				ret = "ARTIST_NM,DISP_NM,MASTER_MV_STR_RIGHTS_YN,MV_ID,MV_TITLE,RELEASE_YMD,SCORE,SEARCH_EXCLUDE_YN,SEARCH_NM,SEARCH_TITLE,STATUS,SVC_FULLHD_YN,TITLE,TRACK_TITLE";
-			} else if(collection.equalsIgnoreCase(Collections.MUSICCAST)) {
-				ret = "RELEASE_YMD,STATUS,TITLE,UNICONTENT_ID,UNICONTENT_R_ID,UPD_DT";
-			}
-			
-			for (String r : ret.split(",")) {
-				if (!StringUtil.isEmpty(r)) {
-					list.add(new SelectSet(r.toUpperCase()));
-				}
-			}
-		} else {
-			for (String r : ret.split(",")) {
-				if (!StringUtil.isEmpty(r)) {
-					list.add(new SelectSet(r.toUpperCase()));
-				}
-			}
-		}
+		if(return_all) {
+			list.add(new SelectSet("ALBUM_TITLE"));
+			list.add(new SelectSet("ARRANGER_NM"));
+			list.add(new SelectSet("ARTIST_DISP_NM"));
+			list.add(new SelectSet("ARTIST_ENG_NM"));
+			list.add(new SelectSet("ARTIST_NM"));
+			list.add(new SelectSet("ARTIST_POPULAR"));
+			list.add(new SelectSet("ARTIST_SRCH_NM"));
+			list.add(new SelectSet("ARTIST_SYN_NM"));
+			list.add(new SelectSet("ARTIST_VOCAL_NM"));
+			list.add(new SelectSet("COMPOSER_ID"));
+			list.add(new SelectSet("COMPOSER_NM"));
+			list.add(new SelectSet("FEATURING_ID"));
+			list.add(new SelectSet("FEATURING_NM"));
+			list.add(new SelectSet("GENDER_CD"));
+			list.add(new SelectSet("GENRE_CD"));
+			list.add(new SelectSet("GROUP_CD"));
+			list.add(new SelectSet("IDOL_CD"));
+			list.add(new SelectSet("LYRICIST_ID"));
+			list.add(new SelectSet("LYRICIST_NM"));
+			list.add(new SelectSet("NATION_CD"));
+			list.add(new SelectSet("POPULAR"));
+			list.add(new SelectSet("RELEASE_YMD"));
+			list.add(new SelectSet("TRACK_ID"));
+			list.add(new SelectSet("TRACK_SEARCH_TITLE"));
+			list.add(new SelectSet("TRACK_TITLE"));
+		} 
 		
 		return list;
 	}
@@ -103,7 +99,7 @@ public class SelectSetService {
 	public int getRank(Result result, int resultIdx) {
 		return Integer.parseInt(String.valueOf(result.getResult(resultIdx, fixedFieldMap.get(_RANK))));
 	}
-
+	
 	public Entry<String, Object> getSourceData(String key, String value) {
 		return new KeyValEntry(key.toLowerCase(), value);
 	}
@@ -129,7 +125,6 @@ public class SelectSetService {
 			this.value = value;
 			return value;
 		}
-
 	}
 
 	public int getFixFieldSize() {
