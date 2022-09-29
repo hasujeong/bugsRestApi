@@ -79,7 +79,7 @@ public class TotalResult {
 			this.query = String.valueOf(q.getQuery(0).getSearchKeyword());
 			this.domainCount = q.querySize();
 			this.status = new Status();
-			this.itemList = new itemList2(items);			
+			this.itemList = new itemList2(items);
 		}
 		
 		private List<String> makeTerms(String searchKeyword) throws IRException {

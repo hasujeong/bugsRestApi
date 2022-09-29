@@ -54,6 +54,7 @@ import com.diquest.rest.nhn.service.error.ErrorMessageService;
 import com.diquest.rest.nhn.service.error.logMessageService;
 import com.diquest.rest.nhn.service.filter.EntityFilterSetService;
 import com.diquest.rest.nhn.service.filter.FilterSetService;
+import com.diquest.rest.nhn.service.filter.TotalFilterSetService;
 import com.diquest.rest.nhn.service.option.searchQoption;
 import com.diquest.rest.nhn.service.orderby.OrderBySetService;
 import com.diquest.rest.nhn.service.select.AutoTagSelectSet;
@@ -319,7 +320,7 @@ public class BugsRestService {
 				query = new Query();
 				FilterFieldParseResult filterFieldParseResult = parseFilterParams(params);
 				query.setSelect(parseSelect(params));
-				query.setFilter(parseFilter(params, filterFieldParseResult, colArray[i]));
+				query.setFilter(parseTotalFilter(params, filterFieldParseResult, colArray[i]));
 				query.setWhere(parseWhere(params, filterFieldParseResult, colArray[i]));
 	//			query.setGroupBy(parseGroupBy(params));
 				query.setOrderby(parseTotalOrderBy(params, colArray[i]));
@@ -831,6 +832,10 @@ public class BugsRestService {
 	
 	protected FilterSet[] parseFilter(Map<String, String> params, FilterFieldParseResult filterFieldParseResult, String collection) throws InvalidParameterException {
 		return FilterSetService.getInstance().parseFilter(params, filterFieldParseResult, collection);
+	}
+	
+	protected FilterSet[] parseTotalFilter(Map<String, String> params, FilterFieldParseResult filterFieldParseResult, String collection) throws InvalidParameterException {
+		return TotalFilterSetService.getInstance().parseTotalFilter(params, filterFieldParseResult, collection);
 	}
 	
 	protected FilterSet[] EntityFilter(String[] raw) throws InvalidParameterException {
