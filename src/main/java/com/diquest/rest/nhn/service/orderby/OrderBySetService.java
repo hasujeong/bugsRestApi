@@ -108,9 +108,13 @@ public class OrderBySetService {
 			}
 		} else if(collection.equalsIgnoreCase(Collections.MUSICCAST)) {
 			if (ArrayValue[0].equalsIgnoreCase("release_ymd")) {			// 최신순
-				return new OrderBySet(false, "UPD_DT", Protocol.OrderBySet.OP_POSTWEIGHT);
+				if(ArrayValue[1].equalsIgnoreCase("asc")) {
+					return new OrderBySet(false, "RELEASE_YMD", Protocol.OrderBySet.OP_POSTWEIGHT);
+				} else {
+					return new OrderBySet(true, "RELEASE_YMD", Protocol.OrderBySet.OP_POSTWEIGHT);
+				}
 			} else {													// 정확도순
-				return new OrderBySet(false, "UPD_DT", Protocol.OrderBySet.OP_PREWEIGHT);
+				return new OrderBySet(false, "POPULAR", Protocol.OrderBySet.OP_PREWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase(Collections.MUSICPD)) {
 			if (ArrayValue[0].equalsIgnoreCase("title")) {			// 뮤직pd앨범명순
@@ -122,9 +126,9 @@ public class OrderBySetService {
 			} 
 //			else if (ArrayValue[0].equalsIgnoreCase("popular")) {			// 인기순
 //				if(ArrayValue[1].equalsIgnoreCase("asc")) {
-//					return new OrderBySet(false, "SCORE", Protocol.OrderBySet.OP_POSTWEIGHT);
+//					return new OrderBySet(false, "POINT", Protocol.OrderBySet.OP_POSTWEIGHT);
 //				} else {
-//					return new OrderBySet(true, "SCORE", Protocol.OrderBySet.OP_POSTWEIGHT);
+//					return new OrderBySet(true, "POINT", Protocol.OrderBySet.OP_POSTWEIGHT);
 //				}
 //			} 
 			else {													// 정확도순
@@ -138,7 +142,7 @@ public class OrderBySetService {
 					return new OrderBySet(true, "RELEASE_YMD", Protocol.OrderBySet.OP_POSTWEIGHT);
 				}
 			} else {													// 정확도순
-				return new OrderBySet(true, "RELEASE_YMD", Protocol.OrderBySet.OP_PREWEIGHT);
+				return new OrderBySet(true, "POPULAR", Protocol.OrderBySet.OP_PREWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase(Collections.CLASSIC)) {
 			if (ArrayValue[0].equalsIgnoreCase("popular")) {			// 인기순
@@ -164,7 +168,7 @@ public class OrderBySetService {
 					return new OrderBySet(true, "RELEASE_YMD", Protocol.OrderBySet.OP_POSTWEIGHT);
 				}
 			} else {													// 정확도순
-				return new OrderBySet(true, "RELEASE_YMD", Protocol.OrderBySet.OP_PREWEIGHT);
+				return new OrderBySet(true, "POPULAR", Protocol.OrderBySet.OP_PREWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase(Collections.AUTO_TAG)) {
 			return new OrderBySet(true, "ESALBUM_CNT", Protocol.OrderBySet.OP_PREWEIGHT);

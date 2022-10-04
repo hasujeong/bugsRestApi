@@ -579,7 +579,7 @@ public class BugsRestService {
 		
 	}
 	
-	// 구매한 곡 검색 API
+	// 구매한 곡 검색 API,  유사곡 검색 API 
 	public String purchasedSearch(Map<String, Object> params, Map<String, Object> document, Map<String, Object> reqHeader, HttpServletRequest request) {
 		
 		List<Map<String, String>> index = (List<Map<String, String>>) params.get("index");
@@ -588,7 +588,6 @@ public class BugsRestService {
 		String collection = "";
 		String q = "";
 		String puchaseId = "";
-		String operand = "";
 		int start = (int) document.get("start");
 		int size = (int) document.get("size");
 		
@@ -598,13 +597,11 @@ public class BugsRestService {
 			if(index.get(i).get("name").equalsIgnoreCase("mv_track_artist_album_idx")) {
 				collection = Collections.MV;
 				q = index.get(i).get("query");
-				operand = index.get(i).get("operand");
 			} else if(index.get(i).get("name").equalsIgnoreCase("key_idx")) {
 				puchaseId = index.get(i).get("query");
 			} else {
 				collection = Collections.TRACK;
 				q = index.get(i).get("query");
-				operand = index.get(i).get("operand");
 			}
 		}
 		
@@ -987,6 +984,8 @@ public class BugsRestService {
 		String name = idx1.get("name");
 		byte option;
 		
+		searchQoption qOption = new searchQoption(operand, collection);
+		
 			if (operand.startsWith("nofm")) {
 			 	option = Protocol.WhereSet.OP_N_OF_M;
 	        } else if (operand.equalsIgnoreCase("or")) {
@@ -1021,8 +1020,13 @@ public class BugsRestService {
 			if (opValue > 0) {
 				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 			}
-					
-			result.add(new WhereSet(e.getKey(), option, keyword, e.getValue()));
+			
+			if (operand.startsWith("nofm")) {
+				result.add(new WhereSet(e.getKey(), option, keyword, e.getValue(), qOption.getNofmPercent()));
+			} else {
+				result.add(new WhereSet(e.getKey(), option, keyword, e.getValue()));
+			}
+			
 			opValue = 1;
 		}
 		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));

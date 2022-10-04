@@ -127,7 +127,7 @@ public class PurchaseResult {
 		String docId;
 		int relevance;
 		String _ID;
-//		TreeMap<String, Object> source;
+		TreeMap<String, Object> source;
 //		LinkedHashMap<String, String> property;
 
 		public Item(Result result, SelectSet[] selectSet, int resultIdx) {
@@ -135,7 +135,7 @@ public class PurchaseResult {
 			this.docId = getDocId(result, resultIdx);
 			this.relevance = getRelevance(result, resultIdx);
 			this._ID = getId(result, resultIdx);
-//			this.source = makeSource(result, selectSet, params, resultIdx);
+			this.source = makeSource(result, selectSet, resultIdx);
 //			this.property = makeProperty(result, selectSet, params, resultIdx);
 		}
 
@@ -155,21 +155,19 @@ public class PurchaseResult {
 			return PurchaseSelectSet.getInstance().getRank(result, resultIdx);
 		}
 		
-//		private TreeMap<String, Object> makeSource(Result result, SelectSet[] selectSet, Map<String, String> params, int resultIdx) {
-//			TreeMap<String, Object> source = new TreeMap<String, Object>();
-//			source.put("_" + PurchaseSelectSet.ID, PurchaseSelectSet.getInstance().getId(result, resultIdx));
-//			int start = PurchaseSelectSet.getInstance().getFixFieldSize();
-//			for (int j = start; j < selectSet.length; j++) {
-//				String key = new String(selectSet[j].getField());
-//				String value = new String(result.getResult(resultIdx, j));
-//				if (TriggerFieldService.getInstance().isTriggerField(params, key) || key.equals("_" + PurchaseSelectSet.ID)) {
-//					continue;
-//				}
-//				Entry<String, Object> keyVal = PurchaseSelectSet.getInstance().getSourceData(key, value);
-//				source.put(keyVal.getKey(), keyVal.getValue());
-//			}
-//			return source;
-//		}
+		private TreeMap<String, Object> makeSource(Result result, SelectSet[] selectSet, int resultIdx) {
+			TreeMap<String, Object> source = new TreeMap<String, Object>();
+			source.put("_" + PurchaseSelectSet.ID, PurchaseSelectSet.getInstance().getId(result, resultIdx));
+			int start = PurchaseSelectSet.getInstance().getFixFieldSize();
+			for (int j = start; j < selectSet.length; j++) {
+				String key = new String(selectSet[j].getField());
+				String value = new String(result.getResult(resultIdx, j));
+				
+				Entry<String, Object> keyVal = PurchaseSelectSet.getInstance().getSourceData(key, value);
+				source.put(keyVal.getKey(), keyVal.getValue());
+			}
+			return source;
+		}
 //
 //		private LinkedHashMap<String, String> makeProperty(Result result, SelectSet[] selectSet, Map<String, String> params, int resultIdx) {
 //			LinkedHashMap<String, String> property = new LinkedHashMap<String, String>();
