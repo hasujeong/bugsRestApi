@@ -124,15 +124,15 @@ public class OrderBySetService {
 					return new OrderBySet(false, "TITLE", Protocol.OrderBySet.OP_POSTWEIGHT);
 				}
 			} 
-//			else if (ArrayValue[0].equalsIgnoreCase("popular")) {			// 인기순
-//				if(ArrayValue[1].equalsIgnoreCase("asc")) {
-//					return new OrderBySet(false, "POINT", Protocol.OrderBySet.OP_POSTWEIGHT);
-//				} else {
-//					return new OrderBySet(true, "POINT", Protocol.OrderBySet.OP_POSTWEIGHT);
-//				}
-//			} 
+			else if (ArrayValue[0].equalsIgnoreCase("popular")) {			// 인기순
+				if(ArrayValue[1].equalsIgnoreCase("asc")) {
+					return new OrderBySet(false, "POPULAR", Protocol.OrderBySet.OP_POSTWEIGHT);
+				} else {
+					return new OrderBySet(true, "POPULAR", Protocol.OrderBySet.OP_POSTWEIGHT);
+				}
+			} 
 			else {													// 정확도순
-				return new OrderBySet(true, "TITLE", Protocol.OrderBySet.OP_PREWEIGHT);
+				return new OrderBySet(true, "POPULAR", Protocol.OrderBySet.OP_PREWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase(Collections.MUSICPOST)) {
 			if (ArrayValue[0].equalsIgnoreCase("release_ymd")) {			// 발매일순
