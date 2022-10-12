@@ -84,9 +84,9 @@ public class BugsRestService {
 	
 	protected static String currTimezone = new SimpleDateFormat("XXX").format(new Date()).replace(":", "");
 
-	protected static int track_score = 0;
-	protected static int album_score = 0;
-	protected static int artist_score = 0;
+	protected static int track_score = 150;
+	protected static int album_score = 100;
+	protected static int artist_score = 300;
 	
 	public BugsRestService() {
 //		idxScoreMap.put("TRACK_TITLE", 100);
@@ -143,20 +143,20 @@ public class BugsRestService {
 					if(selectedValue.equalsIgnoreCase("track")) {
 						track_score = 1000;
 						album_score = 10;
-						artist_score = 10;
+						artist_score = 30;
 					} else if(selectedValue.equalsIgnoreCase("album")) {
-						track_score = 10;
+						track_score = 15;
 						album_score = 1000;
-						artist_score = 10;
+						artist_score = 30;
 					} else {
-						track_score = 10;
+						track_score = 15;
 						album_score = 10;
 						artist_score = 1000;
 					}
 				} else {
-					track_score = 0;
-					album_score = 0;
-					artist_score = 0;
+					track_score = 150;
+					album_score = 100;
+					artist_score = 300;
 				}
 			}
 		} else {			
@@ -274,20 +274,20 @@ public class BugsRestService {
 					if(selectedValue.equalsIgnoreCase("track")) {
 						track_score = 1000;
 						album_score = 10;
-						artist_score = 10;
+						artist_score = 30;
 					} else if(selectedValue.equalsIgnoreCase("album")) {
-						track_score = 10;
+						track_score = 15;
 						album_score = 1000;
-						artist_score = 10;
+						artist_score = 30;
 					} else {
-						track_score = 10;
+						track_score = 15;
 						album_score = 10;
 						artist_score = 1000;
 					}
 				} else {
-					track_score = 0;
-					album_score = 0;
-					artist_score = 0;
+					track_score = 150;
+					album_score = 100;
+					artist_score = 300;
 				}
 			}
 		} else {			
@@ -956,15 +956,20 @@ public class BugsRestService {
 			if(idxField.equalsIgnoreCase("track_idx")) {
 				idxScoreMap.put("TRACK_IDX", 100);
 				idxScoreMap.put("TRACK_IDX_WS", 100);
-				idxScoreMap.put("SYN_TRACK_IDX", 1);
+				idxScoreMap.put("SYN_TRACK_IDX_KO", 30);
+				idxScoreMap.put("SYN_TRACK_IDX_WS", 30);
+				idxScoreMap.put("SYN_TRACK_IDX", 30);
 			} else if(idxField.equalsIgnoreCase("artist_idx")) {
 				idxScoreMap.put("ARTIST_IDX", 100);
 				idxScoreMap.put("ARTIST_IDX_WS", 100);
-				idxScoreMap.put("SYN_ARTIST_IDX", 1);
+				idxScoreMap.put("SYN_ARTIST_IDX_WS", 30);
+				idxScoreMap.put("SYN_ARTIST_IDX", 30);
 			} else if(idxField.equalsIgnoreCase("album_idx")) {
 				idxScoreMap.put("ALBUM_IDX", 100);
 				idxScoreMap.put("ALBUM_IDX_WS", 100);
-				idxScoreMap.put("SYN_ALBUM_IDX", 1);
+				idxScoreMap.put("SYN_ALBUM_IDX", 30);
+				idxScoreMap.put("SYN_ALBUM_IDX_KO", 30);
+				idxScoreMap.put("SYN_ALBUM_IDX_WS", 30);
 			} else {
 				if(track_score != 0) {
 					idxScoreMap.put("TRACK_IDX", track_score);
@@ -974,9 +979,9 @@ public class BugsRestService {
 					idxScoreMap.put("ALBUM_IDX", album_score);
 					idxScoreMap.put("ALBUM_IDX_WS", album_score);
 				}
-				idxScoreMap.put("TRACK_ARTIST_ALBUM_IDX", 100);
-				idxScoreMap.put("TRACK_ARTIST_ALBUM_IDX_WS", 100);
-				idxScoreMap.put("SYN_TRACK_ARTIST_ALBUM_IDX", 1);
+				idxScoreMap.put("TRACK_ARTIST_ALBUM_IDX", 30);
+				idxScoreMap.put("TRACK_ARTIST_ALBUM_IDX_WS", 30);
+				idxScoreMap.put("SYN_TRACK_ARTIST_ALBUM_IDX", 30);
 			}
 		} else if(collection.equalsIgnoreCase(Collections.LYRICS)) {
 				idxScoreMap.put("LYRICS_IDX", 100);
@@ -986,32 +991,30 @@ public class BugsRestService {
 			if(idxField.equalsIgnoreCase("album_idx")) {
 				idxScoreMap.put("ALBUM_IDX", 100);
 				idxScoreMap.put("ALBUM_IDX_WS", 100);
-				idxScoreMap.put("SYN_ALBUM_IDX", 1);
+				idxScoreMap.put("SYN_ALBUM_IDX", 30);
+				idxScoreMap.put("SYN_ALBUM_IDX_KO", 30);
+				idxScoreMap.put("SYN_ALBUM_IDX_WS", 30);
 			} else if(idxField.equalsIgnoreCase("artist_idx")) {
 				idxScoreMap.put("ARTIST_IDX", 100);
 				idxScoreMap.put("ARTIST_IDX_WS", 100);
-				idxScoreMap.put("SYN_ARTIST_IDX", 1);
+				idxScoreMap.put("SYN_ARTIST_IDX", 30);
+				idxScoreMap.put("SYN_ARTIST_IDX_WS", 30);
 			} else {
-				idxScoreMap.put("ARTIST_ALBUM_IDX", 100);
-				idxScoreMap.put("ARTIST_ALBUM_IDX_WS", 100);
-				idxScoreMap.put("SYN_ARTIST_ALBUM_IDX", 1);
+				idxScoreMap.put("ALBUM_IDX", 100);
+				idxScoreMap.put("ALBUM_IDX_WS", 100);
+				idxScoreMap.put("ARTIST_IDX", 300);
+				idxScoreMap.put("ARTIST_IDX_WS", 300);
+				idxScoreMap.put("ARTIST_ALBUM_IDX", 30);
+				idxScoreMap.put("ARTIST_ALBUM_IDX_WS", 30);
+				idxScoreMap.put("SYN_ARTIST_ALBUM_IDX", 30);
 			}
 		} else if(collection.equalsIgnoreCase(Collections.ARTIST)) {
-			if(idxField.equalsIgnoreCase("artist_idx")) {
-				idxScoreMap.put("ARTIST_IDX", 100);
-				idxScoreMap.put("ARTIST_IDX_WS", 100);
-				idxScoreMap.put("SYN_ARTIST_IDX", 1);
-				idxScoreMap.put("GRP_NM_IDX", 50);
-				idxScoreMap.put("GRP_NM_IDX_WS", 50);
-				idxScoreMap.put("SYN_GRP_NM_IDX", 1);
-			} else {
-				idxScoreMap.put("ARTIST_IDX", 100);
-				idxScoreMap.put("ARTIST_IDX_WS", 100);
-				idxScoreMap.put("SYN_ARTIST_IDX", 1);
-				idxScoreMap.put("GRP_NM_IDX", 50);
-				idxScoreMap.put("GRP_NM_IDX_WS", 50);
-				idxScoreMap.put("SYN_GRP_NM_IDX", 1);
-			}
+				idxScoreMap.put("ARTIST_IDX", 200);
+				idxScoreMap.put("ARTIST_IDX_WS", 200);
+				idxScoreMap.put("GRP_NM_IDX", 100);
+				idxScoreMap.put("GRP_NM_IDX_WS", 100);
+				idxScoreMap.put("SYN_ARTIST_IDX_KO", 10);
+				idxScoreMap.put("SYN_ARTIST_IDX", 10);
 		} else if(collection.equalsIgnoreCase(Collections.MV)) {
 			idxScoreMap.put("MV_TRACK_ARTIST_ALBUM_IDX", 100);
 			idxScoreMap.put("MV_TRACK_ARTIST_ALBUM_IDX_WS", 100);
@@ -1113,11 +1116,11 @@ public class BugsRestService {
 					 	}
 					 	
 					 	result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX", option, q, 100, nofmNum));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX", option, q, 30, nofmNum));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", option, q, 100, nofmNum));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", option, q, 30, nofmNum));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("SYN_TRACK_ARTIST_ALBUM_IDX", option, q, 1, nofmNum));
+						result.add(new WhereSet("SYN_TRACK_ARTIST_ALBUM_IDX", option, q, 30, nofmNum));
 						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
 			        } else {
 			        	if (operand.equalsIgnoreCase("or")) {
@@ -1130,11 +1133,11 @@ public class BugsRestService {
 					 		result.add(new WhereSet(Protocol.WhereSet.OP_AND));
 					 	}
 			        	result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX", option, q, 100));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX", option, q, 30));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", option, q, 100));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", option, q, 30));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("SYN_TRACK_ARTIST_ALBUM_IDX", option, q, 1));
+						result.add(new WhereSet("SYN_TRACK_ARTIST_ALBUM_IDX", option, q, 30));
 						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
 			        }
 					
@@ -1165,7 +1168,11 @@ public class BugsRestService {
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 							result.add(new WhereSet("TRACK_IDX_WS", option, tarckQ, 100, nofmNum));
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-							result.add(new WhereSet("SYN_TRACK_IDX", option, tarckQ, 1, nofmNum));
+							result.add(new WhereSet("SYN_TRACK_IDX", option, tarckQ, 30, nofmNum));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("SYN_TRACK_IDX_KO", option, tarckQ, 30, nofmNum));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("SYN_TRACK_IDX_WS", option, tarckQ, 30, nofmNum));
 							result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
 				        } else {
 				        	if (operand.equalsIgnoreCase("or")) {
@@ -1183,7 +1190,11 @@ public class BugsRestService {
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 							result.add(new WhereSet("TRACK_IDX_WS", option, tarckQ, 100));
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-							result.add(new WhereSet("SYN_TRACK_IDX", option, tarckQ, 1));
+							result.add(new WhereSet("SYN_TRACK_IDX", option, tarckQ, 30));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("SYN_TRACK_IDX_KO", option, tarckQ, 30));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("SYN_TRACK_IDX_WS", option, tarckQ, 30));
 							result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
 				        }
 					} else {
@@ -1210,7 +1221,9 @@ public class BugsRestService {
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 							result.add(new WhereSet("ARTIST_IDX_WS", option, artistQ, 100, nofmNum));
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-							result.add(new WhereSet("SYN_ARTIST_IDX", option, artistQ, 1, nofmNum));
+							result.add(new WhereSet("SYN_ARTIST_IDX", option, artistQ, 30, nofmNum));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("SYN_ARTIST_IDX_WS", option, artistQ, 30, nofmNum));
 							result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
 				        } else {
 				        	if (operand.equalsIgnoreCase("or")) {
@@ -1228,7 +1241,9 @@ public class BugsRestService {
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 							result.add(new WhereSet("ARTIST_IDX_WS", option, artistQ, 100));
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-							result.add(new WhereSet("SYN_ARTIST_IDX", option, artistQ, 1));
+							result.add(new WhereSet("SYN_ARTIST_IDX", option, artistQ, 30));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("SYN_ARTIST_IDX_WS", option, artistQ, 30));
 							result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
 				        }
 					}
@@ -1266,11 +1281,14 @@ public class BugsRestService {
 			if(name.equalsIgnoreCase("artist_idx")) {
 				idxScoreMap.put("ARTIST_IDX", 100);
 				idxScoreMap.put("ARTIST_IDX_WS", 100);
-				idxScoreMap.put("SYN_ARTIST_IDX", 1);
+				idxScoreMap.put("SYN_ARTIST_IDX", 30);
+				idxScoreMap.put("SYN_ARTIST_IDX_WS", 30);
 			} else if(name.equalsIgnoreCase("album_idx")) {
 				idxScoreMap.put("ALBUM_IDX", 100);
 				idxScoreMap.put("ALBUM_IDX_WS", 100);
-				idxScoreMap.put("SYN_ALBUM_IDX", 1);
+				idxScoreMap.put("SYN_ALBUM_IDX", 30);
+				idxScoreMap.put("SYN_ALBUM_IDX_KO", 30);
+				idxScoreMap.put("SYN_ALBUM_IDX_WS", 30);
 			}
 		} else if(collection.equalsIgnoreCase(Collections.MV)) {
 			idxScoreMap.put("MV_TRACK_ARTIST_ALBUM_IDX", 100);
