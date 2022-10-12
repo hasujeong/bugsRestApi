@@ -48,6 +48,7 @@ import com.diquest.rest.nhn.result.HotKwdResult;
 import com.diquest.rest.nhn.result.NhnError;
 import com.diquest.rest.nhn.result.NhnResult;
 import com.diquest.rest.nhn.result.PurchaseResult;
+import com.diquest.rest.nhn.result.SimilarResult;
 import com.diquest.rest.nhn.result.TotalResult;
 import com.diquest.rest.nhn.result.EntityResult;
 import com.diquest.rest.nhn.service.error.ErrorMessageService;
@@ -579,7 +580,7 @@ public class BugsRestService {
 		
 	}
 	
-	// 구매한 곡 검색 API,  유사곡 검색 API 
+	// 구매한 곡 검색 API 
 	public String purchasedSearch(Map<String, Object> params, Map<String, Object> document, Map<String, Object> reqHeader, HttpServletRequest request) {
 		
 		List<Map<String, String>> index = (List<Map<String, String>>) params.get("index");
@@ -655,6 +656,104 @@ public class BugsRestService {
 			String resultJson = "";
 			
 			resultJson = gson.toJson(makePurchaseResult(commandSearchRequest.getResultSet().getResult(0), query));
+			
+			ret = resultJson;
+			
+			logMessageService.receiveEnd(reqHeader, request);
+			
+		} catch (InvalidParameterException e) {
+			logMessageService.receiveEnd(reqHeader, request);
+			return invalidParameterResponse(e);
+		} catch (Exception e) {
+			logMessageService.receiveEnd(reqHeader, request);
+			return internalServerResponse(e);
+		}
+		
+		return ret;
+		
+	}
+	
+	// 유사곡 검색 API 
+	public String similarSearch(List<Map<String, String>> index, Map<String, Object> document, Map<String, Object> reqHeader, HttpServletRequest request) {
+		
+		Map<String, String> params = new HashMap<String, String>();
+		
+		String collection = Collections.TRACK;
+		String q = "";
+		
+		int start = (int) document.get("start");
+		int size = (int) document.get("size");
+		
+		int num = 1;
+		int searchSize = index.size() / 3;
+		
+		if(searchSize < 0) {
+			searchSize = 0;
+		}
+		
+		List<String> returns = (List<String>) document.get("returns");
+
+		logMessageService.requestReceived(reqHeader, request);
+		
+		String ret = "";
+		
+		Gson gson = new Gson();
+		
+		QueryParser parser = new QueryParser();
+		
+		QuerySet querySet = new QuerySet(searchSize);
+		Query query = new Query();
+		FilterFieldParseResult filterFieldParseResult = parseFilterParams(params);
+		
+		try {
+			for(int i = 0 ; i < searchSize ; i++) {
+				
+				for(int j = 0 ; j < index.size() ; j++) {
+					if(num == Integer.parseInt(index.get(j).get("num"))) {
+						if(index.get(j).get("name").equalsIgnoreCase("track_artist_album_idx")) {
+							q = index.get(j).get("query");
+						}
+					}
+				}
+				
+				query = new Query();
+				query.setSelect(parsePurchaseSelect(returns));
+				query.setWhere(similarWhere(index, collection, num));
+				query.setFilter(parseTotalFilter(params, filterFieldParseResult, collection));
+				query.setOrderby(purchaseOrderBy(collection));
+				query.setFrom(collection);
+				query.setResult(start-1, (start+size) - 2);
+				query.setSearchKeyword(q);
+				query.setFaultless(true);
+				query.setThesaurusOption((byte) (Protocol.ThesaurusOption.EQUIV_SYNONYM | Protocol.ThesaurusOption.QUASI_SYNONYM));
+				query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
+				query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
+				query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
+				query.setLoggable(false);
+				query.setPrintQuery(true);						// 실제 사용시 false
+				query.setResultModifier("typo");
+				
+				querySet.addQuery(query);
+			
+				String queryStr = parser.queryToString(query);
+//					System.out.println(" :::::::::: query ::::::: " + queryStr);
+				num++;
+			}
+			
+			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
+					
+			int returnCode = commandSearchRequest.request(querySet);
+			
+			if (returnCode <= -100) {
+				logMessageService.receiveEnd(reqHeader, request);
+				return commandSearchRequestErrorResponse(commandSearchRequest.getException().getErrorMessage());
+			} else {
+				logMessageService.messageReceived(reqHeader, request);
+			}
+						
+			String resultJson = "";
+			
+			resultJson = gson.toJson(makeSimilarResult(commandSearchRequest.getResultSet(), querySet));
 			
 			ret = resultJson;
 			
@@ -973,6 +1072,173 @@ public class BugsRestService {
 		return result;
 	}
 	
+	protected WhereSet[] similarWhere(List<Map<String, String>> index, String collection, int num) throws InvalidParameterException {
+		return PurchaseWhereSet.getInstance().makeWhereSet("", makeSimilarWhereSet(index, collection, num));
+	}
+	
+	protected List<WhereSet> makeSimilarWhereSet(List<Map<String, String>> index, String collection, int num) throws InvalidParameterException {
+		List<WhereSet> result = new ArrayList<WhereSet>();
+		String q = "";
+		String tarckQ = "";
+		String artistQ = "";
+		int nofmNum = 0;
+		double DnofmNum = 0;
+		
+		String operand = "";
+		
+		byte option;
+
+		for(int i=0 ; i < index.size() ; i++) {
+			idxScoreMap = new HashMap<String, Integer>();
+						
+			if(num == Integer.parseInt(index.get(i).get("num"))) {				
+				if(index.get(i).get("name").equalsIgnoreCase("track_artist_album_idx")) {
+					q = index.get(i).get("query");
+					operand = index.get(i).get("operand");
+					
+					if (operand.startsWith("nofm")) {
+					 	option = Protocol.WhereSet.OP_N_OF_M;
+					 	DnofmNum = Double.parseDouble(String.valueOf(index.get(i).get("nofm")));
+					 	
+					 	if(DnofmNum < 0){
+					 		DnofmNum = 0;
+			            }else if(DnofmNum > 1){
+			            	DnofmNum = 1;
+			            } 
+					 	
+					 	nofmNum = (int) (DnofmNum * 100);
+					 	
+					 	if(result.size() > 0) {
+					 		result.add(new WhereSet(Protocol.WhereSet.OP_AND));
+					 	}
+					 	
+					 	result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX", option, q, 100, nofmNum));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", option, q, 100, nofmNum));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("SYN_TRACK_ARTIST_ALBUM_IDX", option, q, 1, nofmNum));
+						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+			        } else {
+			        	if (operand.equalsIgnoreCase("or")) {
+			        		option = Protocol.WhereSet.OP_HASANY;
+			        	} else {
+			        		option = Protocol.WhereSet.OP_HASALL;
+			        	}
+			        	
+			        	if(result.size() > 0) {
+					 		result.add(new WhereSet(Protocol.WhereSet.OP_AND));
+					 	}
+			        	result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX", option, q, 100));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", option, q, 100));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("SYN_TRACK_ARTIST_ALBUM_IDX", option, q, 1));
+						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+			        }
+					
+										
+				} else {
+					if(index.get(i).get("name").equalsIgnoreCase("track_idx")) {
+						tarckQ = index.get(i).get("query");
+						operand = index.get(i).get("operand");
+						
+						if (operand.startsWith("nofm")) {
+						 	option = Protocol.WhereSet.OP_N_OF_M;
+						 	DnofmNum = Double.parseDouble(String.valueOf(index.get(i).get("nofm")));
+						 							 	
+						 	if(DnofmNum < 0){
+						 		DnofmNum = 0;
+				            }else if(DnofmNum > 1){
+				            	DnofmNum = 1;
+				            } 
+						 	
+						 	nofmNum = (int) (DnofmNum * 100);
+						 	
+						 	if(result.size() > 0) {
+						 		result.add(new WhereSet(Protocol.WhereSet.OP_AND));
+						 	}
+						 	
+						 	result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+							result.add(new WhereSet("TRACK_IDX", option, tarckQ, 100, nofmNum));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("TRACK_IDX_WS", option, tarckQ, 100, nofmNum));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("SYN_TRACK_IDX", option, tarckQ, 1, nofmNum));
+							result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+				        } else {
+				        	if (operand.equalsIgnoreCase("or")) {
+				        		option = Protocol.WhereSet.OP_HASANY;
+				        	} else {
+				        		option = Protocol.WhereSet.OP_HASALL;
+				        	}
+				        	
+				        	if(result.size() > 0) {
+						 		result.add(new WhereSet(Protocol.WhereSet.OP_AND));
+						 	}
+				        	
+				        	result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+							result.add(new WhereSet("TRACK_IDX", option, tarckQ, 100));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("TRACK_IDX_WS", option, tarckQ, 100));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("SYN_TRACK_IDX", option, tarckQ, 1));
+							result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+				        }
+					} else {
+						artistQ = index.get(i).get("query");
+						operand = index.get(i).get("operand");
+						
+						if (operand.startsWith("nofm")) {
+						 	option = Protocol.WhereSet.OP_N_OF_M;
+						 	DnofmNum = Double.parseDouble(String.valueOf(index.get(i).get("nofm")));
+						 	
+						 	if(DnofmNum < 0){
+						 		DnofmNum = 0;
+				            }else if(DnofmNum > 1){
+				            	DnofmNum = 1;
+				            } 
+						 	
+						 	nofmNum = (int) (DnofmNum * 100);
+						 	if(result.size() > 0) {
+						 		result.add(new WhereSet(Protocol.WhereSet.OP_AND));
+						 	}
+						 	
+							result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+							result.add(new WhereSet("ARTIST_IDX", option, artistQ, 100, nofmNum));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ARTIST_IDX_WS", option, artistQ, 100, nofmNum));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("SYN_ARTIST_IDX", option, artistQ, 1, nofmNum));
+							result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+				        } else {
+				        	if (operand.equalsIgnoreCase("or")) {
+				        		option = Protocol.WhereSet.OP_HASANY;
+				        	} else {
+				        		option = Protocol.WhereSet.OP_HASALL;
+				        	}
+				        	
+				        	if(result.size() > 0) {
+						 		result.add(new WhereSet(Protocol.WhereSet.OP_AND));
+						 	}
+				        	
+							result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+							result.add(new WhereSet("ARTIST_IDX", option, artistQ, 100));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ARTIST_IDX_WS", option, artistQ, 100));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("SYN_ARTIST_IDX", option, artistQ, 1));
+							result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+				        }
+					}
+				}
+			}			
+		}
+		
+		return result;
+	}
+	
 	protected WhereSet[] purchaseWhere(Map<String, String> idx1, String puchaseId, String collection) throws InvalidParameterException {
 		return PurchaseWhereSet.getInstance().makeWhereSet(puchaseId, makePurchaseWhereSet(idx1, puchaseId, collection));
 	}
@@ -1276,6 +1542,10 @@ public class BugsRestService {
 	
 	protected PurchaseResult makePurchaseResult(Result result, Query query) throws IRException {
 		return PurchaseResult.makePurchaseResult(query, result);
+	}
+	
+	protected SimilarResult makeSimilarResult(ResultSet result, QuerySet query) throws IRException {
+		return SimilarResult.makeSimilarResult(query, result);
 	}
 	
 	protected EntityResult makeEntityResult(Result result, Query query) throws IRException {

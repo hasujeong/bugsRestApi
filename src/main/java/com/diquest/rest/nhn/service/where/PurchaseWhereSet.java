@@ -48,10 +48,12 @@ public class PurchaseWhereSet {
     	List<WhereSet> result = new ArrayList<WhereSet>();
 //    	String[] idValue = purchaseId.split(" ");
     	
-    	result.add(new WhereSet(Protocol.WhereSet.OP_AND));
-    	result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-    	result.add(new WhereSet("ID", Protocol.WhereSet.OP_HASANY, purchaseId));
-    	result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+    	if(!purchaseId.equalsIgnoreCase("")) {
+	    	result.add(new WhereSet(Protocol.WhereSet.OP_AND));
+	    	result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+	    	result.add(new WhereSet("ID", Protocol.WhereSet.OP_HASANY, purchaseId));
+	    	result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+    	}
     	
         return result;
     }

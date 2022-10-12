@@ -37,8 +37,8 @@ public class TotalFilterSetService {
         List<FilterSet> filters = new ArrayList<>();
         
         if(collection.equalsIgnoreCase(Collections.TRACK)) {
-        	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "COVER_YN", "N", 100));
-        	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "MR_YN", "N", 100));
+        	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "COVER_YN", "N", 1000));
+        	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "MR_YN", "N", 1000));
         	filters.add(new FilterSet(Protocol.FilterSet.OP_MATCH, "SEARCH_EXCLUDE_YN", "N"));
         } 
         

@@ -103,11 +103,21 @@ public class BugsRestController {
 		
 		Map<String, Object> params = (Map<String, Object>) param.getRequest().get("query");
 		Map<String, Object> document = (Map<String, Object>) param.getRequest().get("document");
-
+		
+		List<Map<String, String>> index = (List<Map<String, String>>) params.get("index");
+		
 		long time = System.currentTimeMillis();
 		
 		if (appKey.equals(APP_KEY_TRACK)) {
-			return bugsRestService.purchasedSearch(params, document, requestHeader, request);
+			if(index.size() > 0) {
+				if(index.get(0).get("num") != null) {
+					return bugsRestService.similarSearch(index, document, requestHeader, request);
+				} else {
+					return bugsRestService.purchasedSearch(params, document, requestHeader, request);
+				}
+			} else {
+				return unknownRequest(header, time);
+			}
 		} else if (appKey.equals(APP_KEY_MV)) {
 			return bugsRestService.purchasedSearch(params, document, requestHeader, request);
 		} else if (appKey.equals(APP_KEY_ENTITY)) {
