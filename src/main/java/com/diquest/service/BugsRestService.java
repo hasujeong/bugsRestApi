@@ -984,9 +984,15 @@ public class BugsRestService {
 				idxScoreMap.put("SYN_TRACK_ARTIST_ALBUM_IDX", 30);
 			}
 		} else if(collection.equalsIgnoreCase(Collections.LYRICS)) {
-				idxScoreMap.put("LYRICS_IDX", 100);
-				idxScoreMap.put("LYRICS_IDX_WS", 100);
-				idxScoreMap.put("SYN_LYRICS_IDX", 1);
+				idxScoreMap.put("TRACK_IDX", 150);
+				idxScoreMap.put("TRACK_IDX_WS", 150);
+				idxScoreMap.put("ALBUM_IDX", 100);
+				idxScoreMap.put("ALBUM_IDX_WS", 100);
+				idxScoreMap.put("ARTIST_IDX", 300);
+				idxScoreMap.put("ARTIST_IDX_WS", 300);
+				idxScoreMap.put("LYRICS_IDX", 30);
+				idxScoreMap.put("LYRICS_IDX_WS", 30);
+				idxScoreMap.put("SYN_LYRICS_IDX", 30);
 		} else if(collection.equalsIgnoreCase(Collections.ALBUM)) {
 			if(idxField.equalsIgnoreCase("album_idx")) {
 				idxScoreMap.put("ALBUM_IDX", 100);
@@ -1016,9 +1022,12 @@ public class BugsRestService {
 				idxScoreMap.put("SYN_ARTIST_IDX_KO", 10);
 				idxScoreMap.put("SYN_ARTIST_IDX", 10);
 		} else if(collection.equalsIgnoreCase(Collections.MV)) {
-			idxScoreMap.put("MV_TRACK_ARTIST_ALBUM_IDX", 100);
-			idxScoreMap.put("MV_TRACK_ARTIST_ALBUM_IDX_WS", 100);
-			idxScoreMap.put("SYN_MV_TRACK_ARTIST_ALBUM_IDX", 1);
+			idxScoreMap.put("MV_TRACK_IDX", 100);
+			idxScoreMap.put("MV_TRACK_IDX_WS", 100);
+			idxScoreMap.put("ARTIST_IDX", 300);
+			idxScoreMap.put("MV_TRACK_ARTIST_ALBUM_IDX", 30);
+			idxScoreMap.put("SYN_MV_TRACK_ARTIST_ALBUM_IDX", 30);
+			idxScoreMap.put("MV_TRACK_ARTIST_ALBUM_IDX_WS", 30);
 		} else if(collection.equalsIgnoreCase(Collections.MUSICCAST)) {
 			idxScoreMap.put("MUSICCAST_IDX", 100);
 			idxScoreMap.put("MUSICCAST_IDX_WS", 100);
@@ -1291,9 +1300,12 @@ public class BugsRestService {
 				idxScoreMap.put("SYN_ALBUM_IDX_WS", 30);
 			}
 		} else if(collection.equalsIgnoreCase(Collections.MV)) {
-			idxScoreMap.put("MV_TRACK_ARTIST_ALBUM_IDX", 100);
-			idxScoreMap.put("MV_TRACK_ARTIST_ALBUM_IDX_WS", 100);
-			idxScoreMap.put("SYN_MV_TRACK_ARTIST_ALBUM_IDX", 1);
+			idxScoreMap.put("MV_TRACK_IDX", 100);
+			idxScoreMap.put("MV_TRACK_IDX_WS", 100);
+			idxScoreMap.put("ARTIST_IDX", 300);
+			idxScoreMap.put("MV_TRACK_ARTIST_ALBUM_IDX", 30);
+			idxScoreMap.put("SYN_MV_TRACK_ARTIST_ALBUM_IDX", 30);
+			idxScoreMap.put("MV_TRACK_ARTIST_ALBUM_IDX_WS", 30);
 		} 
 				
 		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
