@@ -1,9 +1,14 @@
 package com.diquest.service;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -38,6 +43,7 @@ import com.diquest.ir.rest.server.log.ServerLogManager;
 import com.diquest.ir.rest.util.RestUtils;
 import com.diquest.mapper.AdminMapper;
 import com.diquest.mapper.domain.FieldSelector;
+import com.diquest.mapper.domain.artistSelector;
 import com.diquest.rest.nhn.common.Collections;
 import com.diquest.rest.nhn.common.Connection;
 import com.diquest.rest.nhn.filter.parse.FilterValueParser;
@@ -84,9 +90,12 @@ public class BugsRestService {
 	
 	protected static String currTimezone = new SimpleDateFormat("XXX").format(new Date()).replace(":", "");
 
-	protected static int track_score = 150;
+	protected static int track_score = 100;
 	protected static int album_score = 100;
-	protected static int artist_score = 300;
+	protected static int artist_score = 100;
+	
+	protected static String artist_keyword = "";
+//	protected static String a_keyword = "";
 	
 	public BugsRestService() {
 //		idxScoreMap.put("TRACK_TITLE", 100);
@@ -97,7 +106,19 @@ public class BugsRestService {
 	}
 	
 	@Cacheable("fieldSelectorMap")
-	public Map<String, String> fieldSelector() {
+	public List<Map<String, String>> fieldSelector() {
+		
+//		Map<String, String> fieldSelectorMap = new HashMap<String, String>();
+//		
+//		List<FieldSelector> fsList = adminMapper.fieldSelector();
+//		
+//		for (FieldSelector fs : fsList) {
+//			fieldSelectorMap.put(fs.getQuery(), fs.getSelected());
+//		}
+//		
+//		return fieldSelectorMap;
+		
+		List<Map<String, String>> fieldList = new ArrayList<Map<String, String>>();
 		
 		Map<String, String> fieldSelectorMap = new HashMap<String, String>();
 		
@@ -107,14 +128,31 @@ public class BugsRestService {
 			fieldSelectorMap.put(fs.getQuery(), fs.getSelected());
 		}
 		
-		return fieldSelectorMap;
+		fieldList.add(fieldSelectorMap);
 		
+		artistSelector artistSelector	= new artistSelector();
+		
+		Map<String, String> artistFieldMap = new HashMap<String, String>();
+		
+		for (int i=0 ; i < artistSelector.getArtistNmList().length ; i++) {			
+			artistFieldMap.put(artistSelector.getArtistNmList()[i], artistSelector.getArtistNmList()[i]);
+			
+		}
+//		System.out.println("--------- " + artistFieldMap);
+		fieldList.add(artistFieldMap);
+		
+		return fieldList;
 	}
 	
 	public String search(Map<String, String> params, Map<String, Object> reqHeader, HttpServletRequest request) {
 		
-		Map<String, String> fieldSelectorMap = self.fieldSelector();
+//		Map<String, String> fieldSelectorMap = self.fieldSelector();
 //		System.out.println(":::::::::::::::::::" + fieldSelectorMap);
+		
+		List<Map<String, String>> fieldMap =  self.fieldSelector();
+		
+		Map<String, String> fieldSelectorMap = fieldMap.get(0);
+		Map<String, String> artistSelectorMap = fieldMap.get(1);
 		
 		String req = "";
 		req += "Host: " + (String) reqHeader.get("host") + "\n";
@@ -154,9 +192,24 @@ public class BugsRestService {
 						artist_score = 1000;
 					}
 				} else {
-					track_score = 150;
-					album_score = 100;
-					artist_score = 300;
+						String[] qSlice = params.get("q").split("\\s+");
+
+						if(qSlice.length > 0) {
+							for(int s = 0; s < qSlice.length ; s++) {
+								for(String key : artistSelectorMap.keySet()){
+									if(key.equalsIgnoreCase(qSlice[s])) {
+//										System.out.println("------------ " + artistSelectorMap.get(qSlice[s]));
+										
+										artist_keyword = qSlice[s];
+//										a_keyword = params.get("q").replace(artist_keyword, "");
+									}
+								}
+							}
+						} 
+
+						track_score = 100;
+						album_score = 100;
+						artist_score = 100;
 				}
 			}
 		} else {			
@@ -242,12 +295,18 @@ public class BugsRestService {
 		return ret;
 		
 	}
+
 	
 	// 통합검색 API
 	public String Totalsearch(Map<String, String> params, Map<String, Object> reqHeader, HttpServletRequest request) {
 		
-		Map<String, String> fieldSelectorMap = self.fieldSelector();
+//		Map<String, String> fieldSelectorMap = self.fieldSelector();
 //		System.out.println(":::::::::::::::::::" + fieldSelectorMap);
+		
+		List<Map<String, String>> fieldMap =  self.fieldSelector();
+		
+		Map<String, String> fieldSelectorMap = fieldMap.get(0);
+		Map<String, String> artistSelectorMap = fieldMap.get(1);
 		
 		String req = "";
 		req += "Host: " + (String) reqHeader.get("host") + "\n";
@@ -285,9 +344,24 @@ public class BugsRestService {
 						artist_score = 1000;
 					}
 				} else {
-					track_score = 150;
+					String[] qSlice = params.get("q").split("\\s+");
+
+					if(qSlice.length > 0) {
+						for(int s = 0; s < qSlice.length ; s++) {
+							for(String key : artistSelectorMap.keySet()){
+								if(key.equalsIgnoreCase(qSlice[s])) {
+//									System.out.println("------------ " + artistSelectorMap.get(qSlice[s]));
+									
+									artist_keyword = qSlice[s];
+//									a_keyword = params.get("q").replace(artist_keyword, "");
+								}
+							}
+						}
+					} 
+
+					track_score = 100;
 					album_score = 100;
-					artist_score = 300;
+					artist_score = 100;
 				}
 			}
 		} else {			
@@ -759,7 +833,7 @@ public class BugsRestService {
 			
 			logMessageService.receiveEnd(reqHeader, request);
 			
-				System.out.println(ret);
+//				System.out.println(ret);
 		} catch (InvalidParameterException e) {
 			logMessageService.receiveEnd(reqHeader, request);
 			return invalidParameterResponse(e);
@@ -861,7 +935,7 @@ public class BugsRestService {
 			
 			logMessageService.receiveEnd(reqHeader, request);
 			
-				System.out.println(ret);
+//				System.out.println(ret);
 		} catch (InvalidParameterException e) {
 			logMessageService.receiveEnd(reqHeader, request);
 			return invalidParameterResponse(e);
@@ -971,17 +1045,80 @@ public class BugsRestService {
 				idxScoreMap.put("SYN_ALBUM_IDX_KO", 30);
 				idxScoreMap.put("SYN_ALBUM_IDX_WS", 30);
 			} else {
-				if(track_score != 0) {
-					idxScoreMap.put("TRACK_IDX", track_score);
-					idxScoreMap.put("TRACK_IDX_WS", track_score);
-					idxScoreMap.put("ARTIST_IDX", artist_score);
-					idxScoreMap.put("ARTIST_IDX_WS", artist_score);
-					idxScoreMap.put("ALBUM_IDX", album_score);
-					idxScoreMap.put("ALBUM_IDX_WS", album_score);
+				if(!artist_keyword.equalsIgnoreCase("")) {
+					if(qOption.isNofM()) {
+						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+						result.add(new WhereSet("TRACK_IDX", qOption.getOption(), keyword, track_score, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), keyword, track_score, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), keyword, artist_score, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("ALBUM_IDX", qOption.getOption(), keyword, album_score, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("ALBUM_IDX_WS", qOption.getOption(), keyword, album_score, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("SYN_TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+						
+						result.add(new WhereSet(Protocol.WhereSet.OP_WEIGHTAND));
+						
+						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+						result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_WEIGHTAND, artist_keyword, 500, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), artist_keyword, 500, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+					} else {
+						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+						result.add(new WhereSet("TRACK_IDX", qOption.getOption(), keyword, track_score));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), keyword, track_score));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), keyword, artist_score));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("ALBUM_IDX", qOption.getOption(), keyword, album_score));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("ALBUM_IDX_WS", qOption.getOption(), keyword, album_score));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), keyword, 30));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("SYN_TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30));
+						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+						
+						result.add(new WhereSet(Protocol.WhereSet.OP_WEIGHTAND));
+						
+						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+						result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), artist_keyword, 500));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), artist_keyword, 500));
+						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+					}
+					artist_keyword = "";
+					
+				} else {
+					if(track_score != 0) {
+						idxScoreMap.put("TRACK_IDX", track_score);
+						idxScoreMap.put("TRACK_IDX_WS", track_score);
+						idxScoreMap.put("ARTIST_IDX", artist_score);
+						idxScoreMap.put("ARTIST_IDX_WS", artist_score);
+						idxScoreMap.put("ALBUM_IDX", album_score);
+						idxScoreMap.put("ALBUM_IDX_WS", album_score);
+					}
+					idxScoreMap.put("TRACK_ARTIST_ALBUM_IDX", 30);
+					idxScoreMap.put("TRACK_ARTIST_ALBUM_IDX_WS", 30);
+					idxScoreMap.put("SYN_TRACK_ARTIST_ALBUM_IDX", 30);
 				}
-				idxScoreMap.put("TRACK_ARTIST_ALBUM_IDX", 30);
-				idxScoreMap.put("TRACK_ARTIST_ALBUM_IDX_WS", 30);
-				idxScoreMap.put("SYN_TRACK_ARTIST_ALBUM_IDX", 30);
+				
 			}
 		} else if(collection.equalsIgnoreCase(Collections.LYRICS)) {
 				idxScoreMap.put("TRACK_IDX", 150);
