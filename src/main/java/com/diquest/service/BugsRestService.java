@@ -2,16 +2,26 @@ package com.diquest.service;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +47,6 @@ import com.diquest.ir.rest.common.constant.HttpStatus;
 import com.diquest.ir.rest.common.exception.InvalidParameterException;
 import com.diquest.ir.rest.common.object.RestHttpRequest;
 import com.diquest.ir.rest.json.gson.GsonLoader;
-import com.diquest.ir.rest.json.object.JsonUnknownUriResult;
 import com.diquest.ir.rest.json.reponse.ResponseMaker;
 import com.diquest.ir.rest.server.log.ServerLogManager;
 import com.diquest.ir.rest.util.RestUtils;
@@ -56,6 +65,7 @@ import com.diquest.rest.nhn.result.NhnResult;
 import com.diquest.rest.nhn.result.PurchaseResult;
 import com.diquest.rest.nhn.result.SimilarResult;
 import com.diquest.rest.nhn.result.TotalResult;
+import com.diquest.rest.nhn.result.TotalsearchResult;
 import com.diquest.rest.nhn.result.EntityResult;
 import com.diquest.rest.nhn.service.error.ErrorMessageService;
 import com.diquest.rest.nhn.service.error.logMessageService;
@@ -295,14 +305,278 @@ public class BugsRestService {
 		return ret;
 		
 	}
-
 	
-	// 통합검색 API
+	// 통합검색 API (멀티스레드)
 	public String Totalsearch(Map<String, String> params, Map<String, Object> reqHeader, HttpServletRequest request) {
+		String req = "";
+		req += "Host: " + (String) reqHeader.get("host") + "\n";
+		req += "Connection: " + (String) reqHeader.get("connection") + "\n";
+		req += "Upgrade-Insecure-Requests: " + (String) reqHeader.get("upgrade-insecure-requests") + "\n";
+		req += "User-Agent: " + (String) reqHeader.get("user-agent") + "\n";
+		req += "Accept: " + (String) reqHeader.get("accept") + "\n";
+		req += "Accept-Encoding: " + (String) reqHeader.get("accept-encoding") + "\n";
+		req += "Accept-Language: " + (String) reqHeader.get("accept-language");
 		
-//		Map<String, String> fieldSelectorMap = self.fieldSelector();
-//		System.out.println(":::::::::::::::::::" + fieldSelectorMap);
+		String keyword = parseQ(params);
 		
+		try {
+			keyword = URLEncoder.encode(keyword, "UTF-8");
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		int colSize = 0;
+		String colSort = "";
+
+		String urlStr = "";
+		String colStr = "";
+		
+		String[] colArray = getTotalCollection(params);
+				
+		for(int i = 0 ; i < colArray.length ; i++) {
+			if(colArray[i].equalsIgnoreCase(Collections.TRACK)) {
+				colSize = parseTotalSize(params,Collections.TRACK);
+				colStr += Collections.TRACK + "##";
+				colSort = TotalOrderBy(params, Collections.TRACK);
+				
+				if(!colSort.equalsIgnoreCase("")) {
+					colSort = "&sort=" + colSort;
+				}
+				
+				urlStr += "http://alp-search.bugs.co.kr:9090/lZjTO0HlFg91HwD/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + "&size=" + colSize + colSort + "##";
+				colSort = "";
+			} 
+			if(colArray[i].equalsIgnoreCase(Collections.ALBUM)) {
+				colSize = parseTotalSize(params,Collections.ALBUM);
+				colStr += Collections.ALBUM + "##";
+				colSort = TotalOrderBy(params, Collections.ALBUM);
+				
+				if(!colSort.equalsIgnoreCase("")) {
+					colSort = "&sort=" + colSort;
+				}
+				
+				urlStr += "http://alp-search.bugs.co.kr:9090/vbmKja0BuYy35Ok/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + "&size=" + colSize + colSort + "##";	
+				colSort = "";
+			} 
+			if(colArray[i].equalsIgnoreCase(Collections.ARTIST)) {
+				colSize = parseTotalSize(params,Collections.ARTIST);
+				colStr += Collections.ARTIST + "##";
+				colSort = TotalOrderBy(params, Collections.ARTIST);
+				
+				if(!colSort.equalsIgnoreCase("")) {
+					colSort = "&sort=" + colSort;
+				}
+				
+				urlStr += "http://alp-search.bugs.co.kr:9090/7S4pV1yEaFoWJsj/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + "&size=" + colSize + colSort + "##";	
+				colSort = "";
+			} 
+			if(colArray[i].equalsIgnoreCase(Collections.MV)) {
+				colSize = parseTotalSize(params,Collections.MV);
+				colStr += Collections.MV + "##";
+				colSort = TotalOrderBy(params, Collections.MV);
+				
+				if(!colSort.equalsIgnoreCase("")) {
+					colSort = "&sort=" + colSort;
+				}
+				
+				urlStr += "http://alp-search.bugs.co.kr:9090/58IHeEjp2lyoR4M/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + "&size=" + colSize + colSort + "##";
+				colSort = "";
+			} 
+			if(colArray[i].equalsIgnoreCase(Collections.MUSICCAST)) {
+				colSize = parseTotalSize(params,Collections.MUSICCAST);
+				colStr += Collections.MUSICCAST + "##";
+				colSort = TotalOrderBy(params, Collections.MUSICCAST);
+				
+				if(!colSort.equalsIgnoreCase("")) {
+					colSort = "&sort=" + colSort;
+				}
+				
+				urlStr += "http://alp-search.bugs.co.kr:9090/7ZEz9GaqpMRc5DH/v1/search/advanced.search?q="+ keyword + "&size=" + colSize + colSort + "##";
+				colSort = "";
+			} 
+			if(colArray[i].equalsIgnoreCase(Collections.MUSICPD)) {
+				colSize = parseTotalSize(params,Collections.MUSICPD);
+				colStr += Collections.MUSICPD + "##";
+				colSort = TotalOrderBy(params, Collections.MUSICPD);
+				
+				if(!colSort.equalsIgnoreCase("")) {
+					colSort = "&sort=" + colSort;
+				}
+				
+				urlStr += "http://alp-search.bugs.co.kr:9090/6Jfys7XEvdQ0KuU/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + "&size=" + colSize + colSort + "##";
+				colSort = "";
+			} 
+			if(colArray[i].equalsIgnoreCase(Collections.MUSICPOST)) {
+				colSize = parseTotalSize(params,Collections.MUSICPOST);
+				colStr += Collections.MUSICPOST + "##";
+				colSort = TotalOrderBy(params, Collections.MUSICPOST);
+				
+				if(!colSort.equalsIgnoreCase("")) {
+					colSort = "&sort=" + colSort;
+				}
+				
+				urlStr += "http://alp-search.bugs.co.kr:9090/SVmCkyjdYM9n3go/v1/search/advanced.search?q="+ keyword + "&size=" + colSize + colSort + "##";
+				colSort = "";
+			} 
+			if(colArray[i].equalsIgnoreCase(Collections.CLASSIC)) {
+				colSize = parseTotalSize(params,Collections.CLASSIC);
+				colStr += Collections.CLASSIC + "##";
+				colSort = TotalOrderBy(params, Collections.CLASSIC);
+				
+				if(!colSort.equalsIgnoreCase("")) {
+					colSort = "&sort=" + colSort;
+				}
+				
+				urlStr += "http://alp-search.bugs.co.kr:9090/0WleItZOyGJbrVF/v1/search/advanced.search?q="+ keyword + "&size=" + colSize + colSort + "##";
+				colSort = "";
+			} 
+			if(colArray[i].equalsIgnoreCase(Collections.LYRICS)) {
+				colSize = parseTotalSize(params,Collections.LYRICS);
+				colStr += Collections.LYRICS + "##";
+				colSort = TotalOrderBy(params, Collections.LYRICS);
+				
+				if(!colSort.equalsIgnoreCase("")) {
+					colSort = "&sort=" + colSort;
+				}
+				
+				urlStr += "http://alp-search.bugs.co.kr:9090/M2NjMWRjOWMwOGN/v1/search/advanced.search?q="+ keyword + "&size=" + colSize + colSort + "##";
+				colSort = "";
+			}
+		}
+
+		String[] totalUrls = urlStr.split("##");
+		String[] cols = colStr.split("##");
+	
+//		System.out.println("url :: " + urlStr);
+		String totalUrl = "";
+		String result = "";
+		
+		List<Map<Integer, Object>> totalList = new ArrayList<Map<Integer, Object>>();
+		
+		List<Future<Map<Integer, Object>>> resultList = new ArrayList<>();
+		
+		Gson gson = new Gson();
+
+		ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(9);
+         
+		for(int j=0 ; j < totalUrls.length ; j++) {
+			totalUrl = totalUrls[j];
+			
+			Callable<Map<Integer, Object>> task = new totalThread(totalUrl, cols[j], j);
+			Future<Map<Integer, Object>> futures = executor.submit(task);
+			resultList.add(futures);
+		}
+		executor.shutdown();
+		
+//		List<Callable<Map<Integer, Object>>> totalSearch = new ArrayList<>();
+//		
+//			for(int j=0 ; j < totalUrls.length ; j++) {
+//				totalUrl = totalUrls[j];
+//				
+//				totalSearch.add(new totalThread(totalUrl, cols[j], j));
+//			}
+//		
+//		ExecutorService executorService = Executors.newFixedThreadPool(9);
+//		
+//		try {
+//			resultList = executorService.invokeAll(totalSearch);
+//		} catch (InterruptedException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		executorService.shutdown();
+		
+		 for(Future<Map<Integer, Object>> future : resultList)
+         {
+               try
+               {
+//                   System.out.println("Future result is - " + " - " + future.get() + "; And Task done is " + future.isDone());
+                   totalList.add(future.get());
+               }
+               catch (InterruptedException | ExecutionException e)
+               {
+                   e.printStackTrace();
+               }
+           }
+
+		try {
+			result = gson.toJson(makeTotalsearchResult(totalList));
+		} catch (IRException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return result;
+	}
+	
+	// 통합검색 실행 thread
+	public class totalThread implements Callable<Map<Integer, Object>>  {
+		
+    	String totalUrl = "";
+    	String cols = "";
+    	int num = 0;
+    	
+    	public totalThread(String totalUrl, String cols, int num){
+            this.totalUrl = totalUrl;
+            this.cols = cols;
+            this.num = num;
+        }
+
+    	@Override
+        public Map<Integer, Object> call() {
+        	
+			int totalCode = 0;
+			String resultJson = "";
+			
+			Map<Integer, Object> Col_items = new HashMap<Integer, Object>();
+							
+            try{
+    				HttpURLConnection totalConnection = (HttpURLConnection) new URL(totalUrl).openConnection();
+    				
+    				totalConnection.setRequestMethod("GET");
+    				totalConnection.setRequestProperty("Content-Type","application/json;");
+    				totalConnection.setRequestProperty("Accept", "application/json");
+    				totalConnection.setConnectTimeout(5000);
+    				totalConnection.setReadTimeout(5000);
+    				totalConnection.setDoOutput(true);
+    	
+    				try {
+    					totalCode = totalConnection.getResponseCode();
+    									
+    					if (totalCode == 400 || totalCode == 401 || totalCode == 500 ) {
+    		                System.out.println(totalCode + " Error!");
+    		            } else {
+    		                BufferedReader br = new BufferedReader(new InputStreamReader(totalConnection.getInputStream(), "UTF-8"));
+    		                StringBuilder sb = new StringBuilder();
+    		                String line = "";
+    		                
+    		                while ((line = br.readLine()) != null) {
+    		                    sb.append(line);
+    		                }
+    		                
+    		                resultJson = sb.toString();
+    		                
+    			            Col_items.put(num, resultJson);
+    			            Col_items.put(num+100, cols);
+    		            }
+//    					System.out.println("순서"+num+"("+ cols + ") : " + totalUrl);
+    					
+    				} catch(Exception e) {
+    					e.printStackTrace();
+    				}
+    				
+    				totalConnection.disconnect();
+            } catch (Exception e){
+            	e.printStackTrace();
+            }
+            
+            return Col_items;
+        }
+	}
+	
+	// 통합검색 API (기존)
+	public String TestTotalsearch(Map<String, String> params, Map<String, Object> reqHeader, HttpServletRequest request) {
+	
 		List<Map<String, String>> fieldMap =  self.fieldSelector();
 		
 		Map<String, String> fieldSelectorMap = fieldMap.get(0);
@@ -1023,27 +1297,36 @@ public class BugsRestService {
 		searchQoption qOption = new searchQoption(RestUtils.getParam(params, "q_option"), collection);
 		
 		String idxField = qOption.getIndexField();
+				
+		HashMap<String, Integer> trackMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> lyricsMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> albumMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> artistMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> mvMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> musicpdMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> musicpostMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> musiccastMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> classicMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> entityMap = new HashMap<String, Integer>();
 		
-		idxScoreMap = new HashMap<String, Integer>();
-
 		if(collection.equalsIgnoreCase(Collections.TRACK)) {
 			if(idxField.equalsIgnoreCase("track_idx")) {
-				idxScoreMap.put("TRACK_IDX", 100);
-				idxScoreMap.put("TRACK_IDX_WS", 100);
-				idxScoreMap.put("SYN_TRACK_IDX_KO", 30);
-				idxScoreMap.put("SYN_TRACK_IDX_WS", 30);
-				idxScoreMap.put("SYN_TRACK_IDX", 30);
+				trackMap.put("TRACK_IDX", 100);
+				trackMap.put("TRACK_IDX_WS", 100);
+				trackMap.put("SYN_TRACK_IDX_KO", 30);
+				trackMap.put("SYN_TRACK_IDX_WS", 30);
+				trackMap.put("SYN_TRACK_IDX", 30);
 			} else if(idxField.equalsIgnoreCase("artist_idx")) {
-				idxScoreMap.put("ARTIST_IDX", 100);
-				idxScoreMap.put("ARTIST_IDX_WS", 100);
-				idxScoreMap.put("SYN_ARTIST_IDX_WS", 30);
-				idxScoreMap.put("SYN_ARTIST_IDX", 30);
+				trackMap.put("ARTIST_IDX", 100);
+				trackMap.put("ARTIST_IDX_WS", 100);
+				trackMap.put("SYN_ARTIST_IDX_WS", 30);
+				trackMap.put("SYN_ARTIST_IDX", 30);
 			} else if(idxField.equalsIgnoreCase("album_idx")) {
-				idxScoreMap.put("ALBUM_IDX", 100);
-				idxScoreMap.put("ALBUM_IDX_WS", 100);
-				idxScoreMap.put("SYN_ALBUM_IDX", 30);
-				idxScoreMap.put("SYN_ALBUM_IDX_KO", 30);
-				idxScoreMap.put("SYN_ALBUM_IDX_WS", 30);
+				trackMap.put("ALBUM_IDX", 100);
+				trackMap.put("ALBUM_IDX_WS", 100);
+				trackMap.put("SYN_ALBUM_IDX", 30);
+				trackMap.put("SYN_ALBUM_IDX_KO", 30);
+				trackMap.put("SYN_ALBUM_IDX_WS", 30);
 			} else {
 				if(!artist_keyword.equalsIgnoreCase("")) {
 					if(qOption.isNofM()) {
@@ -1107,116 +1390,243 @@ public class BugsRestService {
 					
 				} else {
 					if(track_score != 0) {
-						idxScoreMap.put("TRACK_IDX", track_score);
-						idxScoreMap.put("TRACK_IDX_WS", track_score);
-						idxScoreMap.put("ARTIST_IDX", artist_score);
-						idxScoreMap.put("ARTIST_IDX_WS", artist_score);
-						idxScoreMap.put("ALBUM_IDX", album_score);
-						idxScoreMap.put("ALBUM_IDX_WS", album_score);
+						trackMap.put("TRACK_IDX", track_score);
+						trackMap.put("TRACK_IDX_WS", track_score);
+						trackMap.put("ARTIST_IDX", artist_score);
+						trackMap.put("ARTIST_IDX_WS", artist_score);
+						trackMap.put("ALBUM_IDX", album_score);
+						trackMap.put("ALBUM_IDX_WS", album_score);
 					}
-					idxScoreMap.put("TRACK_ARTIST_ALBUM_IDX", 30);
-					idxScoreMap.put("TRACK_ARTIST_ALBUM_IDX_WS", 30);
-					idxScoreMap.put("SYN_TRACK_ARTIST_ALBUM_IDX", 30);
+					trackMap.put("TRACK_ARTIST_ALBUM_IDX", 30);
+					trackMap.put("TRACK_ARTIST_ALBUM_IDX_WS", 30);
+					trackMap.put("SYN_TRACK_ARTIST_ALBUM_IDX", 30);
 				}
-				
+			}
+			
+			for (Entry<String, Integer> e : trackMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				if (qOption.isNofM()) {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				}
 			}
 		} else if(collection.equalsIgnoreCase(Collections.LYRICS)) {
-				idxScoreMap.put("TRACK_IDX", 150);
-				idxScoreMap.put("TRACK_IDX_WS", 150);
-				idxScoreMap.put("ALBUM_IDX", 100);
-				idxScoreMap.put("ALBUM_IDX_WS", 100);
-				idxScoreMap.put("ARTIST_IDX", 300);
-				idxScoreMap.put("ARTIST_IDX_WS", 300);
-				idxScoreMap.put("LYRICS_IDX", 30);
-				idxScoreMap.put("LYRICS_IDX_WS", 30);
-				idxScoreMap.put("SYN_LYRICS_IDX", 30);
+				lyricsMap.put("TRACK_IDX", 150);
+				lyricsMap.put("TRACK_IDX_WS", 150);
+				lyricsMap.put("ALBUM_IDX", 100);
+				lyricsMap.put("ALBUM_IDX_WS", 100);
+				lyricsMap.put("ARTIST_IDX", 300);
+				lyricsMap.put("ARTIST_IDX_WS", 300);
+				lyricsMap.put("LYRICS_IDX", 30);
+				lyricsMap.put("LYRICS_IDX_WS", 30);
+				lyricsMap.put("SYN_LYRICS_IDX", 30);
+				
+				for (Entry<String, Integer> e : lyricsMap.entrySet()) {
+					if (result.size() > 0) {
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					}
+					if (qOption.isNofM()) {
+						result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+					} else {
+						result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+					}
+				}
 		} else if(collection.equalsIgnoreCase(Collections.ALBUM)) {
 			if(idxField.equalsIgnoreCase("album_idx")) {
-				idxScoreMap.put("ALBUM_IDX", 100);
-				idxScoreMap.put("ALBUM_IDX_WS", 100);
-				idxScoreMap.put("SYN_ALBUM_IDX", 30);
-				idxScoreMap.put("SYN_ALBUM_IDX_KO", 30);
-				idxScoreMap.put("SYN_ALBUM_IDX_WS", 30);
+				albumMap.put("ALBUM_IDX", 100);
+				albumMap.put("ALBUM_IDX_WS", 100);
+				albumMap.put("SYN_ALBUM_IDX", 30);
+				albumMap.put("SYN_ALBUM_IDX_KO", 30);
+				albumMap.put("SYN_ALBUM_IDX_WS", 30);
 			} else if(idxField.equalsIgnoreCase("artist_idx")) {
-				idxScoreMap.put("ARTIST_IDX", 100);
-				idxScoreMap.put("ARTIST_IDX_WS", 100);
-				idxScoreMap.put("SYN_ARTIST_IDX", 30);
-				idxScoreMap.put("SYN_ARTIST_IDX_WS", 30);
+				albumMap.put("ARTIST_IDX", 100);
+				albumMap.put("ARTIST_IDX_WS", 100);
+				albumMap.put("SYN_ARTIST_IDX", 30);
+				albumMap.put("SYN_ARTIST_IDX_WS", 30);
 			} else {
-				idxScoreMap.put("ALBUM_IDX", 100);
-				idxScoreMap.put("ALBUM_IDX_WS", 100);
-				idxScoreMap.put("ARTIST_IDX", 300);
-				idxScoreMap.put("ARTIST_IDX_WS", 300);
-				idxScoreMap.put("ARTIST_ALBUM_IDX", 30);
-				idxScoreMap.put("ARTIST_ALBUM_IDX_WS", 30);
-				idxScoreMap.put("SYN_ARTIST_ALBUM_IDX", 30);
+				albumMap.put("ALBUM_IDX", 100);
+				albumMap.put("ALBUM_IDX_WS", 100);
+				albumMap.put("ARTIST_IDX", 300);
+				albumMap.put("ARTIST_IDX_WS", 300);
+				albumMap.put("ARTIST_ALBUM_IDX", 30);
+				albumMap.put("ARTIST_ALBUM_IDX_WS", 30);
+				albumMap.put("SYN_ARTIST_ALBUM_IDX", 30);
+			}
+			
+			for (Entry<String, Integer> e : albumMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				if (qOption.isNofM()) {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				}
 			}
 		} else if(collection.equalsIgnoreCase(Collections.ARTIST)) {
-				idxScoreMap.put("ARTIST_IDX", 200);
-				idxScoreMap.put("ARTIST_IDX_WS", 200);
-				idxScoreMap.put("GRP_NM_IDX", 100);
-				idxScoreMap.put("GRP_NM_IDX_WS", 100);
-				idxScoreMap.put("SYN_ARTIST_IDX_KO", 10);
-				idxScoreMap.put("SYN_ARTIST_IDX", 10);
+				artistMap.put("ARTIST_IDX", 200);
+				artistMap.put("ARTIST_IDX_WS", 200);
+				artistMap.put("GRP_NM_IDX", 100);
+				artistMap.put("GRP_NM_IDX_WS", 100);
+				artistMap.put("SYN_ARTIST_IDX_KO", 10);
+				artistMap.put("SYN_ARTIST_IDX", 10);
+				
+				for (Entry<String, Integer> e : artistMap.entrySet()) {
+					if (result.size() > 0) {
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					}
+					if (qOption.isNofM()) {
+						result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+					} else {
+						result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+					}
+				}
 		} else if(collection.equalsIgnoreCase(Collections.MV)) {
-			idxScoreMap.put("MV_TRACK_IDX", 100);
-			idxScoreMap.put("MV_TRACK_IDX_WS", 100);
-			idxScoreMap.put("ARTIST_IDX", 300);
-			idxScoreMap.put("MV_TRACK_ARTIST_ALBUM_IDX", 30);
-			idxScoreMap.put("SYN_MV_TRACK_ARTIST_ALBUM_IDX", 30);
-			idxScoreMap.put("MV_TRACK_ARTIST_ALBUM_IDX_WS", 30);
+			mvMap.put("MV_TRACK_IDX", 100);
+			mvMap.put("MV_TRACK_IDX_WS", 100);
+			mvMap.put("ARTIST_IDX", 300);
+			mvMap.put("MV_TRACK_ARTIST_ALBUM_IDX", 30);
+			mvMap.put("SYN_MV_TRACK_ARTIST_ALBUM_IDX", 30);
+			mvMap.put("MV_TRACK_ARTIST_ALBUM_IDX_WS", 30);
+			
+			for (Entry<String, Integer> e : mvMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				if (qOption.isNofM()) {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				}
+			}
 		} else if(collection.equalsIgnoreCase(Collections.MUSICCAST)) {
-			idxScoreMap.put("MUSICCAST_IDX", 100);
-			idxScoreMap.put("MUSICCAST_IDX_WS", 100);
+			musiccastMap.put("MUSICCAST_IDX", 100);
+			musiccastMap.put("MUSICCAST_IDX_WS", 100);
+			
+			for (Entry<String, Integer> e : musiccastMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				if (qOption.isNofM()) {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				}
+			}
 		} else if(collection.equalsIgnoreCase(Collections.MUSICPD)) {
 			if(idxField.equalsIgnoreCase("musicpd_album_idx")) {
-				idxScoreMap.put("MUSICPD_ALBUM_IDX", 100);
-				idxScoreMap.put("MUSICPD_ALBUM_IDX_WS", 100);
+				musicpdMap.put("MUSICPD_ALBUM_IDX", 100);
+				musicpdMap.put("MUSICPD_ALBUM_IDX_WS", 100);
 			} else {
-				idxScoreMap.put("MUSICPD_ALBUM_IDX", 100);
-				idxScoreMap.put("MUSICPD_ALBUM_IDX_WS", 100);
+				musicpdMap.put("MUSICPD_ALBUM_IDX", 100);
+				musicpdMap.put("MUSICPD_ALBUM_IDX_WS", 100);
+			}
+			
+			for (Entry<String, Integer> e : musicpdMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				if (qOption.isNofM()) {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				}
 			}
 		} else if(collection.equalsIgnoreCase(Collections.MUSICPOST)) {
-			idxScoreMap.put("MUSICPOST_IDX", 100);
-			idxScoreMap.put("MUSICPOST_IDX_WS", 100);
+			musicpostMap.put("MUSICPOST_IDX", 100);
+			musicpostMap.put("MUSICPOST_IDX_WS", 100);
+			
+			for (Entry<String, Integer> e : musicpostMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				if (qOption.isNofM()) {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				}
+			}
 		} else if(collection.equalsIgnoreCase(Collections.CLASSIC)) {
-			idxScoreMap.put("ARTIST_IDX", 100);
-			idxScoreMap.put("TITLE_IDX", 50);
-			idxScoreMap.put("CLASSIC_IDX", 30);
+			String classic_kwd = keyword.replaceAll("\\s", "");
+			
+			if(qOption.isNofM()) {
+				result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), classic_kwd, 100, qOption.getNofmPercent()));
+				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, 100, qOption.getNofmPercent()));
+				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				result.add(new WhereSet("TITLE_IDX", qOption.getOption(), keyword, 50, qOption.getNofmPercent()));
+				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				result.add(new WhereSet("TITLE_IDX", qOption.getOption(), classic_kwd, 50, qOption.getNofmPercent()));
+			} else {
+				result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), classic_kwd, 100));
+				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, 100));
+				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				result.add(new WhereSet("TITLE_IDX", qOption.getOption(), keyword, 50));
+				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				result.add(new WhereSet("TITLE_IDX", qOption.getOption(), classic_kwd, 50));
+			}
+			classicMap.put("CLASSIC_IDX", 30);
+			classicMap.put("CLASSIC_IDX_KOR", 30);
+			
+			for (Entry<String, Integer> e : classicMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				if (qOption.isNofM()) {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				}
+			}
 		} else if(collection.equalsIgnoreCase(Collections.ENTITY)) {
 			if(idxField.equalsIgnoreCase("track_idx")) {
-				idxScoreMap.put("TRACK_IDX", 100);
+				entityMap.put("TRACK_IDX", 100);
 			} else if(idxField.equalsIgnoreCase("album_idx")) {
-				idxScoreMap.put("ALBUM_IDX", 100);
+				entityMap.put("ALBUM_IDX", 100);
 			} else if(idxField.equalsIgnoreCase("artist_idx")) {
-				idxScoreMap.put("ARTIST_IDX", 100);
+				entityMap.put("ARTIST_IDX", 100);
 			} else if(idxField.equalsIgnoreCase("arranger_idx")) {
-				idxScoreMap.put("ARRANGER_IDX", 100);
+				entityMap.put("ARRANGER_IDX", 100);
 			} else if(idxField.equalsIgnoreCase("composer_idx")) {
-				idxScoreMap.put("COMPOSER_IDX", 100);
+				entityMap.put("COMPOSER_IDX", 100);
 			} else if(idxField.equalsIgnoreCase("featuring_idx")) {
-				idxScoreMap.put("FEATURING_IDX", 100);
+				entityMap.put("FEATURING_IDX", 100);
 			} else if(idxField.equalsIgnoreCase("lyricist_idx")) {
-				idxScoreMap.put("LYRICIST_IDX", 100);
+				entityMap.put("LYRICIST_IDX", 100);
 			} else if(idxField.equalsIgnoreCase("genre_idx")) {
-				idxScoreMap.put("GENRE_IDX", 100);
+				entityMap.put("GENRE_IDX", 100);
 			} else if(idxField.equalsIgnoreCase("artist_role_idx")) {
-				idxScoreMap.put("ARTIST_ROLE_IDX", 100);
+				entityMap.put("ARTIST_ROLE_IDX", 100);
 			} else {
-				idxScoreMap.put("TRACK_IDX", 100);
+				entityMap.put("TRACK_IDX", 100);
 			} 
+			
+			for (Entry<String, Integer> e : entityMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				if (qOption.isNofM()) {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				}
+			}
 		} 
 
-		for (Entry<String, Integer> e : idxScoreMap.entrySet()) {
-			if (result.size() > 0) {
-				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-			}
-			if (qOption.isNofM()) {
-				result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
-			} else {
-				result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
-			}
-		}
+//		for (Entry<String, Integer> e : idxScoreMap.entrySet()) {
+//			if (result.size() > 0) {
+//				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+//			}
+//			if (qOption.isNofM()) {
+//				result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+//			} else {
+//				result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+//			}
+//		}
 		
 		return result;
 	}
@@ -1237,9 +1647,7 @@ public class BugsRestService {
 		
 		byte option;
 
-		for(int i=0 ; i < index.size() ; i++) {
-			idxScoreMap = new HashMap<String, Integer>();
-						
+		for(int i=0 ; i < index.size() ; i++) {						
 			if(num == Integer.parseInt(index.get(i).get("num"))) {				
 				if(index.get(i).get("name").equalsIgnoreCase("track_artist_album_idx")) {
 					q = index.get(i).get("query");
@@ -1651,6 +2059,16 @@ public class BugsRestService {
 		return new OrderBySet[] { OrderBySetService.getInstance().getOrderBySet(RestUtils.getParam(params, col_sort.toLowerCase()), collection) };
 	}
 	
+	// 통합검색 정렬 체크
+	protected String TotalOrderBy(Map<String, String> params, String collection) {
+		
+		String col_sort = collection + "@sort";
+		
+		String sort = RestUtils.getParam(params, col_sort.toLowerCase());
+		
+		return sort;
+	}
+	
 	// 구매곡 정렬
 	protected OrderBySet[] purchaseOrderBy(String collection) {
 		return new OrderBySet[] { OrderBySetService.getInstance().getOrderBySet("", collection) };
@@ -1695,6 +2113,10 @@ public class BugsRestService {
 	
 	protected TotalResult makeTotalResult(ResultSet result, QuerySet query, Map<String, String> params) throws IRException {
 		return TotalResult.makeTotalResult(query, result, params);
+	}
+	
+	protected TotalsearchResult makeTotalsearchResult(List<Map<Integer, Object>> totalList) throws IRException {
+		return TotalsearchResult.makeTotalsearchResult(totalList);
 	}
 	
 	protected AutoTotalResult makeAutoResult(ResultSet result, QuerySet query, Map<String, String> params) throws IRException {
