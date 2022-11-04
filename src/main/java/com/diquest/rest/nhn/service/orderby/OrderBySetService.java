@@ -88,7 +88,7 @@ public class OrderBySetService {
 					return new OrderBySet(false, "DISP_NM", Protocol.OrderBySet.OP_POSTWEIGHT);
 				}
 			} else {													// 정확도순
-				return new OrderBySet(true, "DISP_NM", Protocol.OrderBySet.OP_PREWEIGHT);
+				return new OrderBySet(true, "SCORE", Protocol.OrderBySet.OP_PREWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase(Collections.MV)) {
 			if (ArrayValue[0].equalsIgnoreCase("mv_title")) {			// 영상명순
@@ -104,7 +104,7 @@ public class OrderBySetService {
 					return new OrderBySet(true, "RELEASE_YMD", Protocol.OrderBySet.OP_POSTWEIGHT);
 				}
 			} else {													// 정확도순
-				return new OrderBySet(true, "MV_TITLE", Protocol.OrderBySet.OP_PREWEIGHT);
+				return new OrderBySet(true, "SCORE", Protocol.OrderBySet.OP_PREWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase(Collections.MUSICCAST)) {
 			if (ArrayValue[0].equalsIgnoreCase("release_ymd")) {			// 최신순
@@ -114,7 +114,7 @@ public class OrderBySetService {
 					return new OrderBySet(true, "RELEASE_YMD", Protocol.OrderBySet.OP_POSTWEIGHT);
 				}
 			} else {													// 정확도순
-				return new OrderBySet(false, "POPULAR", Protocol.OrderBySet.OP_PREWEIGHT);
+				return new OrderBySet(true, "POPULAR", Protocol.OrderBySet.OP_PREWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase(Collections.MUSICPD)) {
 			if (ArrayValue[0].equalsIgnoreCase("title")) {			// 뮤직pd앨범명순

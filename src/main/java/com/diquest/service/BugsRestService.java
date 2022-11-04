@@ -308,14 +308,6 @@ public class BugsRestService {
 	
 	// 통합검색 API (멀티스레드)
 	public String Totalsearch(Map<String, String> params, Map<String, Object> reqHeader, HttpServletRequest request) {
-		String req = "";
-		req += "Host: " + (String) reqHeader.get("host") + "\n";
-		req += "Connection: " + (String) reqHeader.get("connection") + "\n";
-		req += "Upgrade-Insecure-Requests: " + (String) reqHeader.get("upgrade-insecure-requests") + "\n";
-		req += "User-Agent: " + (String) reqHeader.get("user-agent") + "\n";
-		req += "Accept: " + (String) reqHeader.get("accept") + "\n";
-		req += "Accept-Encoding: " + (String) reqHeader.get("accept-encoding") + "\n";
-		req += "Accept-Language: " + (String) reqHeader.get("accept-language");
 		
 		String keyword = parseQ(params);
 		
@@ -1414,15 +1406,14 @@ public class BugsRestService {
 				}
 			}
 		} else if(collection.equalsIgnoreCase(Collections.LYRICS)) {
-				lyricsMap.put("TRACK_IDX", 150);
-				lyricsMap.put("TRACK_IDX_WS", 150);
-				lyricsMap.put("ALBUM_IDX", 100);
-				lyricsMap.put("ALBUM_IDX_WS", 100);
+				lyricsMap.put("TRACK_IDX", 100);
+				lyricsMap.put("TRACK_IDX_WS", 100);
 				lyricsMap.put("ARTIST_IDX", 300);
 				lyricsMap.put("ARTIST_IDX_WS", 300);
-				lyricsMap.put("LYRICS_IDX", 30);
-				lyricsMap.put("LYRICS_IDX_WS", 30);
-				lyricsMap.put("SYN_LYRICS_IDX", 30);
+				lyricsMap.put("LYRICS_IDX", 300);
+				lyricsMap.put("LYRICS_IDX_WS", 300);
+				lyricsMap.put("TOTAL_LYRICS_IDX", 30);
+				lyricsMap.put("TOTAL_LYRICS_IDX_WS", 30);
 				
 				for (Entry<String, Integer> e : lyricsMap.entrySet()) {
 					if (result.size() > 0) {
