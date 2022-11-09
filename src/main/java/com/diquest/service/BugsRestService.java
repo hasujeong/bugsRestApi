@@ -1347,6 +1347,8 @@ public class BugsRestService {
 	protected List<WhereSet> makeBaseWhereSet(Map<String, String> params, String collection) throws InvalidParameterException {
 		List<WhereSet> result = new ArrayList<WhereSet>();
 		String keyword = parseQ(params);
+		String trimKeyword = keyword.replaceAll("\\s", "");
+		
 //		String collection = getCollection(params);
 		searchQoption qOption = new searchQoption(RestUtils.getParam(params, "q_option"), collection);
 		
@@ -1365,6 +1367,11 @@ public class BugsRestService {
 		
 		if(collection.equalsIgnoreCase(Collections.TRACK)) {
 			if(idxField.equalsIgnoreCase("track_idx")) {
+				if(qOption.isNofM()) {
+					result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, 100, qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, 100));
+				}
 				trackMap.put("TRACK_IDX", 100);
 				trackMap.put("TRACK_IDX_WS", 100);
 				trackMap.put("SYN_TRACK_IDX_KO", 30);
@@ -1388,6 +1395,8 @@ public class BugsRestService {
 						result.add(new WhereSet("TRACK_IDX", qOption.getOption(), keyword, track_score, qOption.getNofmPercent()));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), keyword, track_score, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, track_score, qOption.getNofmPercent()));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score, qOption.getNofmPercent()));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
@@ -1417,6 +1426,8 @@ public class BugsRestService {
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), keyword, track_score));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, track_score));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), keyword, artist_score));
@@ -1444,6 +1455,11 @@ public class BugsRestService {
 					
 				} else {
 					if(track_score != 0) {
+						if(qOption.isNofM()) {
+							result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, 100, qOption.getNofmPercent()));
+						} else {
+							result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, 100));
+						}
 						trackMap.put("TRACK_IDX", track_score);
 						trackMap.put("TRACK_IDX_WS", track_score);
 						trackMap.put("ARTIST_IDX", artist_score);
