@@ -750,6 +750,7 @@ public class BugsRestService {
 		logMessageService.requestReceived(reqHeader, request);
 		
 		String ret = "";
+		String OriginKwd = parseQ(params);
 		
 		Gson gson = new Gson();
 		
@@ -789,6 +790,9 @@ public class BugsRestService {
 				query.setPrintQuery(true);						// 실제 사용시 false
 				parseTrigger(params, query, getCollection(params));
 				query.setResultModifier("typo");
+				query.setValue("typo-parameters", OriginKwd);
+		    	query.setValue("typo-options", "ALPHABETS_TO_HANGUL|HANGUL_TO_HANGUL");
+		    	query.setValue("typo-correct-result-num", "1");
 				
 				querySet.addQuery(query);
 			
@@ -806,6 +810,64 @@ public class BugsRestService {
 				return commandSearchRequestErrorResponse(commandSearchRequest.getException().getErrorMessage());
 			} else {
 				logMessageService.messageReceived(reqHeader, request);
+				
+				if(colStr.equalsIgnoreCase(Collections.AUTO_TOTAL)) {
+					ResultSet resultSet = commandSearchRequest.getResultSet();
+	    			Result[] resultlist = resultSet.getResultList();
+	    			Result result1 = resultlist[0];
+	    			Result result2 = resultlist[1];
+	    			    			
+	    			int totalSize = 0;
+	    			String typoKwd = "";
+	    			
+	    			totalSize = result1.getTotalSize() + result2.getTotalSize();
+	    			    			
+	    			if (totalSize == 0) {
+	    				if (result1.getValue("typo-result") != null) {
+	    					typoKwd = result1.getValue("typo-result");
+						}
+	    				
+	    				if (!typoKwd.equals("")) {
+	    					params.put("q", typoKwd);
+	    					querySet = new QuerySet(queryInt);
+	    					
+	    					for(int j = 0 ; j < queryInt ; j++) {
+	    						query = new Query();
+	    						    						
+	    						FilterFieldParseResult filterFieldParseResult = parseFilterParams(params);
+	    						query.setSelect(parseAutoSelect(params, getCollection(params), j));
+	    						query.setWhere(parseAutoWhere(params, filterFieldParseResult, getCollection(params), j));
+	    						query.setOrderby(parseOrderBy(params, getCollection(params)));
+	    						query.setFrom(getCollection(params));
+	    						query.setResult(parseStart(params) - 1, parseStart(params) + parseAutoSize(params, j) - 2);
+	    						query.setSearchKeyword(parseQ(params));
+	    						query.setFaultless(true);
+	    						query.setThesaurusOption((byte) (Protocol.ThesaurusOption.EQUIV_SYNONYM | Protocol.ThesaurusOption.QUASI_SYNONYM));
+	    						query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
+	    						query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
+	    						query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
+	    						query.setLoggable(false);
+	    						query.setPrintQuery(true);						// 실제 사용시 false
+	    						parseTrigger(params, query, getCollection(params));
+	    						
+	    						querySet.addQuery(query);
+	    					}
+	    											
+	    					commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
+	    							
+	    					returnCode = commandSearchRequest.request(querySet);
+	    					
+	    					if (returnCode <= -100) {
+	    						ErrorMessageService.getInstance().minusReturnCodeLog(returnCode, commandSearchRequest.getException(), req);
+	    						logMessageService.receiveEnd(reqHeader, request);
+	    						return commandSearchRequestErrorResponse(commandSearchRequest.getException().getErrorMessage());
+	    					} else {
+	    						logMessageService.messageReceived(reqHeader, request);
+	    					}
+	    				}
+	    			}
+	    			params.put("q", OriginKwd);
+				}
 			}
 					
 			String resultJson = "";

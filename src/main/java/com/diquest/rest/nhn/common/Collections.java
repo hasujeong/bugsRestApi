@@ -5,7 +5,7 @@ public class Collections {
 	public static final String TOTAL = "TOTAL";
 	
 	/** 트랙 컬렉션 **/
-	public static final String TRACK = "TEST_TRACK";
+	public static final String TRACK = "TRACK";
 	
 	/** 가사 컬렉션 **/
 	public static final String LYRICS = "LYRICS";
