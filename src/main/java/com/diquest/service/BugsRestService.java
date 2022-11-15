@@ -229,6 +229,7 @@ public class BugsRestService {
 		logMessageService.requestReceived(reqHeader, request);
 		
 		String ret = "";
+		String OriginKwd = parseQ(params);
 		
 		Gson gson = new Gson();
 		
@@ -259,16 +260,17 @@ public class BugsRestService {
 			query.setLogKeyword(parseQ(params).toCharArray());
 			query.setPrintQuery(true);						// 실제 사용시 false
 			parseTrigger(params, query, getCollection(params));
-//			query.setQueryModifier("diver");
 			query.setResultModifier("typo");
-//				query.setDebug(true);
-//				query.setFaultless(true);	
+			query.setValue("typo-parameters", OriginKwd);
+	    	query.setValue("typo-options", "ALPHABETS_TO_HANGUL|HANGUL_TO_HANGUL");
+	    	query.setValue("typo-correct-result-num", "1");
 			
 			querySet.addQuery(query);
 		
 			String queryStr = parser.queryToString(query);
 //			System.out.println(" :::::::::: query ::::::: " + queryStr);
-									
+			
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 10000, 50, 50);
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 					
 			int returnCode = commandSearchRequest.request(querySet);
@@ -279,6 +281,67 @@ public class BugsRestService {
 				return commandSearchRequestErrorResponse(commandSearchRequest.getException().getErrorMessage());
 			} else {
 				logMessageService.messageReceived(reqHeader, request);
+				
+				ResultSet resultSet = commandSearchRequest.getResultSet();
+    			Result[] resultlist = resultSet.getResultList();
+    			Result result1 = resultlist[0];
+    			    			
+    			int totalSize = 0;
+    			String typoKwd = "";
+    			
+    			totalSize = result1.getTotalSize();
+    			    			
+    			if (totalSize == 0) {
+    				if (result1.getValue("typo-result") != null) {
+    					typoKwd = result1.getValue("typo-result");
+					}
+    				
+    				if (!typoKwd.equals("")) {
+    					params.put("q", typoKwd);
+    					querySet = new QuerySet(1);
+    					
+						query = new Query();
+						    						
+						filterFieldParseResult = parseFilterParams(params);
+						query.setSelect(parseSelect(params));
+						query.setFilter(parseFilter(params, filterFieldParseResult, getCollection(params)));
+						query.setWhere(parseWhere(params, filterFieldParseResult, getCollection(params)));
+//						query.setGroupBy(parseGroupBy(params));
+						query.setOrderby(parseOrderBy(params, getCollection(params)));
+						query.setFrom(getCollection(params));
+						query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
+						query.setSearchKeyword(parseQ(params));
+						query.setFaultless(true);
+						query.setThesaurusOption((byte) (Protocol.ThesaurusOption.EQUIV_SYNONYM | Protocol.ThesaurusOption.QUASI_SYNONYM));
+						query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
+						query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
+						query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
+						query.setUserName(getUserName(params));										// 로그인 사용자 ID 기록
+						query.setExtData(RestUtils.getParam(params, "pr"));							// pr (app,web,pc)
+						query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
+						query.setLogKeyword(parseQ(params).toCharArray());
+						query.setPrintQuery(true);						// 실제 사용시 false
+						parseTrigger(params, query, getCollection(params));
+						
+						querySet.addQuery(query);
+					
+						queryStr = parser.queryToString(query);
+//						System.out.println(" :::::::::: query22 ::::::: " + queryStr);
+    					
+    					commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
+    							
+    					returnCode = commandSearchRequest.request(querySet);
+    					
+    					if (returnCode <= -100) {
+    						ErrorMessageService.getInstance().minusReturnCodeLog(returnCode, commandSearchRequest.getException(), req);
+    						logMessageService.receiveEnd(reqHeader, request);
+    						return commandSearchRequestErrorResponse(commandSearchRequest.getException().getErrorMessage());
+    					} else {
+    						logMessageService.messageReceived(reqHeader, request);
+    					}
+    				}
+    			}
+    			params.put("q", OriginKwd);
 			}
 			
 //			System.out.println(returnCode);
@@ -323,6 +386,17 @@ public class BugsRestService {
 		String urlStr = "";
 		String colStr = "";
 		
+		String prValue = "";
+		String searchTpValue = "";
+		
+		if(!RestUtils.getParam(params, "pr").equalsIgnoreCase("")) {
+			prValue = "&pr=" + RestUtils.getParam(params, "pr");
+		}
+		
+		if(!RestUtils.getParam(params, "search_tp").equalsIgnoreCase("")) {
+			searchTpValue = "&search_tp=" + RestUtils.getParam(params, "search_tp");
+		}
+				
 		String[] colArray = getTotalCollection(params);
 				
 		for(int i = 0 ; i < colArray.length ; i++) {
@@ -335,7 +409,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://alp-search.bugs.co.kr:9090/lZjTO0HlFg91HwD/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + "&size=" + colSize + colSort + "##";
+				urlStr += "http://alp-search.bugs.co.kr:9090/lZjTO0HlFg91HwD/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.ALBUM)) {
@@ -347,7 +421,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://alp-search.bugs.co.kr:9090/vbmKja0BuYy35Ok/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + "&size=" + colSize + colSort + "##";	
+				urlStr += "http://alp-search.bugs.co.kr:9090/vbmKja0BuYy35Ok/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";	
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.ARTIST)) {
@@ -359,7 +433,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://alp-search.bugs.co.kr:9090/7S4pV1yEaFoWJsj/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + "&size=" + colSize + colSort + "##";	
+				urlStr += "http://alp-search.bugs.co.kr:9090/7S4pV1yEaFoWJsj/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";	
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.MV)) {
@@ -371,7 +445,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://alp-search.bugs.co.kr:9090/58IHeEjp2lyoR4M/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + "&size=" + colSize + colSort + "##";
+				urlStr += "http://alp-search.bugs.co.kr:9090/58IHeEjp2lyoR4M/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.MUSICCAST)) {
@@ -383,7 +457,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://alp-search.bugs.co.kr:9090/7ZEz9GaqpMRc5DH/v1/search/advanced.search?q="+ keyword + "&size=" + colSize + colSort + "##";
+				urlStr += "http://alp-search.bugs.co.kr:9090/7ZEz9GaqpMRc5DH/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.MUSICPD)) {
@@ -395,7 +469,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://alp-search.bugs.co.kr:9090/6Jfys7XEvdQ0KuU/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + "&size=" + colSize + colSort + "##";
+				urlStr += "http://alp-search.bugs.co.kr:9090/6Jfys7XEvdQ0KuU/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.MUSICPOST)) {
@@ -407,7 +481,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://alp-search.bugs.co.kr:9090/SVmCkyjdYM9n3go/v1/search/advanced.search?q="+ keyword + "&size=" + colSize + colSort + "##";
+				urlStr += "http://alp-search.bugs.co.kr:9090/SVmCkyjdYM9n3go/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.CLASSIC)) {
@@ -419,7 +493,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://alp-search.bugs.co.kr:9090/0WleItZOyGJbrVF/v1/search/advanced.search?q="+ keyword + "&size=" + colSize + colSort + "##";
+				urlStr += "http://alp-search.bugs.co.kr:9090/0WleItZOyGJbrVF/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.LYRICS)) {
@@ -431,7 +505,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://alp-search.bugs.co.kr:9090/M2NjMWRjOWMwOGN/v1/search/advanced.search?q="+ keyword + "&size=" + colSize + colSort + "##";
+				urlStr += "http://alp-search.bugs.co.kr:9090/M2NjMWRjOWMwOGN/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			}
 		}
@@ -686,7 +760,8 @@ public class BugsRestService {
 				String queryStr = parser.queryToString(query);
 //				System.out.println(" :::::::::: query ::::::: [" + i + "] " + queryStr);
 			}
-									
+								
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 10000, 50, 50);
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 					
 			int returnCode = commandSearchRequest.request(querySet);
@@ -799,7 +874,8 @@ public class BugsRestService {
 				String queryStr = parser.queryToString(query);
 //				System.out.println(" :::::::::: query ::::::: " + queryStr);
 			}
-									
+								
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 10000, 50, 50);
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 					
 			int returnCode = commandSearchRequest.request(querySet);
@@ -944,7 +1020,8 @@ public class BugsRestService {
 		
 			String queryStr = parser.queryToString(query);
 //			System.out.println(" :::::::::: query ::::::: " + queryStr);
-									
+								
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 10000, 50, 50);
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 					
 			int returnCode = commandSearchRequest.request(querySet);
@@ -1043,7 +1120,8 @@ public class BugsRestService {
 			String queryStr = parser.queryToString(query);
 //				System.out.println(" :::::::::: query ::::::: " + queryStr);
 			
-									
+								
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 10000, 50, 50);
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 					
 			int returnCode = commandSearchRequest.request(querySet);
@@ -1142,6 +1220,7 @@ public class BugsRestService {
 				num++;
 			}
 			
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 10000, 50, 50);
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 					
 			int returnCode = commandSearchRequest.request(querySet);
@@ -1244,6 +1323,7 @@ public class BugsRestService {
 			String queryStr = parser.queryToString(query);
 //					System.out.println(" :::::::::: query ::::::: " + queryStr);
 			
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 10000, 50, 50);
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 					
 			int returnCode = commandSearchRequest.request(querySet);
