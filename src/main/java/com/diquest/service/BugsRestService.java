@@ -409,7 +409,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://alp-search.bugs.co.kr:9090/lZjTO0HlFg91HwD/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+				urlStr += "http://10.160.235.191:9090/lZjTO0HlFg91HwD/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.ALBUM)) {
@@ -421,7 +421,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://alp-search.bugs.co.kr:9090/vbmKja0BuYy35Ok/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";	
+				urlStr += "http://10.160.235.180:9090/vbmKja0BuYy35Ok/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";	
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.ARTIST)) {
@@ -433,7 +433,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://alp-search.bugs.co.kr:9090/7S4pV1yEaFoWJsj/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";	
+				urlStr += "http://10.160.235.180:9090/7S4pV1yEaFoWJsj/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";	
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.MV)) {
@@ -445,7 +445,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://alp-search.bugs.co.kr:9090/58IHeEjp2lyoR4M/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+				urlStr += "http://10.160.235.219:9090/58IHeEjp2lyoR4M/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.MUSICCAST)) {
@@ -457,7 +457,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://alp-search.bugs.co.kr:9090/7ZEz9GaqpMRc5DH/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+				urlStr += "http://10.160.235.219:9090/7ZEz9GaqpMRc5DH/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.MUSICPD)) {
@@ -469,7 +469,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://alp-search.bugs.co.kr:9090/6Jfys7XEvdQ0KuU/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+				urlStr += "http://10.160.235.219:9090/6Jfys7XEvdQ0KuU/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.MUSICPOST)) {
@@ -481,7 +481,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://alp-search.bugs.co.kr:9090/SVmCkyjdYM9n3go/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+				urlStr += "http://10.160.235.219:9090/SVmCkyjdYM9n3go/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.CLASSIC)) {
@@ -493,7 +493,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://alp-search.bugs.co.kr:9090/0WleItZOyGJbrVF/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+				urlStr += "http://10.160.235.219:9090/0WleItZOyGJbrVF/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.LYRICS)) {
@@ -505,7 +505,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://alp-search.bugs.co.kr:9090/M2NjMWRjOWMwOGN/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+				urlStr += "http://10.160.235.180:9090/M2NjMWRjOWMwOGN/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			}
 		}
