@@ -16,6 +16,9 @@ public class Collections {
 	/** 아티스트 컬렉션 **/
 	public static final String ARTIST = "ARTIST";
 	
+	/** 최신 아티스트 컬렉션 **/
+	public static final String EXACT_ARTIST = "EXACTARTIST";
+	
 	/** 영상 컬렉션 **/
 	public static final String MV = "MV";
 	

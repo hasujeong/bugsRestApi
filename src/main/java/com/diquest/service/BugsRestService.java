@@ -270,7 +270,7 @@ public class BugsRestService {
 			String queryStr = parser.queryToString(query);
 //			System.out.println(" :::::::::: query ::::::: " + queryStr);
 			
-			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 10000, 50, 50);
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 5000, 50, 50);
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 					
 			int returnCode = commandSearchRequest.request(querySet);
@@ -400,6 +400,18 @@ public class BugsRestService {
 		String[] colArray = getTotalCollection(params);
 				
 		for(int i = 0 ; i < colArray.length ; i++) {
+			if(colArray[i].equalsIgnoreCase(Collections.EXACT_ARTIST)) {
+				colSize = parseTotalSize(params,Collections.EXACT_ARTIST);
+				colStr += Collections.EXACT_ARTIST + "##";
+				colSort = TotalOrderBy(params, Collections.EXACT_ARTIST);
+				
+				if(!colSort.equalsIgnoreCase("")) {
+					colSort = "&sort=" + colSort;
+				}
+				
+				urlStr += "http://10.160.235.180:9090/7S4pV1yEaFoWJsj/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&q_option=and,exact_artist_idx&size=" + colSize + colSort + "##";
+				colSort = "";
+			}
 			if(colArray[i].equalsIgnoreCase(Collections.TRACK)) {
 				colSize = parseTotalSize(params,Collections.TRACK);
 				colStr += Collections.TRACK + "##";
@@ -761,7 +773,7 @@ public class BugsRestService {
 //				System.out.println(" :::::::::: query ::::::: [" + i + "] " + queryStr);
 			}
 								
-			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 10000, 50, 50);
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 5000, 50, 50);
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 					
 			int returnCode = commandSearchRequest.request(querySet);
@@ -875,7 +887,7 @@ public class BugsRestService {
 //				System.out.println(" :::::::::: query ::::::: " + queryStr);
 			}
 								
-			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 10000, 50, 50);
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 5000, 50, 50);
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 					
 			int returnCode = commandSearchRequest.request(querySet);
@@ -1021,7 +1033,7 @@ public class BugsRestService {
 			String queryStr = parser.queryToString(query);
 //			System.out.println(" :::::::::: query ::::::: " + queryStr);
 								
-			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 10000, 50, 50);
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 5000, 50, 50);
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 					
 			int returnCode = commandSearchRequest.request(querySet);
@@ -1121,7 +1133,7 @@ public class BugsRestService {
 //				System.out.println(" :::::::::: query ::::::: " + queryStr);
 			
 								
-			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 10000, 50, 50);
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 5000, 50, 50);
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 					
 			int returnCode = commandSearchRequest.request(querySet);
@@ -1220,7 +1232,7 @@ public class BugsRestService {
 				num++;
 			}
 			
-			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 10000, 50, 50);
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 5000, 50, 50);
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 					
 			int returnCode = commandSearchRequest.request(querySet);
@@ -1323,7 +1335,7 @@ public class BugsRestService {
 			String queryStr = parser.queryToString(query);
 //					System.out.println(" :::::::::: query ::::::: " + queryStr);
 			
-			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 10000, 50, 50);
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 5000, 50, 50);
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 					
 			int returnCode = commandSearchRequest.request(querySet);
@@ -1372,7 +1384,7 @@ public class BugsRestService {
 		String[] colArray = {};
 		
 		if(collec.equalsIgnoreCase(Collections.TOTAL)) {
-			colArray = new String[] {Collections.TRACK, Collections.ALBUM, Collections.ARTIST, Collections.MV, Collections.MUSICCAST, Collections.MUSICPD, Collections.MUSICPOST, Collections.CLASSIC, Collections.LYRICS};
+			colArray = new String[] {Collections.EXACT_ARTIST, Collections.TRACK, Collections.ALBUM, Collections.ARTIST, Collections.MV, Collections.MUSICCAST, Collections.MUSICPD, Collections.MUSICPOST, Collections.CLASSIC, Collections.LYRICS};
 		} else {
 			colArray = new String[] {collec};
 		}
@@ -1616,6 +1628,14 @@ public class BugsRestService {
 				}
 			}
 		} else if(collection.equalsIgnoreCase(Collections.ARTIST)) {
+			if(idxField.equalsIgnoreCase("exact_artist_idx")) {
+				if(qOption.isNofM()) {
+					result.add(new WhereSet("EXACT_ARTIST_IDX", qOption.getOption(), trimKeyword, 100, qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet("EXACT_ARTIST_IDX", qOption.getOption(), trimKeyword, 100));
+				}
+				
+			} else {
 				artistMap.put("ARTIST_IDX", 200);
 				artistMap.put("ARTIST_IDX_WS", 200);
 				artistMap.put("GRP_NM_IDX", 100);
@@ -1633,6 +1653,8 @@ public class BugsRestService {
 						result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
 					}
 				}
+			}
+				
 		} else if(collection.equalsIgnoreCase(Collections.MV)) {
 			mvMap.put("MV_TRACK_IDX", 100);
 			mvMap.put("MV_TRACK_IDX_WS", 100);
