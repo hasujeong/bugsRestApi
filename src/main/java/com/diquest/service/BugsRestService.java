@@ -2014,6 +2014,16 @@ public class BugsRestService {
 				idxScoreMap.put("SYN_ALBUM_IDX", 30);
 				idxScoreMap.put("SYN_ALBUM_IDX_KO", 30);
 				idxScoreMap.put("SYN_ALBUM_IDX_WS", 30);
+			} else if(name.equalsIgnoreCase("track_idx")) {
+				idxScoreMap.put("TRACK_IDX", 100);
+				idxScoreMap.put("TRACK_IDX_WS", 100);
+				idxScoreMap.put("SYN_TRACK_IDX", 30);
+				idxScoreMap.put("SYN_TRACK_IDX_KO", 30);
+				idxScoreMap.put("SYN_TRACK_IDX_WS", 30);
+			} else {
+				idxScoreMap.put("TRACK_ARTIST_ALBUM_IDX", 100);
+				idxScoreMap.put("TRACK_ARTIST_ALBUM_IDX_WS", 100);
+				idxScoreMap.put("SYN_TRACK_ARTIST_ALBUM_IDX", 30);
 			}
 		} else if(collection.equalsIgnoreCase(Collections.MV)) {
 			idxScoreMap.put("MV_TRACK_IDX", 100);

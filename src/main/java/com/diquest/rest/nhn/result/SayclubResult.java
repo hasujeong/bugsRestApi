@@ -15,7 +15,7 @@ import com.diquest.ir.common.msg.protocol.query.Query;
 import com.diquest.ir.common.msg.protocol.query.SelectSet;
 import com.diquest.ir.common.msg.protocol.result.Result;
 import com.diquest.rest.nhn.common.Connection;
-import com.diquest.rest.nhn.service.select.SelectSetService;
+import com.diquest.rest.nhn.service.select.SayclubSelectSet;
 import com.diquest.rest.nhn.service.trigger.TriggerFieldService;
 
 public class SayclubResult {
@@ -204,32 +204,32 @@ public class SayclubResult {
 		}
 
 		private String getId(Result result, int resultIdx) {
-			return SelectSetService.getInstance().getId(result, resultIdx);
+			return SayclubSelectSet.getInstance().getId(result, resultIdx);
 		}
 
 		private int getRelevance(Result result, int resultIdx) {
-			return SelectSetService.getInstance().getRelevance(result, resultIdx);
+			return SayclubSelectSet.getInstance().getRelevance(result, resultIdx);
 		}
 
 		private String getDocId(Result result, int resultIdx) {
-			return SelectSetService.getInstance().getDocId(result, resultIdx);
+			return SayclubSelectSet.getInstance().getDocId(result, resultIdx);
 		}
 
 		private int getRank(Result result, int resultIdx) {
-			return SelectSetService.getInstance().getRank(result, resultIdx);
+			return SayclubSelectSet.getInstance().getRank(result, resultIdx);
 		}
 
 		private TreeMap<String, Object> makeSource(Result result, SelectSet[] selectSet, Map<String, String> params, int resultIdx) {
 			TreeMap<String, Object> source = new TreeMap<String, Object>();
-			source.put("_" + SelectSetService.ID, SelectSetService.getInstance().getId(result, resultIdx));
-			int start = SelectSetService.getInstance().getFixFieldSize();
+			source.put("_" + SayclubSelectSet.ID, SayclubSelectSet.getInstance().getId(result, resultIdx));
+			int start = SayclubSelectSet.getInstance().getFixFieldSize();
 			for (int j = start; j < selectSet.length; j++) {
 				String key = new String(selectSet[j].getField());
 				String value = new String(result.getResult(resultIdx, j));
-				if (TriggerFieldService.getInstance().isTriggerField(params, key) || key.equals("_" + SelectSetService.ID)) {
+				if (TriggerFieldService.getInstance().isTriggerField(params, key) || key.equals("_" + SayclubSelectSet.ID)) {
 					continue;
 				}
-				Entry<String, Object> keyVal = SelectSetService.getInstance().getSourceData(key, value);
+				Entry<String, Object> keyVal = SayclubSelectSet.getInstance().getSourceData(key, value);
 				source.put(keyVal.getKey(), keyVal.getValue());
 			}
 			return source;
@@ -237,7 +237,7 @@ public class SayclubResult {
 
 		private LinkedHashMap<String, String> makeProperty(Result result, SelectSet[] selectSet, Map<String, String> params, int resultIdx) {
 			LinkedHashMap<String, String> property = new LinkedHashMap<String, String>();
-			int start = SelectSetService.getInstance().getFixFieldSize();
+			int start = SayclubSelectSet.getInstance().getFixFieldSize();
 			for (int j = start; j < selectSet.length; j++) {
 				if (TriggerFieldService.getInstance().isTriggerField(params, new String(selectSet[j].getField()))) {
 					String key = new String(selectSet[j].getField());
