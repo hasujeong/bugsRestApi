@@ -409,7 +409,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://10.160.235.180:9090/7S4pV1yEaFoWJsj/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&q_option=and,exact_artist_idx&size=" + colSize + colSort + "##";
+				urlStr += "http://api-alar-kr-tcc.qpit.ai/7S4pV1yEaFoWJsj/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&q_option=and,exact_artist_idx&size=" + colSize + colSort + "##";
 				colSort = "";
 			}
 			if(colArray[i].equalsIgnoreCase(Collections.TRACK)) {
@@ -421,7 +421,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://10.160.235.191:9090/lZjTO0HlFg91HwD/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+				urlStr += "http://api-track-kr-tcc.qpit.ai/lZjTO0HlFg91HwD/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.ALBUM)) {
@@ -433,7 +433,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://10.160.235.180:9090/vbmKja0BuYy35Ok/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";	
+				urlStr += "http://api-alar-kr-tcc.qpit.ai/vbmKja0BuYy35Ok/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";	
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.ARTIST)) {
@@ -445,7 +445,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://10.160.235.180:9090/7S4pV1yEaFoWJsj/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";	
+				urlStr += "http://api-alar-kr-tcc.qpit.ai/7S4pV1yEaFoWJsj/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";	
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.MV)) {
@@ -457,7 +457,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://10.160.235.219:9090/58IHeEjp2lyoR4M/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+				urlStr += "http://api-etc-kr-tcc.qpit.ai/58IHeEjp2lyoR4M/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.MUSICCAST)) {
@@ -469,7 +469,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://10.160.235.219:9090/7ZEz9GaqpMRc5DH/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+				urlStr += "http://api-etc-kr-tcc.qpit.ai/7ZEz9GaqpMRc5DH/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.MUSICPD)) {
@@ -481,7 +481,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://10.160.235.219:9090/6Jfys7XEvdQ0KuU/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+				urlStr += "http://api-etc-kr-tcc.qpit.ai/6Jfys7XEvdQ0KuU/v1/search/advanced.search?filter.search_exclude_yn=N&q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.MUSICPOST)) {
@@ -493,7 +493,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://10.160.235.219:9090/SVmCkyjdYM9n3go/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+				urlStr += "http://api-etc-kr-tcc.qpit.ai/SVmCkyjdYM9n3go/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.CLASSIC)) {
@@ -505,7 +505,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://10.160.235.219:9090/0WleItZOyGJbrVF/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+				urlStr += "http://api-etc-kr-tcc.qpit.ai/0WleItZOyGJbrVF/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			} 
 			if(colArray[i].equalsIgnoreCase(Collections.LYRICS)) {
@@ -517,7 +517,7 @@ public class BugsRestService {
 					colSort = "&sort=" + colSort;
 				}
 				
-				urlStr += "http://10.160.235.180:9090/M2NjMWRjOWMwOGN/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+				urlStr += "http://api-alar-kr-tcc.qpit.ai/M2NjMWRjOWMwOGN/v1/search/advanced.search?q="+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			}
 		}
@@ -1077,7 +1077,7 @@ public class BugsRestService {
 		List<Map<String, String>> index = (List<Map<String, String>>) params.get("index");
 //		Map<String, Object> document = (Map<String, Object>) params.get("document");
 		
-		String collection = "";
+		String collection = Collections.TRACK;
 		String q = "";
 		String puchaseId = "";
 		int start = (int) document.get("start");
@@ -1086,13 +1086,99 @@ public class BugsRestService {
 		Map<String, String> idx1 = index.get(0);
 		
 		for(int i=0 ; i < index.size() ; i++) {
-			if(index.get(i).get("name").equalsIgnoreCase("mv_track_artist_album_idx")) {
-				collection = Collections.MV;
-				q = index.get(i).get("query");
-			} else if(index.get(i).get("name").equalsIgnoreCase("key_idx")) {
+			if(index.get(i).get("name").equalsIgnoreCase("key_idx")) {
 				puchaseId = index.get(i).get("query");
 			} else {
-				collection = Collections.TRACK;
+				q = index.get(i).get("query");
+			}
+		}
+		
+		List<String> returns = (List<String>) document.get("returns");
+
+		logMessageService.requestReceived(reqHeader, request);
+		
+		String ret = "";
+		
+		Gson gson = new Gson();
+		
+		QueryParser parser = new QueryParser();
+		
+		QuerySet querySet = new QuerySet(1);
+		Query query = new Query();
+		
+		try {
+			query = new Query();
+			query.setSelect(parsePurchaseSelect(returns));
+			query.setWhere(purchaseWhere(idx1, puchaseId, collection));
+			query.setOrderby(purchaseOrderBy(collection));
+			query.setFrom(collection);
+			query.setResult(start-1, (start+size) - 2);
+			query.setSearchKeyword(q);
+			query.setFaultless(true);
+			query.setThesaurusOption((byte) (Protocol.ThesaurusOption.EQUIV_SYNONYM | Protocol.ThesaurusOption.QUASI_SYNONYM));
+			query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
+			query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
+			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
+			query.setLoggable(false);
+			query.setPrintQuery(true);						// 실제 사용시 false
+			query.setResultModifier("typo");
+			
+			querySet.addQuery(query);
+		
+			String queryStr = parser.queryToString(query);
+//				System.out.println(" :::::::::: query ::::::: " + queryStr);
+			
+								
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 5000, 50, 50);
+			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
+					
+			int returnCode = commandSearchRequest.request(querySet);
+			
+			if (returnCode <= -100) {
+				logMessageService.receiveEnd(reqHeader, request);
+				return commandSearchRequestErrorResponse(commandSearchRequest.getException().getErrorMessage());
+			} else {
+				logMessageService.messageReceived(reqHeader, request);
+			}
+						
+			String resultJson = "";
+			
+			resultJson = gson.toJson(makePurchaseResult(commandSearchRequest.getResultSet().getResult(0), query));
+			
+			ret = resultJson;
+			
+			logMessageService.receiveEnd(reqHeader, request);
+			
+		} catch (InvalidParameterException e) {
+			logMessageService.receiveEnd(reqHeader, request);
+			return invalidParameterResponse(e);
+		} catch (Exception e) {
+			logMessageService.receiveEnd(reqHeader, request);
+			return internalServerResponse(e);
+		}
+		
+		return ret;
+		
+	}
+	
+	// 구매한 영상 검색 API 
+	public String purchasedMvSearch(Map<String, Object> params, Map<String, Object> document, Map<String, Object> reqHeader, HttpServletRequest request) {
+		
+		List<Map<String, String>> index = (List<Map<String, String>>) params.get("index");
+//		Map<String, Object> document = (Map<String, Object>) params.get("document");
+		
+		String collection = Collections.MV;
+		String q = "";
+		String puchaseId = "";
+		int start = (int) document.get("start");
+		int size = (int) document.get("size");
+		
+		Map<String, String> idx1 = index.get(0);
+		
+		for(int i=0 ; i < index.size() ; i++) {
+			if(index.get(i).get("name").equalsIgnoreCase("key_idx")) {
+				puchaseId = index.get(i).get("query");
+			} else {
 				q = index.get(i).get("query");
 			}
 		}
@@ -2026,12 +2112,17 @@ public class BugsRestService {
 				idxScoreMap.put("SYN_TRACK_ARTIST_ALBUM_IDX", 30);
 			}
 		} else if(collection.equalsIgnoreCase(Collections.MV)) {
-			idxScoreMap.put("MV_TRACK_IDX", 100);
-			idxScoreMap.put("MV_TRACK_IDX_WS", 100);
-			idxScoreMap.put("ARTIST_IDX", 300);
-			idxScoreMap.put("MV_TRACK_ARTIST_ALBUM_IDX", 30);
-			idxScoreMap.put("SYN_MV_TRACK_ARTIST_ALBUM_IDX", 30);
-			idxScoreMap.put("MV_TRACK_ARTIST_ALBUM_IDX_WS", 30);
+			if(name.equalsIgnoreCase("mv_idx")) {
+				idxScoreMap.put("MV_IDX", 100);
+				idxScoreMap.put("MV_IDX_WS", 100);
+			} else if(name.equalsIgnoreCase("artist_idx")) {
+				idxScoreMap.put("ARTIST_IDX", 100);
+				idxScoreMap.put("ARTIST_IDX_WS", 100);
+			} else {
+				idxScoreMap.put("MV_TRACK_ARTIST_ALBUM_IDX", 100);
+				idxScoreMap.put("MV_TRACK_ARTIST_ALBUM_IDX_WS", 100);
+				idxScoreMap.put("SYN_MV_TRACK_ARTIST_ALBUM_IDX", 30);
+			}
 		} 
 				
 		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));

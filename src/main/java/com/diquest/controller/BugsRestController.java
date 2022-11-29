@@ -119,7 +119,7 @@ public class BugsRestController {
 				return unknownRequest(header, time);
 			}
 		} else if (appKey.equals(APP_KEY_MV)) {
-			return bugsRestService.purchasedSearch(params, document, requestHeader, request);
+			return bugsRestService.purchasedMvSearch(params, document, requestHeader, request);
 		} else if (appKey.equals(APP_KEY_ENTITY)) {
 			return bugsRestService.EntitySearch(req, requestHeader, request);
 		} else {
