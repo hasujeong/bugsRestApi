@@ -96,12 +96,6 @@ public class AutoResult {
 		
 		public Item(Result result, SelectSet[] selectSet, Map<String, String> params, int resultIdx, String tag) {
 			if(!tag.equalsIgnoreCase("")) {
-				this.value = getValue(result, resultIdx);
-				this.type = "TAG";
-				this.ranking = getRanking(result, resultIdx);
-				this.tag_id = getTagId(result, resultIdx);
-				this.tag_type = getType(result, resultIdx);
-			} else {
 				this.value = getValuetag(result, resultIdx);
 				this.type = "TAG";
 				this.weight = getRelevance(result, resultIdx);
@@ -110,6 +104,12 @@ public class AutoResult {
 				this.albumreview_cnt = getAlbumreview(result, resultIdx);
 				this.special_cnt = getSpecial(result, resultIdx);
 				this.musiccast_cnt = getMusiccast(result, resultIdx);
+			} else {
+				this.value = getValue(result, resultIdx);
+				this.type = "TAG";
+				this.ranking = getRanking(result, resultIdx);
+				this.tag_id = getTagId(result, resultIdx);
+				this.tag_type = getType(result, resultIdx);
 			}
 		}
 		

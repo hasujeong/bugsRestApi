@@ -41,11 +41,19 @@ public class AutoTotalResult {
 	private List<Map<String, Object>> makeTotalItems(QuerySet q, ResultSet result, Map<String, String> map) throws IRException {
 		List<Map<String, Object>> items = new ArrayList<Map<String, Object>>();
 		
+		List<Item> metas = new ArrayList<Item>();
+		String Values = "";
+		
 		for (int i = 0; i < result.getResult(1).getRealSize() ; i++) {
 			Map<String, Object> temp = new HashMap<>();
-			temp.put("meta", new Item(q.getQuery(1), result.getResult(1), map, i));
-			temp.put("value", new Item(q.getQuery(1), result.getResult(1), map, i).value);
-			
+			metas.add(new Item(q.getQuery(1), result.getResult(1), map, i));
+			Values = new Item(q.getQuery(1), result.getResult(1), map, i).value;
+						
+//			temp.put("meta", new Item(q.getQuery(1), result.getResult(1), map, i));
+			temp.put("meta", metas);
+			temp.put("value", Values);
+//			temp.put("value", new Item(q.getQuery(1), result.getResult(1), map, i).value);
+			metas = new ArrayList<Item>();
 			items.add(temp);
 		}
 		
@@ -87,26 +95,24 @@ public class AutoTotalResult {
 		public Item(Query q, Result result, Map<String, String> map, int resultIdx) {
 			String tp = getTypetotal(result, resultIdx);
 
+			this.value = getValuetotal(result, resultIdx);
 			if(tp.equalsIgnoreCase("TR")) {
 				this.type = getTypetotal(result, resultIdx);
 				this.ranking = getRankingtotal(result, resultIdx);
 				this.track_id = getTrack(result, resultIdx);
 				this.album_id = getAlbum(result, resultIdx);
 				this.artist_id = getArtisttotal(result, resultIdx);
-				this.value = getValuetotal(result, resultIdx);
 			} else if(tp.equalsIgnoreCase("AL")) {
 				this.type = getTypetotal(result, resultIdx);
 				this.ranking = getRankingtotal(result, resultIdx);
 				this.album_id = getAlbum(result, resultIdx);
 				this.artist_id = getArtisttotal(result, resultIdx);
-				this.value = getValuetotal(result, resultIdx);
 			} else if(tp.equalsIgnoreCase("TR_AR")) {
 				this.type = getTypetotal(result, resultIdx);
 				this.ranking = getRankingtotal(result, resultIdx);
 				this.track_id = getTrack(result, resultIdx);
 				this.album_id = getAlbum(result, resultIdx);
 				this.artist_id = getArtisttotal(result, resultIdx);
-				this.value = getValuetotal(result, resultIdx);
 			} else if(tp.equalsIgnoreCase("AR")) {
 				this.type = getTypetotal(result, resultIdx);
 				this.ranking = getRankingtotal(result, resultIdx);
@@ -115,13 +121,11 @@ public class AutoTotalResult {
 				this.genre_cd = getGenretotal(result, resultIdx);
 				this.grp_cd = getGrpcdtotal(result, resultIdx);
 				this.sex_cd = getSexcdtotal(result, resultIdx);
-				this.value = getValuetotal(result, resultIdx);
 			} else {
 				this.type = getTypetotal(result, resultIdx);
 				this.ranking = getRankingtotal(result, resultIdx);
 				this.album_id = getAlbum(result, resultIdx);
 				this.artist_id = getArtisttotal(result, resultIdx);
-				this.value = getValuetotal(result, resultIdx);
 			} 
 		}
 		

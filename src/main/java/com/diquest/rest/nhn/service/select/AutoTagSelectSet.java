@@ -74,7 +74,7 @@ public class AutoTagSelectSet {
 		String filter = RestUtils.getParam(params, "filter.use_esalbum_yn");
 		List<SelectSet> sets = new ArrayList<SelectSet>();
 		
-		if(!filter.equalsIgnoreCase("")) {
+		if(filter.equalsIgnoreCase("")) {
 			for (Entry<String, Integer> entry : fixedFieldMap.entrySet()) {
 				sets.add(new SelectSet(entry.getKey()));
 			}
