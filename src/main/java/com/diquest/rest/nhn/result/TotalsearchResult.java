@@ -20,7 +20,7 @@ import com.google.gson.JsonParser;
 
 public class TotalsearchResult {
 	private static String currTimezone = new SimpleDateFormat("XXX").format(new Date()).replace(":", "");
-	private static RestCommandExtractor restCommandExtractor = new RestCommandExtractor(Connection.IP, Connection.PORT);
+//	private static RestCommandExtractor restCommandExtractor = new RestCommandExtractor(Connection.IP, Connection.PORT);
 	Header header;
 	resultData result;
 
@@ -158,13 +158,14 @@ public class TotalsearchResult {
 
 		private List<String> makeTerms(String searchKeyword) throws IRException {
 			List<String> terms = new ArrayList<String>();
-			String[][] result = restCommandExtractor.request("KOREAN", "", searchKeyword);
-			for (String[] innerRst : result) {
-				if (innerRst != null) {
-					terms.addAll(Arrays.asList(innerRst));
-				}
-			}
-
+//			String[][] result = restCommandExtractor.request("KOREAN", "", searchKeyword);
+//			for (String[] innerRst : result) {
+//				if (innerRst != null) {
+//					terms.addAll(Arrays.asList(innerRst));
+//				}
+//			}
+			terms.add(searchKeyword);
+			
 			return terms;
 		}
 

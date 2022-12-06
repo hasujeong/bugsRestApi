@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.diquest.ir.rest.json.gson.GsonLoader;
 import com.diquest.ir.rest.json.object.JsonUnknownUriResult;
-import com.diquest.rest.nhn.common.Collections;
+import com.diquest.rest.nhn.common.SayclubCollections;
 import com.diquest.rest.nhn.domain.Param;
 import com.diquest.ir.rest.common.constant.HttpStatus;
 import com.diquest.service.SayclubRestService;
@@ -39,7 +39,7 @@ public class SayclubRestController {
 		long time = System.currentTimeMillis();
 		
 		if (appKey.equals(APP_KEY_SAYCAST)) {
-			params.put("collection",Collections.ALBUM);
+			params.put("collection",SayclubCollections.SAYCAST);
 			return sayclubRestService.saySearch(params, requestHeader, request);
 		} else {
 			return unknownRequest(params, time);
