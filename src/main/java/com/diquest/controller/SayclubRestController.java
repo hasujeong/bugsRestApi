@@ -25,13 +25,17 @@ public class SayclubRestController {
 	
 	private SayclubRestService sayclubRestService;
 	
-	public static String APP_KEY_SAYCAST = "saycast";
+	public static String APP_KEY_SAYCAST = "saycast_alpha";
+	public static String APP_KEY_SAYCAST_ART = "saycast_article_alpha";
+	public static String APP_KEY_SAYMALL = "saymall_alpha";
+	public static String APP_KEY_ALLUSER = "alluser_alpha";
+	public static String APP_KEY_CHATUSER = "chatuser_alpha";
 
 	public SayclubRestController(SayclubRestService sayclubRestService) {
 		this.sayclubRestService = sayclubRestService;
 	}
 	
-	@GetMapping("/{appKey}/search")
+	@GetMapping("/search/v1.0/appkeys/VDHj9vamzjTEtPgT/serviceids/{appKey}/search")
 	public String colSearch(@PathVariable("appKey") String appKey, @RequestParam Map<String, String> params, @RequestHeader Map<String, Object> requestHeader, HttpServletRequest request) {
 		
 		params.put("requestHeader.sid", (requestHeader.get("sid")==null?"":requestHeader.get("sid").toString()));
@@ -41,7 +45,19 @@ public class SayclubRestController {
 		if (appKey.equals(APP_KEY_SAYCAST)) {
 			params.put("collection",SayclubCollections.SAYCAST);
 			return sayclubRestService.saySearch(params, requestHeader, request);
-		} else {
+		} else if (appKey.equals(APP_KEY_SAYCAST_ART)) {
+			params.put("collection",SayclubCollections.SAYCAST_ART);
+			return sayclubRestService.saySearch(params, requestHeader, request);
+		} else if (appKey.equals(APP_KEY_SAYMALL)) {
+			params.put("collection",SayclubCollections.SAYMALL);
+			return sayclubRestService.saySearch(params, requestHeader, request);
+		} else if (appKey.equals(APP_KEY_ALLUSER)) {
+			params.put("collection",SayclubCollections.ALLUSER);
+			return sayclubRestService.saySearch(params, requestHeader, request);
+		} else if (appKey.equals(APP_KEY_CHATUSER)) {
+			params.put("collection",SayclubCollections.CHATUSER);
+			return sayclubRestService.saySearch(params, requestHeader, request);
+		}else {
 			return unknownRequest(params, time);
 		}
 		

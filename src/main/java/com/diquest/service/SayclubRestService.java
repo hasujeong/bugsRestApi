@@ -34,19 +34,18 @@ import com.diquest.ir.rest.util.RestUtils;
 import com.diquest.mapper.AdminMapper;
 import com.diquest.rest.nhn.common.SayclubCollections;
 import com.diquest.rest.nhn.common.Connection;
-import com.diquest.rest.nhn.filter.parse.FilterValueParser;
+import com.diquest.rest.nhn.filter.parse.SayclubFilterValue;
 import com.diquest.rest.nhn.filter.result.FilterFieldParseResult;
 import com.diquest.rest.nhn.result.NhnError;
 import com.diquest.rest.nhn.result.NhnResult;
 import com.diquest.rest.nhn.result.SayclubResult;
 import com.diquest.rest.nhn.service.error.ErrorMessageService;
 import com.diquest.rest.nhn.service.error.logMessageService;
-import com.diquest.rest.nhn.service.filter.FilterSetService;
-import com.diquest.rest.nhn.service.option.searchQoption;
-import com.diquest.rest.nhn.service.orderby.OrderBySetService;
-import com.diquest.rest.nhn.service.select.SelectSetService;
+import com.diquest.rest.nhn.service.filter.SayclubFilterSetService;
+import com.diquest.rest.nhn.service.orderby.SayclubOrderBySet;
+import com.diquest.rest.nhn.service.select.SayclubSelectSet;
 import com.diquest.rest.nhn.service.trigger.TriggerFieldService;
-import com.diquest.rest.nhn.service.where.WhereSetService;
+import com.diquest.rest.nhn.service.where.SayclubWhereSet;
 import com.google.gson.Gson;
 
 @Service
@@ -98,6 +97,7 @@ public class SayclubRestService {
 		
 		logMessageService.requestReceived(reqHeader, request);
 		
+		String collection = getCollection(params);
 		String ret = "";
 		String OriginKwd = parseQ(params);
 		
@@ -108,15 +108,33 @@ public class SayclubRestService {
 		QuerySet querySet = new QuerySet(1);
 		Query query = new Query();
 		
+		String paramStr = request.getQueryString();
+		String paramFilter = "";
+		
+		if(paramStr.indexOf("&filter=") > -1) {
+			if(paramStr.indexOf("%27") > -1) {
+				int filterStart = paramStr.indexOf("%27");
+				int filterStop = paramStr.indexOf("%27", filterStart+1);
+				
+				paramFilter = paramStr.substring(filterStart+3, filterStop);
+				System.out.println("@@@@@@@@@@@@@@" + paramFilter);
+			} else {
+				int filterStart = paramStr.indexOf("&filter=");
+				int filterStop = paramStr.indexOf("&", filterStart+1);
+				
+				paramFilter = paramStr.substring(filterStart+8, filterStop);
+				System.out.println("@@@@@@@@@@@@@@" + paramFilter);
+			}
+		} 
+			
 		try {
 			
 			FilterFieldParseResult filterFieldParseResult = parseFilterParams(params);
 			query.setSelect(parseSelect(params));
-			query.setFilter(parseFilter(params, filterFieldParseResult, getCollection(params)));
-			query.setWhere(parseWhere(params, filterFieldParseResult, getCollection(params)));
-//			query.setGroupBy(parseGroupBy(params));
-			query.setOrderby(parseOrderBy(params, getCollection(params)));
-			query.setFrom(getCollection(params));
+//			query.setFilter(parseFilter(paramFilter, filterFieldParseResult, collection));
+			query.setWhere(parseWhere(params, filterFieldParseResult, collection, paramFilter));
+			query.setOrderby(parseOrderBy(params, collection));
+			query.setFrom(collection);
 			query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
 			query.setSearchKeyword(parseQ(params));
 			query.setFaultless(true);
@@ -129,7 +147,7 @@ public class SayclubRestService {
 			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 			query.setLogKeyword(parseQ(params).toCharArray());
 			query.setPrintQuery(true);						// 실제 사용시 false
-			parseTrigger(params, query, getCollection(params));
+			parseTrigger(params, query, collection);
 			query.setResultModifier("typo");
 			query.setValue("typo-parameters", OriginKwd);
 	    	query.setValue("typo-options", "ALPHABETS_TO_HANGUL|HANGUL_TO_HANGUL");
@@ -174,11 +192,11 @@ public class SayclubRestService {
 						    						
 						filterFieldParseResult = parseFilterParams(params);
 						query.setSelect(parseSelect(params));
-						query.setFilter(parseFilter(params, filterFieldParseResult, getCollection(params)));
-						query.setWhere(parseWhere(params, filterFieldParseResult, getCollection(params)));
+//						query.setFilter(parseFilter(paramFilter, filterFieldParseResult, collection));
+						query.setWhere(parseWhere(params, filterFieldParseResult, collection, paramFilter));
 //						query.setGroupBy(parseGroupBy(params));
 						query.setOrderby(parseOrderBy(params, getCollection(params)));
-						query.setFrom(getCollection(params));
+						query.setFrom(collection);
 						query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
 						query.setSearchKeyword(parseQ(params));
 						query.setFaultless(true);
@@ -191,12 +209,12 @@ public class SayclubRestService {
 						query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 						query.setLogKeyword(parseQ(params).toCharArray());
 						query.setPrintQuery(true);						// 실제 사용시 false
-						parseTrigger(params, query, getCollection(params));
+						parseTrigger(params, query, collection);
 						
 						querySet.addQuery(query);
 					
 						queryStr = parser.queryToString(query);
-//						System.out.println(" :::::::::: query22 ::::::: " + queryStr);
+//						System.out.println(" :::::::::: query ::::::: " + queryStr);
     					
     					commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
     							
@@ -217,7 +235,7 @@ public class SayclubRestService {
 //			System.out.println(returnCode);
 //			System.out.println(commandSearchRequest.getResultSet().getResult(0).getTotalSize());
 			
-			String resultJson = gson.toJson(makeResult(commandSearchRequest.getResultSet().getResult(0), query, params));
+			String resultJson = gson.toJson(makeResult(commandSearchRequest.getResultSet().getResult(0), query, params, collection));
 
 			ret = resultJson;
 			
@@ -257,170 +275,167 @@ public class SayclubRestService {
 	}
 	
 	private FilterFieldParseResult parseFilterParams(Map<String, String> params) {
-		return new FilterValueParser(params).parseAll();
+		return new SayclubFilterValue(params).parseAll();
 	}
 	
-	protected WhereSet[] parseWhere(Map<String, String> params, FilterFieldParseResult filterFieldParseResult, String collection) throws InvalidParameterException {
-		return WhereSetService.getInstance().makeWhereSet(params, filterFieldParseResult, makeBaseWhereSet(params, collection));
+	protected WhereSet[] parseWhere(Map<String, String> params, FilterFieldParseResult filterFieldParseResult, String collection, String paramFilter) throws InvalidParameterException {
+		return SayclubWhereSet.getInstance().makeWhereSet(params, filterFieldParseResult, makeBaseWhereSet(params, collection, paramFilter));
 	}
 	
-	protected List<WhereSet> makeBaseWhereSet(Map<String, String> params, String collection) throws InvalidParameterException {
+	protected List<WhereSet> makeBaseWhereSet(Map<String, String> params, String collection, String paramFilter) throws InvalidParameterException {
 		List<WhereSet> result = new ArrayList<WhereSet>();
 		String keyword = parseQ(params);
 		String trimKeyword = keyword.replaceAll("\\s", "");
+	
+		byte searchOption;
+		String qOption = parseQoption(params);
 		
-//		String collection = getCollection(params);
-		searchQoption qOption = new searchQoption(RestUtils.getParam(params, "q_option"), collection);
+		String[] OptValues = {};
+ 		String Opt = "";
+		Map<String, Double> fieldOpt = new HashMap<String, Double>();
 		
-		String idxField = qOption.getIndexField();
-				
-		HashMap<String, Integer> trackMap = new HashMap<String, Integer>();
-		HashMap<String, Integer> lyricsMap = new HashMap<String, Integer>();
-		HashMap<String, Integer> albumMap = new HashMap<String, Integer>();
-		HashMap<String, Integer> artistMap = new HashMap<String, Integer>();
-		HashMap<String, Integer> mvMap = new HashMap<String, Integer>();
-		HashMap<String, Integer> musicpdMap = new HashMap<String, Integer>();
-		HashMap<String, Integer> musicpostMap = new HashMap<String, Integer>();
-		HashMap<String, Integer> musiccastMap = new HashMap<String, Integer>();
-		HashMap<String, Integer> classicMap = new HashMap<String, Integer>();
-		HashMap<String, Integer> entityMap = new HashMap<String, Integer>();
-		
-		if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST)) {
-			if(idxField.equalsIgnoreCase("track_idx")) {
-				if(qOption.isNofM()) {
-					result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, 100, qOption.getNofmPercent()));
-				} else {
-					result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, 100));
-				}
-				trackMap.put("TRACK_IDX", 100);
-				trackMap.put("TRACK_IDX_WS", 100);
-				trackMap.put("SYN_TRACK_IDX_KO", 30);
-				trackMap.put("SYN_TRACK_IDX_WS", 30);
-				trackMap.put("SYN_TRACK_IDX", 30);
-			} else if(idxField.equalsIgnoreCase("artist_idx")) {
-				trackMap.put("ARTIST_IDX", 100);
-				trackMap.put("ARTIST_IDX_WS", 100);
-				trackMap.put("SYN_ARTIST_IDX_WS", 30);
-				trackMap.put("SYN_ARTIST_IDX", 30);
-			} else if(idxField.equalsIgnoreCase("album_idx")) {
-				trackMap.put("ALBUM_IDX", 100);
-				trackMap.put("ALBUM_IDX_WS", 100);
-				trackMap.put("SYN_ALBUM_IDX", 30);
-				trackMap.put("SYN_ALBUM_IDX_KO", 30);
-				trackMap.put("SYN_ALBUM_IDX_WS", 30);
-			} else {
-				if(!artist_keyword.equalsIgnoreCase("")) {
-					if(qOption.isNofM()) {
-						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-						result.add(new WhereSet("TRACK_IDX", qOption.getOption(), keyword, track_score, qOption.getNofmPercent()));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), keyword, track_score, qOption.getNofmPercent()));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, track_score, qOption.getNofmPercent()));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score, qOption.getNofmPercent()));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), keyword, artist_score, qOption.getNofmPercent()));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("ALBUM_IDX", qOption.getOption(), keyword, album_score, qOption.getNofmPercent()));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("ALBUM_IDX_WS", qOption.getOption(), keyword, album_score, qOption.getNofmPercent()));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("SYN_TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
-						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-						
-						result.add(new WhereSet(Protocol.WhereSet.OP_WEIGHTAND));
-						
-						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-						result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_WEIGHTAND, artist_keyword, 500, qOption.getNofmPercent()));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), artist_keyword, 500, qOption.getNofmPercent()));
-						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+		if(!qOption.equalsIgnoreCase("")) {
+			OptValues = qOption.split(",");
+			for(int i=0 ; i < OptValues.length ; i++) {
+				if(OptValues[i].equalsIgnoreCase("and") || OptValues[i].equalsIgnoreCase("or") || OptValues[i].equalsIgnoreCase("boolean")) {
+					Opt = OptValues[i];
+				} else { 					
+					if(!OptValues[i].split("\\*").equals("")) {
+						fieldOpt.put(OptValues[i].split("\\*")[0], Double.parseDouble(OptValues[i].split("\\*")[1]));
 					} else {
-						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-						result.add(new WhereSet("TRACK_IDX", qOption.getOption(), keyword, track_score));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), keyword, track_score));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, track_score));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), keyword, artist_score));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("ALBUM_IDX", qOption.getOption(), keyword, album_score));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("ALBUM_IDX_WS", qOption.getOption(), keyword, album_score));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), keyword, 30));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("SYN_TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30));
-						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-						
-						result.add(new WhereSet(Protocol.WhereSet.OP_WEIGHTAND));
-						
-						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-						result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), artist_keyword, 500));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), artist_keyword, 500));
-						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-					}
-					artist_keyword = "";
-					
-				} else {
-					if(track_score != 0) {
-						if(qOption.isNofM()) {
-							result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, 100, qOption.getNofmPercent()));
-						} else {
-							result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, 100));
-						}
-						trackMap.put("TRACK_IDX", track_score);
-						trackMap.put("TRACK_IDX_WS", track_score);
-						trackMap.put("ARTIST_IDX", artist_score);
-						trackMap.put("ARTIST_IDX_WS", artist_score);
-						trackMap.put("ALBUM_IDX", album_score);
-						trackMap.put("ALBUM_IDX_WS", album_score);
-					}
-					trackMap.put("TRACK_ARTIST_ALBUM_IDX", 30);
-					trackMap.put("TRACK_ARTIST_ALBUM_IDX_WS", 30);
-					trackMap.put("SYN_TRACK_ARTIST_ALBUM_IDX", 30);
-				}
-			}
-			
-			for (Entry<String, Integer> e : trackMap.entrySet()) {
-				if (result.size() > 0) {
-					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-				}
-				if (qOption.isNofM()) {
-					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
-				} else {
-					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+						fieldOpt.put(OptValues[i], 0.0);
+					}				
 				}
 			}
 		}
-
-//		for (Entry<String, Integer> e : idxScoreMap.entrySet()) {
-//			if (result.size() > 0) {
-//				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-//			}
-//			if (qOption.isNofM()) {
-//				result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
-//			} else {
-//				result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
-//			}
-//		}
 		
+		if (Opt.equalsIgnoreCase("and")) {
+			 searchOption = Protocol.WhereSet.OP_HASALL;
+        } else if (Opt.equalsIgnoreCase("or")) {
+        	searchOption = Protocol.WhereSet.OP_HASANY;
+        } else {
+        	searchOption = Protocol.WhereSet.OP_HASALL;
+        }
+			
+		HashMap<String, Integer> sayCastMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> sayArticleMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> sayMallMap = new HashMap<String, Integer>();
+		
+		if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST)) {
+
+			for (Entry<String, Double> field : fieldOpt.entrySet()) {
+				String fieldNm = field.getKey();
+				int weight = 0;
+				weight = (int) (field.getValue() * 100);
+				
+				sayCastMap.put(fieldNm, weight);
+				sayCastMap.put(fieldNm + "_WS", weight);
+			}
+			
+			for (Entry<String, Integer> e : sayCastMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				result.add(new WhereSet(e.getKey(), searchOption, keyword, e.getValue()));
+			}
+			
+		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_ART)) {
+			for (Entry<String, Double> field : fieldOpt.entrySet()) {
+				String fieldNm = field.getKey();
+				int weight = 0;
+				weight = (int) (field.getValue() * 100);
+				
+				sayArticleMap.put(fieldNm, weight);
+				sayArticleMap.put(fieldNm + "_WS", weight);
+			}
+			
+			for (Entry<String, Integer> e : sayArticleMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				result.add(new WhereSet(e.getKey(), searchOption, keyword, e.getValue()));
+			}
+		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYMALL)) {
+			for (Entry<String, Double> field : fieldOpt.entrySet()) {
+				String fieldNm = field.getKey();
+				int weight = 0;
+				weight = (int) (field.getValue() * 100);
+				
+				sayMallMap.put(fieldNm, weight);
+				sayMallMap.put(fieldNm + "_WS", weight);
+			}
+						
+			for (Entry<String, Integer> e : sayMallMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				result.add(new WhereSet(e.getKey(), searchOption, keyword, e.getValue()));
+			}
+		} else if(collection.equalsIgnoreCase(SayclubCollections.ALLUSER)) {
+			result.add(new WhereSet("ALL", searchOption, "A"));
+			
+		} else if(collection.equalsIgnoreCase(SayclubCollections.CHATUSER)) {
+			result.add(new WhereSet("ALL", searchOption, "A"));
+		}
+		
+		String[] fts;
+        
+        if(!paramFilter.equalsIgnoreCase("")) {
+        	result.add(new WhereSet(Protocol.WhereSet.OP_AND));
+        	        	
+        	if(paramFilter.indexOf("|") > -1) {
+        		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+        		
+        		fts = paramFilter.split("\\|");
+        		        		
+        		for(int i=0 ; i < fts.length ; i++) {
+        			String key = fts[i].split("=")[0].toUpperCase();
+        			String value = fts[i].split("=")[1];
+        			
+        			if(i > 0) {
+        				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+        			}
+        			result.add(new WhereSet(key, searchOption, value));
+        			
+        			System.out.println("======1=========> " + key + " <==========> " + value);
+        		}
+        		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+        		
+        	} else if(paramFilter.indexOf("&") > -1) {
+        		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+        		
+        		fts = paramFilter.split("&");
+        		
+        		for(int i=0 ; i < fts.length ; i++) {
+        			String key = fts[i].split("=")[0].toUpperCase();
+        			String value = fts[i].split("=")[1];
+        			
+        			if(i > 0) {
+        				result.add(new WhereSet(Protocol.WhereSet.OP_AND));
+        			}
+        			result.add(new WhereSet(key, searchOption, value));
+        			
+        			System.out.println("=======2========> " + key + " <==========> " + value);
+        		}
+        		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+        		
+        	} else {
+        		fts = paramFilter.split("=");
+        		
+    			String key = fts[0].toUpperCase();
+    			String value = fts[1];
+    			
+    			result.add(new WhereSet(key, searchOption, value));
+    			
+    			System.out.println("=======3========> " + key + " <==========> " + value);
+        	}
+        } 
+			
 		return result;
 	}
 	
 	private SelectSet[] parseSelect(Map<String, String> params) {
-		return SelectSetService.getInstance().makeSelectSet(params);
+		return SayclubSelectSet.getInstance().makeSelectSet(params);
 	}
 	
 	public GroupBySet[] parseGroupBy(Map<String, String> params) {
@@ -436,7 +451,7 @@ public class SayclubRestService {
 	}
 	
 	protected OrderBySet[] parseOrderBy(Map<String, String> params, String collection) {
-		return new OrderBySet[] { OrderBySetService.getInstance().getOrderBySet(RestUtils.getParam(params, "sort"), collection) };
+		return new OrderBySet[] { SayclubOrderBySet.getInstance().getOrderBySet(RestUtils.getParam(params, "sort"), collection) };
 	}
 	
 	protected int parseStart(Map<String, String> params) {
@@ -475,20 +490,24 @@ public class SayclubRestService {
 		return true;
 	}
 	
-	protected FilterSet[] parseFilter(Map<String, String> params, FilterFieldParseResult filterFieldParseResult, String collection) throws InvalidParameterException {
-		return FilterSetService.getInstance().parseFilter(params, filterFieldParseResult, collection);
+	protected FilterSet[] parseFilter(String paramFilter, FilterFieldParseResult filterFieldParseResult, String collection) throws InvalidParameterException {
+		return SayclubFilterSetService.getInstance().parseFilter(paramFilter, filterFieldParseResult, collection);
 	}
 	
 	private void parseTrigger(Map<String, String> req, Query query, String collection) throws InvalidParameterException {
 		TriggerFieldService.getInstance().parseTrigger(req, query, collection);
 	}
 	
-	protected SayclubResult makeResult(Result result, Query query, Map<String, String> params) throws IRException {
-		return SayclubResult.makeProductResult(query, result, params);
+	protected SayclubResult makeResult(Result result, Query query, Map<String, String> params, String collection) throws IRException {
+		return SayclubResult.makeSayclubResult(query, result, params, collection);
 	}
 	
 	protected String parseQ(Map<String, String> params) {
 		return RestUtils.getParam(params, "q");
+	}
+	
+	protected String parseQoption(Map<String, String> params) {
+		return RestUtils.getParam(params, "q_option");
 	}
 	
 	protected String commandSearchRequestErrorResponse(String message) {

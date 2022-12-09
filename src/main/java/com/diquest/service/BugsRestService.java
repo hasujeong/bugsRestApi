@@ -1515,8 +1515,8 @@ public class BugsRestService {
 						result.add(new WhereSet("TRACK_IDX", qOption.getOption(), keyword, track_score, qOption.getNofmPercent()));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), keyword, track_score, qOption.getNofmPercent()));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, track_score, qOption.getNofmPercent()));
+//						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+//						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, track_score, qOption.getNofmPercent()));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score, qOption.getNofmPercent()));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
@@ -1525,6 +1525,8 @@ public class BugsRestService {
 						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), trimKeyword, qOption.getNofmPercent()));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("SYN_TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
 						
@@ -1548,8 +1550,8 @@ public class BugsRestService {
 						result.add(new WhereSet("TRACK_IDX", qOption.getOption(), keyword, track_score));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), keyword, track_score));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, track_score));
+//						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+//						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, track_score));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
@@ -1558,6 +1560,8 @@ public class BugsRestService {
 						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), keyword, 30));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), trimKeyword));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("SYN_TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30));
 						
@@ -1582,9 +1586,11 @@ public class BugsRestService {
 				} else {
 					if(track_score != 0) {
 						if(qOption.isNofM()) {
-							result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, 100, qOption.getNofmPercent()));
+							result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
+							result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), trimKeyword, qOption.getNofmPercent()));
 						} else {
-							result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, 100));
+							result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), keyword, 30));
+							result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), trimKeyword));
 						}
 						trackMap.put("TRACK_IDX", track_score);
 						trackMap.put("TRACK_IDX_WS", track_score);
@@ -1597,7 +1603,6 @@ public class BugsRestService {
 						}
 					}
 					trackMap.put("TRACK_ARTIST_ALBUM_IDX", 30);
-					trackMap.put("TRACK_ARTIST_ALBUM_IDX_WS", 30);
 					trackMap.put("SYN_TRACK_ARTIST_ALBUM_IDX", 30);
 				}
 			}
