@@ -63,6 +63,7 @@ import com.diquest.rest.nhn.result.HotKwdResult;
 import com.diquest.rest.nhn.result.NhnError;
 import com.diquest.rest.nhn.result.NhnResult;
 import com.diquest.rest.nhn.result.PurchaseResult;
+import com.diquest.rest.nhn.result.SayMusicResult;
 import com.diquest.rest.nhn.result.SimilarResult;
 import com.diquest.rest.nhn.result.TotalResult;
 import com.diquest.rest.nhn.result.TotalsearchResult;
@@ -79,6 +80,7 @@ import com.diquest.rest.nhn.service.select.AutoTotalSelectSet;
 import com.diquest.rest.nhn.service.select.EntitySelectSet;
 import com.diquest.rest.nhn.service.select.HotKwdSelectSet;
 import com.diquest.rest.nhn.service.select.PurchaseSelectSet;
+import com.diquest.rest.nhn.service.select.SayclubMusicSelectSet;
 import com.diquest.rest.nhn.service.select.SelectSetService;
 import com.diquest.rest.nhn.service.trigger.TriggerFieldService;
 import com.diquest.rest.nhn.service.where.EntityWhereSet;
@@ -1396,6 +1398,208 @@ public class BugsRestService {
 		
 	}
 	
+	// 세이클럽 음악 검색
+	public String SayMusicSearch(Map<String, String> params, Map<String, Object> reqHeader, HttpServletRequest request) {
+				
+		List<Map<String, String>> fieldMap =  self.fieldSelector();
+		
+		Map<String, String> fieldSelectorMap = fieldMap.get(0);
+		Map<String, String> artistSelectorMap = fieldMap.get(1);
+		
+		String collection = getCollection(params);
+		
+		String req = "";
+		req += "Host: " + (String) reqHeader.get("host") + "\n";
+		req += "Connection: " + (String) reqHeader.get("connection") + "\n";
+		req += "Upgrade-Insecure-Requests: " + (String) reqHeader.get("upgrade-insecure-requests") + "\n";
+		req += "User-Agent: " + (String) reqHeader.get("user-agent") + "\n";
+		req += "Accept: " + (String) reqHeader.get("accept") + "\n";
+		req += "Accept-Encoding: " + (String) reqHeader.get("accept-encoding") + "\n";
+		req += "Accept-Language: " + (String) reqHeader.get("accept-language");
+		
+		if(params.get("q") != null) {
+			if(params.get("q").isEmpty()){
+				return makeEmptyNhnData(params);
+			}
+			String paramQ = parseQ(params);
+			String qValue = paramQ.replaceAll("\\s", "");
+			String col = getCollection(params);
+			
+			if(col.equalsIgnoreCase(Collections.TRACK)) {
+				if(fieldSelectorMap.containsKey(qValue) == true) {
+					
+					String selectedValue = fieldSelectorMap.get(qValue);
+					
+					if(selectedValue.equalsIgnoreCase("track")) {
+						track_score = 1000;
+						album_score = 10;
+						artist_score = 30;
+					} else if(selectedValue.equalsIgnoreCase("album")) {
+						track_score = 15;
+						album_score = 1000;
+						artist_score = 30;
+					} else {
+						track_score = 15;
+						album_score = 10;
+						artist_score = 1000;
+					}
+				} else {
+						String[] qSlice = params.get("q").split("\\s+");
+
+						if(qSlice.length > 0) {
+							for(int s = 0; s < qSlice.length ; s++) {
+								for(String key : artistSelectorMap.keySet()){
+									if(key.equalsIgnoreCase(qSlice[s])) {
+										artist_keyword = qSlice[s];
+									}
+								}
+							}
+						} 
+
+						track_score = 100;
+						album_score = 100;
+						artist_score = 100;
+				}
+			}
+		} else {			
+			return makeEmptyNhnData(params);
+		}
+		
+		logMessageService.requestReceived(reqHeader, request);
+		
+		String ret = "";
+		String OriginKwd = parseQ(params);
+		
+		Gson gson = new Gson();
+		
+		QueryParser parser = new QueryParser();
+		
+		QuerySet querySet = new QuerySet(1);
+		Query query = new Query();
+		
+		try {
+			
+			FilterFieldParseResult filterFieldParseResult = parseFilterParams(params);
+			query.setSelect(parseSayMusicSelect(params));
+			query.setFilter(parseFilter(params, filterFieldParseResult, getCollection(params)));
+			query.setWhere(parseWhere(params, filterFieldParseResult, getCollection(params)));
+			query.setOrderby(parseOrderBy(params, getCollection(params)));
+			query.setFrom(getCollection(params));
+			query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
+			query.setSearchKeyword(parseQ(params));
+			query.setFaultless(true);
+			query.setThesaurusOption((byte) (Protocol.ThesaurusOption.EQUIV_SYNONYM | Protocol.ThesaurusOption.QUASI_SYNONYM));
+			query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
+			query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
+			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
+			query.setUserName(getUserName(params));										// 로그인 사용자 ID 기록
+			query.setExtData(RestUtils.getParam(params, "pr"));							// pr (app,web,pc)
+			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
+			query.setLogKeyword(parseQ(params).toCharArray());
+			query.setPrintQuery(true);						// 실제 사용시 false
+			parseTrigger(params, query, getCollection(params));
+			query.setResultModifier("typo");
+			query.setValue("typo-parameters", OriginKwd);
+	    	query.setValue("typo-options", "ALPHABETS_TO_HANGUL|HANGUL_TO_HANGUL");
+	    	query.setValue("typo-correct-result-num", "1");
+			
+			querySet.addQuery(query);
+		
+			String queryStr = parser.queryToString(query);
+//			System.out.println(" :::::::::: query ::::::: " + queryStr);
+			
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 5000, 50, 50);
+			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
+					
+			int returnCode = commandSearchRequest.request(querySet);
+			
+			if (returnCode <= -100) {
+				ErrorMessageService.getInstance().minusReturnCodeLog(returnCode, commandSearchRequest.getException(), req);
+				logMessageService.receiveEnd(reqHeader, request);
+				return commandSearchRequestErrorResponse(commandSearchRequest.getException().getErrorMessage());
+			} else {
+				logMessageService.messageReceived(reqHeader, request);
+				
+				ResultSet resultSet = commandSearchRequest.getResultSet();
+    			Result[] resultlist = resultSet.getResultList();
+    			Result result1 = resultlist[0];
+    			    			
+    			int totalSize = 0;
+    			String typoKwd = "";
+    			
+    			totalSize = result1.getTotalSize();
+    			    			
+    			if (totalSize == 0) {
+    				if (result1.getValue("typo-result") != null) {
+    					typoKwd = result1.getValue("typo-result");
+					}
+    				
+    				if (!typoKwd.equals("")) {
+    					params.put("q", typoKwd);
+    					querySet = new QuerySet(1);
+    					
+						query = new Query();
+						    						
+						filterFieldParseResult = parseFilterParams(params);
+						query.setSelect(parseSelect(params));
+						query.setFilter(parseFilter(params, filterFieldParseResult, getCollection(params)));
+						query.setWhere(parseWhere(params, filterFieldParseResult, getCollection(params)));
+						query.setOrderby(parseOrderBy(params, getCollection(params)));
+						query.setFrom(getCollection(params));
+						query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
+						query.setSearchKeyword(parseQ(params));
+						query.setFaultless(true);
+						query.setThesaurusOption((byte) (Protocol.ThesaurusOption.EQUIV_SYNONYM | Protocol.ThesaurusOption.QUASI_SYNONYM));
+						query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
+						query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
+						query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
+						query.setUserName(getUserName(params));										// 로그인 사용자 ID 기록
+						query.setExtData(RestUtils.getParam(params, "pr"));							// pr (app,web,pc)
+						query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
+						query.setLogKeyword(parseQ(params).toCharArray());
+						query.setPrintQuery(true);						// 실제 사용시 false
+						parseTrigger(params, query, getCollection(params));
+						
+						querySet.addQuery(query);
+					
+						queryStr = parser.queryToString(query);
+//						System.out.println(" :::::::::: query22 ::::::: " + queryStr);
+    					
+    					commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
+    							
+    					returnCode = commandSearchRequest.request(querySet);
+    					
+    					if (returnCode <= -100) {
+    						ErrorMessageService.getInstance().minusReturnCodeLog(returnCode, commandSearchRequest.getException(), req);
+    						logMessageService.receiveEnd(reqHeader, request);
+    						return commandSearchRequestErrorResponse(commandSearchRequest.getException().getErrorMessage());
+    					} else {
+    						logMessageService.messageReceived(reqHeader, request);
+    					}
+    				}
+    			}
+    			params.put("q", OriginKwd);
+			}
+						
+			String resultJson = gson.toJson(makeSayMusicResult(commandSearchRequest.getResultSet().getResult(0), query, params, collection));
+
+			ret = resultJson;
+			
+			logMessageService.receiveEnd(reqHeader, request);
+			
+		} catch (InvalidParameterException e) {
+			ErrorMessageService.getInstance().invalidParameterLog(req, e);
+			logMessageService.receiveEnd(reqHeader, request);
+			return invalidParameterResponse(e);
+		} catch (Exception e) {
+			ErrorMessageService.getInstance().InternalServerErrorLog(req, e);
+			logMessageService.receiveEnd(reqHeader, request);
+			return internalServerResponse(e);
+		}
+		
+		return ret;
+	}
+	
 	private String makeEmptyNhnData(Map<String, String> params) {
 //		JsonUnknownUriResult result = new JsonUnknownUriResult(HttpStatus.OK, NhnResult.makeEmptyResult());
 		String emptyData = GsonLoader.getInstance().toJson(NhnResult.makeEmptyResult());
@@ -1446,6 +1650,10 @@ public class BugsRestService {
 	
 	private SelectSet[] parseEntitySelect(boolean return_all) {
 		return EntitySelectSet.getInstance().makeSelectSet(return_all);
+	}
+	
+	private SelectSet[] parseSayMusicSelect(Map<String, String> params) {
+		return SayclubMusicSelectSet.getInstance().makeSelectSet(params);
 	}
 	
 	protected FilterSet[] parseFilter(Map<String, String> params, FilterFieldParseResult filterFieldParseResult, String collection) throws InvalidParameterException {
@@ -2367,6 +2575,10 @@ public class BugsRestService {
 	
 	protected EntityResult makeEntityResult(Result result, Query query) throws IRException {
 		return EntityResult.makeEntityResult(query, result);
+	}
+	
+	protected SayMusicResult makeSayMusicResult(Result result, Query query, Map<String, String> params, String collection) throws IRException {
+		return SayMusicResult.makeSayMusicResult(query, result, params, collection);
 	}
 	
 	protected String parseQ(Map<String, String> params) {

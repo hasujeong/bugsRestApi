@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.diquest.ir.rest.json.gson.GsonLoader;
 import com.diquest.ir.rest.json.object.JsonUnknownUriResult;
 import com.diquest.ir.rest.json.reponse.ResponseMaker;
+import com.diquest.ir.rest.util.RestUtils;
 import com.diquest.rest.nhn.common.Collections;
 import com.diquest.rest.nhn.domain.Param;
 import com.diquest.ir.common.msg.protocol.query.WhereSet;
@@ -52,11 +53,19 @@ public class BugsRestController {
 		
 		params.put("requestHeader.sid", (requestHeader.get("sid")==null?"":requestHeader.get("sid").toString()));
 		
+		String prValue = RestUtils.getParam(params, "pr");
+		
 		long time = System.currentTimeMillis();
 		
 		if (appKey.equals(APP_KEY_TRACK)) {
 			params.put("collection",Collections.TRACK);
-			return bugsRestService.search(params, requestHeader, request);
+			
+			if(prValue.indexOf("sayclub_web") > -1) {
+				return bugsRestService.SayMusicSearch(params, requestHeader, request);
+			} else {
+				return bugsRestService.search(params, requestHeader, request);
+			}
+			
 		} else if (appKey.equals(APP_KEY_LYRICS)) {
 			params.put("collection",Collections.LYRICS);
 			return bugsRestService.search(params, requestHeader, request);
@@ -65,7 +74,12 @@ public class BugsRestController {
 			return bugsRestService.search(params, requestHeader, request);
 		} else if (appKey.equals(APP_KEY_ARTIST)) {
 			params.put("collection",Collections.ARTIST);
-			return bugsRestService.search(params, requestHeader, request);
+			
+			if(prValue.indexOf("sayclub_web") > -1) {
+				return bugsRestService.SayMusicSearch(params, requestHeader, request);
+			} else {
+				return bugsRestService.search(params, requestHeader, request);
+			}
 		} else if (appKey.equals(APP_KEY_MV)) {
 			params.put("collection",Collections.MV);
 			return bugsRestService.search(params, requestHeader, request);

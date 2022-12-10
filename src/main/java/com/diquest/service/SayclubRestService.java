@@ -87,19 +87,19 @@ public class SayclubRestService {
 		req += "Accept-Encoding: " + (String) reqHeader.get("accept-encoding") + "\n";
 		req += "Accept-Language: " + (String) reqHeader.get("accept-language");
 		
+		String OriginKwd = "";
+		
 		if(params.get("q") != null) {
-			if(params.get("q").isEmpty()){
-				return makeEmptyNhnData(params);
-			}			
+			OriginKwd = parseQ(params);		
 		} else {			
-			return makeEmptyNhnData(params);
+			OriginKwd = "";
+//			return makeEmptyNhnData(params);
 		}
 		
 		logMessageService.requestReceived(reqHeader, request);
 		
 		String collection = getCollection(params);
 		String ret = "";
-		String OriginKwd = parseQ(params);
 		
 		Gson gson = new Gson();
 		
@@ -107,36 +107,17 @@ public class SayclubRestService {
 		
 		QuerySet querySet = new QuerySet(1);
 		Query query = new Query();
-		
-		String paramStr = request.getQueryString();
-		String paramFilter = "";
-		
-		if(paramStr.indexOf("&filter=") > -1) {
-			if(paramStr.indexOf("%27") > -1) {
-				int filterStart = paramStr.indexOf("%27");
-				int filterStop = paramStr.indexOf("%27", filterStart+1);
-				
-				paramFilter = paramStr.substring(filterStart+3, filterStop);
-				System.out.println("@@@@@@@@@@@@@@" + paramFilter);
-			} else {
-				int filterStart = paramStr.indexOf("&filter=");
-				int filterStop = paramStr.indexOf("&", filterStart+1);
-				
-				paramFilter = paramStr.substring(filterStart+8, filterStop);
-				System.out.println("@@@@@@@@@@@@@@" + paramFilter);
-			}
-		} 
 			
 		try {
 			
 			FilterFieldParseResult filterFieldParseResult = parseFilterParams(params);
 			query.setSelect(parseSelect(params));
 //			query.setFilter(parseFilter(paramFilter, filterFieldParseResult, collection));
-			query.setWhere(parseWhere(params, filterFieldParseResult, collection, paramFilter));
+			query.setWhere(parseWhere(params, filterFieldParseResult, collection, OriginKwd));
 			query.setOrderby(parseOrderBy(params, collection));
 			query.setFrom(collection);
 			query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
-			query.setSearchKeyword(parseQ(params));
+			query.setSearchKeyword(OriginKwd);
 			query.setFaultless(true);
 			query.setThesaurusOption((byte) (Protocol.ThesaurusOption.EQUIV_SYNONYM | Protocol.ThesaurusOption.QUASI_SYNONYM));
 			query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
@@ -193,7 +174,7 @@ public class SayclubRestService {
 						filterFieldParseResult = parseFilterParams(params);
 						query.setSelect(parseSelect(params));
 //						query.setFilter(parseFilter(paramFilter, filterFieldParseResult, collection));
-						query.setWhere(parseWhere(params, filterFieldParseResult, collection, paramFilter));
+//						query.setWhere(parseWhere(params, filterFieldParseResult, collection));
 //						query.setGroupBy(parseGroupBy(params));
 						query.setOrderby(parseOrderBy(params, getCollection(params)));
 						query.setFrom(collection);
@@ -278,18 +259,19 @@ public class SayclubRestService {
 		return new SayclubFilterValue(params).parseAll();
 	}
 	
-	protected WhereSet[] parseWhere(Map<String, String> params, FilterFieldParseResult filterFieldParseResult, String collection, String paramFilter) throws InvalidParameterException {
-		return SayclubWhereSet.getInstance().makeWhereSet(params, filterFieldParseResult, makeBaseWhereSet(params, collection, paramFilter));
+	protected WhereSet[] parseWhere(Map<String, String> params, FilterFieldParseResult filterFieldParseResult, String collection, String OriginKwd) throws InvalidParameterException {
+		return SayclubWhereSet.getInstance().makeWhereSet(params, filterFieldParseResult, makeBaseWhereSet(params, collection, OriginKwd));
 	}
 	
-	protected List<WhereSet> makeBaseWhereSet(Map<String, String> params, String collection, String paramFilter) throws InvalidParameterException {
+	protected List<WhereSet> makeBaseWhereSet(Map<String, String> params, String collection, String OriginKwd) throws InvalidParameterException {
 		List<WhereSet> result = new ArrayList<WhereSet>();
-		String keyword = parseQ(params);
-		String trimKeyword = keyword.replaceAll("\\s", "");
+		String keyword = OriginKwd;
+//		String trimKeyword = keyword.replaceAll("\\s", "");
 	
 		byte searchOption;
 		String qOption = parseQoption(params);
-		
+		String paramFilter = parseFilterParam(params);
+				
 		String[] OptValues = {};
  		String Opt = "";
 		Map<String, Double> fieldOpt = new HashMap<String, Double>();
@@ -322,24 +304,29 @@ public class SayclubRestService {
 		HashMap<String, Integer> sayMallMap = new HashMap<String, Integer>();
 		
 		if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST)) {
-
-			for (Entry<String, Double> field : fieldOpt.entrySet()) {
-				String fieldNm = field.getKey();
-				int weight = 0;
-				weight = (int) (field.getValue() * 100);
-				
-				sayCastMap.put(fieldNm, weight);
-				sayCastMap.put(fieldNm + "_WS", weight);
-			}
 			
-			for (Entry<String, Integer> e : sayCastMap.entrySet()) {
-				if (result.size() > 0) {
-					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+			if(keyword.equalsIgnoreCase("")) {
+				result.add(new WhereSet("ALL", searchOption, "A"));
+			} else {
+				for (Entry<String, Double> field : fieldOpt.entrySet()) {
+					String fieldNm = field.getKey();
+					int weight = 0;
+					weight = (int) (field.getValue() * 100);
+					
+					sayCastMap.put(fieldNm, weight);
+					sayCastMap.put(fieldNm + "_WS", weight);
 				}
-				result.add(new WhereSet(e.getKey(), searchOption, keyword, e.getValue()));
+				
+				for (Entry<String, Integer> e : sayCastMap.entrySet()) {
+					if (result.size() > 0) {
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					}
+					result.add(new WhereSet(e.getKey(), searchOption, keyword, e.getValue()));
+				}
 			}
 			
 		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_ART)) {
+			
 			for (Entry<String, Double> field : fieldOpt.entrySet()) {
 				String fieldNm = field.getKey();
 				int weight = 0;
@@ -355,6 +342,7 @@ public class SayclubRestService {
 				}
 				result.add(new WhereSet(e.getKey(), searchOption, keyword, e.getValue()));
 			}
+			
 		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYMALL)) {
 			for (Entry<String, Double> field : fieldOpt.entrySet()) {
 				String fieldNm = field.getKey();
@@ -381,8 +369,10 @@ public class SayclubRestService {
 		String[] fts;
         
         if(!paramFilter.equalsIgnoreCase("")) {
-        	result.add(new WhereSet(Protocol.WhereSet.OP_AND));
-        	        	
+        	if (result.size() > 0) {
+        		result.add(new WhereSet(Protocol.WhereSet.OP_AND));
+			}
+        	  	
         	if(paramFilter.indexOf("|") > -1) {
         		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
         		
@@ -397,7 +387,7 @@ public class SayclubRestService {
         			}
         			result.add(new WhereSet(key, searchOption, value));
         			
-        			System.out.println("======1=========> " + key + " <==========> " + value);
+//        			System.out.println("======1=========> " + key + " <==========> " + value);
         		}
         		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
         		
@@ -415,7 +405,7 @@ public class SayclubRestService {
         			}
         			result.add(new WhereSet(key, searchOption, value));
         			
-        			System.out.println("=======2========> " + key + " <==========> " + value);
+//        			System.out.println("=======2========> " + key + " <==========> " + value);
         		}
         		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
         		
@@ -427,7 +417,7 @@ public class SayclubRestService {
     			
     			result.add(new WhereSet(key, searchOption, value));
     			
-    			System.out.println("=======3========> " + key + " <==========> " + value);
+//    			System.out.println("=======3========> " + key + " <==========> " + value);
         	}
         } 
 			
@@ -508,6 +498,10 @@ public class SayclubRestService {
 	
 	protected String parseQoption(Map<String, String> params) {
 		return RestUtils.getParam(params, "q_option");
+	}
+	
+	protected String parseFilterParam(Map<String, String> params) {
+		return RestUtils.getParam(params, "filter");
 	}
 	
 	protected String commandSearchRequestErrorResponse(String message) {
