@@ -101,6 +101,30 @@ public class SayclubRestService {
 		String collection = getCollection(params);
 		String ret = "";
 		
+		String FilterParams = parseFilterParam(params);
+		String RangeFilter = "";
+		String RangeKey = "";
+		
+		if(collection.equalsIgnoreCase(SayclubCollections.CHATUSER)) {						
+			if(FilterParams.indexOf("&") > -1) {
+				
+        		String[] f = FilterParams.split("&");
+        		
+        		for(int i=0 ; i < f.length ; i++) {
+        			String key = f[i].split("=")[0].toUpperCase();
+        			String value = f[i].split("=")[1];
+        			
+        			if(key.equalsIgnoreCase("BYEAR")) {
+        				if(value.indexOf("[") > -1) {
+        					RangeFilter = value;
+        					RangeKey = key;
+        				}
+        			}
+        		}
+        		
+        	}
+		}
+		
 		Gson gson = new Gson();
 		
 		QueryParser parser = new QueryParser();
@@ -112,7 +136,9 @@ public class SayclubRestService {
 			
 			FilterFieldParseResult filterFieldParseResult = parseFilterParams(params);
 			query.setSelect(parseSelect(params));
-//			query.setFilter(parseFilter(paramFilter, filterFieldParseResult, collection));
+			if(!RangeFilter.equalsIgnoreCase("")) {
+				query.setFilter(parseFilter(collection, RangeFilter, RangeKey));
+			}
 			query.setWhere(parseWhere(params, filterFieldParseResult, collection, OriginKwd));
 			query.setOrderby(parseOrderBy(params, collection));
 			query.setFrom(collection);
@@ -173,9 +199,7 @@ public class SayclubRestService {
 						    						
 						filterFieldParseResult = parseFilterParams(params);
 						query.setSelect(parseSelect(params));
-//						query.setFilter(parseFilter(paramFilter, filterFieldParseResult, collection));
-//						query.setWhere(parseWhere(params, filterFieldParseResult, collection));
-//						query.setGroupBy(parseGroupBy(params));
+						query.setWhere(parseWhere(params, filterFieldParseResult, collection, OriginKwd));
 						query.setOrderby(parseOrderBy(params, getCollection(params)));
 						query.setFrom(collection);
 						query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
@@ -399,12 +423,14 @@ public class SayclubRestService {
         		for(int i=0 ; i < fts.length ; i++) {
         			String key = fts[i].split("=")[0].toUpperCase();
         			String value = fts[i].split("=")[1];
-        			
-        			if(i > 0) {
-        				result.add(new WhereSet(Protocol.WhereSet.OP_AND));
+        			        			
+        			if(value.indexOf("[") == -1) {
+        				if(i > 0) {
+            				result.add(new WhereSet(Protocol.WhereSet.OP_AND));
+            			}
+        				
+        				result.add(new WhereSet(key, searchOption, value));
         			}
-        			result.add(new WhereSet(key, searchOption, value));
-        			
 //        			System.out.println("=======2========> " + key + " <==========> " + value);
         		}
         		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
@@ -480,8 +506,8 @@ public class SayclubRestService {
 		return true;
 	}
 	
-	protected FilterSet[] parseFilter(String paramFilter, FilterFieldParseResult filterFieldParseResult, String collection) throws InvalidParameterException {
-		return SayclubFilterSetService.getInstance().parseFilter(paramFilter, filterFieldParseResult, collection);
+	protected FilterSet[] parseFilter(String collection, String RangeFilter, String RangeKey) throws InvalidParameterException {
+		return SayclubFilterSetService.getInstance().parseFilter(collection,RangeFilter,RangeKey);
 	}
 	
 	private void parseTrigger(Map<String, String> req, Query query, String collection) throws InvalidParameterException {

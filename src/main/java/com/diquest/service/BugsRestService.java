@@ -1795,9 +1795,11 @@ public class BugsRestService {
 					if(track_score != 0) {
 						if(qOption.isNofM()) {
 							result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 							result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), trimKeyword, qOption.getNofmPercent()));
 						} else {
 							result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), keyword, 30));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 							result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), trimKeyword));
 						}
 						trackMap.put("TRACK_IDX", track_score);
