@@ -173,7 +173,7 @@ public class OrderBySetService {
 		} else if(collection.equalsIgnoreCase(Collections.AUTO_TAG)) {
 			return new OrderBySet(true, "ESALBUM_CNT", Protocol.OrderBySet.OP_PREWEIGHT);
 		} else if(collection.equalsIgnoreCase(Collections.AUTO_TOTAL)) {
-			return new OrderBySet(true, "SCORE", Protocol.OrderBySet.OP_PREWEIGHT);
+			return new OrderBySet(true, "SCORE", Protocol.OrderBySet.OP_POSTWEIGHT);
 		} else if(collection.equalsIgnoreCase(Collections.HOTKEYWORD)) {
 			return new OrderBySet(true, "RANKING", Protocol.OrderBySet.OP_POSTWEIGHT);
 		}

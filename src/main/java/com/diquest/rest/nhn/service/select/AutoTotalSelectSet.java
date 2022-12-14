@@ -14,7 +14,7 @@ import com.diquest.rest.nhn.service.trigger.TriggerFieldService;
 
 public class AutoTotalSelectSet {
 	public static String TYPE = "TYPE";
-	public static String RANKING = "_RANK";
+	public static String RANKING = "SCORE";
 	public static String ARTISTID = "ARTIST_ID";
 	public static String NATIONCD = "NATION_CD";
 	public static String GENRECD = "GENRE_CD";
