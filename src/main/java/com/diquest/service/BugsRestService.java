@@ -1983,6 +1983,8 @@ public class BugsRestService {
 				result.add(new WhereSet("TITLE_IDX", qOption.getOption(), keyword, 50, qOption.getNofmPercent()));
 				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 				result.add(new WhereSet("TITLE_IDX", qOption.getOption(), classic_kwd, 50, qOption.getNofmPercent()));
+				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				result.add(new WhereSet("TITLE_IDX_KOR", qOption.getOption(), keyword, 50, qOption.getNofmPercent()));
 			} else {
 				result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), classic_kwd, 100));
 				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
@@ -1991,6 +1993,8 @@ public class BugsRestService {
 				result.add(new WhereSet("TITLE_IDX", qOption.getOption(), keyword, 50));
 				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 				result.add(new WhereSet("TITLE_IDX", qOption.getOption(), classic_kwd, 50));
+				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				result.add(new WhereSet("TITLE_IDX_KOR", qOption.getOption(), keyword, 50));
 			}
 			classicMap.put("CLASSIC_IDX", 30);
 			classicMap.put("CLASSIC_IDX_KOR", 30);

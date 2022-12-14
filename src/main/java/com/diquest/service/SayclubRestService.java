@@ -419,18 +419,20 @@ public class SayclubRestService {
         		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
         		
         		fts = paramFilter.split("&");
+        		int k = 0;
         		
         		for(int i=0 ; i < fts.length ; i++) {
         			String key = fts[i].split("=")[0].toUpperCase();
         			String value = fts[i].split("=")[1];
         			        			
         			if(value.indexOf("[") == -1) {
-        				if(i > 0) {
+        				if(k > 0) {
             				result.add(new WhereSet(Protocol.WhereSet.OP_AND));
             			}
         				
         				result.add(new WhereSet(key, searchOption, value));
-        			}
+        				k++;
+        			} 
 //        			System.out.println("=======2========> " + key + " <==========> " + value);
         		}
         		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
