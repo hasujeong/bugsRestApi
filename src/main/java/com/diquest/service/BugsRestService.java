@@ -2401,13 +2401,24 @@ public class BugsRestService {
 			idxScoreMap.put("BKEY", 30);
 		} else {
 			if(num == 0) {
-				result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALL, keyword, 100));
+				result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 100));
 //				idxScoreMap.put("ARTIST_IDX", 100);
 			} else {
-				idxScoreMap.put("ARTR_IDX", 1000); 
-				idxScoreMap.put("FKEY_NOSP", 100);
-				idxScoreMap.put("FKEY", 50);
-				idxScoreMap.put("BKEY", 30);
+//				idxScoreMap.put("ARTR_IDX", 1000); 
+//				idxScoreMap.put("FKEY_NOSP", 100);
+//				idxScoreMap.put("FKEY", 50);
+//				idxScoreMap.put("BKEY", 30);
+				result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+				result.add(new WhereSet("FKEY", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 1000));
+				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				result.add(new WhereSet("FKEY", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 1000));
+//				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+//				result.add(new WhereSet("BKEY", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 100));
+				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				result.add(new WhereSet("ARTR_IDX", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 100));
+				result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+				result.add(new WhereSet(Protocol.WhereSet.OP_NOT));
+				result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 100));
 			}
 		}
 		
