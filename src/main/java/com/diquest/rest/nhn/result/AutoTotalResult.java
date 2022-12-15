@@ -12,6 +12,7 @@ import com.diquest.ir.common.msg.protocol.query.Query;
 import com.diquest.ir.common.msg.protocol.query.QuerySet;
 import com.diquest.ir.common.msg.protocol.result.Result;
 import com.diquest.ir.common.msg.protocol.result.ResultSet;
+import com.diquest.ir.rest.util.RestUtils;
 import com.diquest.rest.nhn.common.Connection;
 import com.diquest.rest.nhn.service.select.AutoTotalSelectSet;
 
@@ -44,17 +45,34 @@ public class AutoTotalResult {
 		List<Item> metas = new ArrayList<Item>();
 		String Values = "";
 		
+		String paramSize = RestUtils.getParam(map, "size");
+		int retSize = paramSize.equals("") ? 10 : Integer.parseInt(paramSize);
+		
+		if (retSize > result.getResult(1).getRealSize()) {
+			retSize = result.getResult(1).getRealSize();
+		}
+		
+		Map<String, String> check = new HashMap<>();
+		
 		for (int i = 0; i < result.getResult(1).getRealSize() ; i++) {
 			Map<String, Object> temp = new HashMap<>();
 			metas.add(new Item(q.getQuery(1), result.getResult(1), map, i));
-			Values = new Item(q.getQuery(1), result.getResult(1), map, i).value;
+			Values = new Item(q.getQuery(1), result.getResult(1), map, i).value;  
 						
 //			temp.put("meta", new Item(q.getQuery(1), result.getResult(1), map, i));
 			temp.put("meta", metas);
 			temp.put("value", Values);
 //			temp.put("value", new Item(q.getQuery(1), result.getResult(1), map, i).value);
 			metas = new ArrayList<Item>();
-			items.add(temp);
+			
+			if (!check.containsKey(Values)) {
+				if (retSize > items.size()) {
+					items.add(temp);
+				}
+				
+				check.put(Values, "");
+			}
+			
 		}
 		
 		return items;

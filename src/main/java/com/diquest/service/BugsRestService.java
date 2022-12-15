@@ -868,7 +868,11 @@ public class BugsRestService {
 	//			query.setGroupBy(parseGroupBy(params));
 				query.setOrderby(parseOrderBy(params, getCollection(params)));
 				query.setFrom(getCollection(params));
-				query.setResult(parseStart(params) - 1, parseStart(params) + parseAutoSize(params, i) - 2);
+				if(i == 1) {
+					query.setResult(parseStart(params) - 1, 19);
+				} else {
+					query.setResult(parseStart(params) - 1, parseStart(params) + parseAutoSize(params, i) - 2);
+				}
 				query.setSearchKeyword(parseQ(params));
 				query.setFaultless(true);
 				query.setThesaurusOption((byte) (Protocol.ThesaurusOption.EQUIV_SYNONYM | Protocol.ThesaurusOption.QUASI_SYNONYM));
@@ -2413,10 +2417,10 @@ public class BugsRestService {
 				result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
 				result.add(new WhereSet("FKEY", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 1000));
 				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-				result.add(new WhereSet("BKEY", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 100));
+				result.add(new WhereSet("BKEY", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 0));
 				result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
 				result.add(new WhereSet(Protocol.WhereSet.OP_NOT));
-				result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 100));
+				result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", "")));
 			}
 		}
 		
