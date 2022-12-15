@@ -875,7 +875,9 @@ public class BugsRestService {
 				query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
 				query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 				query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
-				query.setLoggable(false);
+//				query.setLoggable(false);
+				query.setLoggable(getAutoLoggable(RestUtils.getParam(params, "search_tp")));
+				query.setLogKeyword(parseQ(params).toCharArray());
 				query.setPrintQuery(true);						// 실제 사용시 false
 				parseTrigger(params, query, getCollection(params));
 				query.setResultModifier("typo");
@@ -1355,7 +1357,6 @@ public class BugsRestService {
 			query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
 			query.setLoggable(false);
-			query.setLoggable(true);
 			query.setLogKeyword(q.toCharArray());
 			query.setPrintQuery(true);						// 실제 사용시 false
 			query.setResultModifier("typo");
@@ -2550,6 +2551,15 @@ public class BugsRestService {
 			return false;
 		}
 		return true;
+	}
+	
+	protected boolean getAutoLoggable(String value) {
+		if (value.equalsIgnoreCase("sb")) {
+			return true;
+		} else if (value.equalsIgnoreCase("ign")) {
+			return false;
+		}
+		return false;
 	}
 	
 	private void parseTrigger(Map<String, String> req, Query query, String collection) throws InvalidParameterException {
