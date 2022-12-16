@@ -78,7 +78,7 @@ public class OrderBySetService {
 					return new OrderBySet(true, "SCORE", Protocol.OrderBySet.OP_POSTWEIGHT);
 				}
 			} else {													// 정확도순
-				return new OrderBySet(true, "SCORE", Protocol.OrderBySet.OP_PREWEIGHT);
+				return new OrderBySet(true, "BUGS_WEIGHT", Protocol.OrderBySet.OP_ADDWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase(Collections.ARTIST)) {
 			if (ArrayValue[0].equalsIgnoreCase("disp_nm")) {			// 이름순

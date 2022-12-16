@@ -1867,8 +1867,8 @@ public class BugsRestService {
 			} else {
 				albumMap.put("ALBUM_IDX", 100);
 				albumMap.put("ALBUM_IDX_WS", 100);
-				albumMap.put("ARTIST_IDX", 300);
-				albumMap.put("ARTIST_IDX_WS", 300);
+				albumMap.put("ARTIST_IDX", 100);
+				albumMap.put("ARTIST_IDX_WS", 100);
 				albumMap.put("ARTIST_ALBUM_IDX", 30);
 				albumMap.put("ARTIST_ALBUM_IDX_WS", 30);
 				albumMap.put("SYN_ARTIST_ALBUM_IDX", 30);
