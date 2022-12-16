@@ -10,6 +10,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -51,6 +52,7 @@ import com.diquest.ir.rest.json.reponse.ResponseMaker;
 import com.diquest.ir.rest.server.log.ServerLogManager;
 import com.diquest.ir.rest.util.RestUtils;
 import com.diquest.mapper.AdminMapper;
+import com.diquest.mapper.domain.ClassicArtistSelector;
 import com.diquest.mapper.domain.FieldSelector;
 import com.diquest.mapper.domain.artistSelector;
 import com.diquest.rest.nhn.common.Collections;
@@ -107,7 +109,7 @@ public class BugsRestService {
 	protected static int artist_score = 100;
 	
 	protected static String artist_keyword = "";
-//	protected static String a_keyword = "";
+	protected static String CSartist_keyword = "";
 	
 	public BugsRestService() {
 //		idxScoreMap.put("TRACK_TITLE", 100);
@@ -153,6 +155,17 @@ public class BugsRestService {
 //		System.out.println("--------- " + artistFieldMap);
 		fieldList.add(artistFieldMap);
 		
+		ClassicArtistSelector CSartistSelector	= new ClassicArtistSelector();
+		
+		LinkedHashMap<String, String> CSartistFieldMap = new LinkedHashMap<String, String>();
+		
+		for (int i=0 ; i < CSartistSelector.getCSArtistNmList().length ; i++) {			
+			CSartistFieldMap.put(CSartistSelector.getCSArtistNmList()[i], CSartistSelector.getCSArtistNmList()[i]);
+			
+		}
+//		System.out.println("--------- " + CSartistFieldMap);
+		fieldList.add(CSartistFieldMap);
+		
 		return fieldList;
 	}
 	
@@ -165,6 +178,7 @@ public class BugsRestService {
 		
 		Map<String, String> fieldSelectorMap = fieldMap.get(0);
 		Map<String, String> artistSelectorMap = fieldMap.get(1);
+		Map<String, String> CSartistSelectorMap = fieldMap.get(2);
 		
 		String req = "";
 		req += "Host: " + (String) reqHeader.get("host") + "\n";
@@ -222,6 +236,15 @@ public class BugsRestService {
 						track_score = 100;
 						album_score = 100;
 						artist_score = 100;
+				}
+			} else if(col.equalsIgnoreCase(Collections.CLASSIC)) {
+				String CS_kwd = params.get("q").replaceAll("\\s", "");
+				
+				for(String key : CSartistSelectorMap.keySet()){				
+					if(CS_kwd.indexOf(key) > -1) {
+						CS_kwd = CS_kwd.replaceAll(key, "");
+						CSartist_keyword = CS_kwd;
+					}
 				}
 			}
 		} else {			
@@ -1980,29 +2003,65 @@ public class BugsRestService {
 		} else if(collection.equalsIgnoreCase(Collections.CLASSIC)) {
 			String classic_kwd = keyword.replaceAll("\\s", "");
 			
-			if(qOption.isNofM()) {
-				result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), classic_kwd, 100, qOption.getNofmPercent()));
-				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-				result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, 100, qOption.getNofmPercent()));
-				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-				result.add(new WhereSet("TITLE_IDX", qOption.getOption(), keyword, 50, qOption.getNofmPercent()));
-				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-				result.add(new WhereSet("TITLE_IDX", qOption.getOption(), classic_kwd, 50, qOption.getNofmPercent()));
-				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-				result.add(new WhereSet("TITLE_IDX_KOR", qOption.getOption(), keyword, 50, qOption.getNofmPercent()));
+			if(!CSartist_keyword.equalsIgnoreCase("")) {
+				if(qOption.isNofM()) {
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), classic_kwd, 100, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, 100, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX", qOption.getOption(), keyword, 50, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX", qOption.getOption(), classic_kwd, 50, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX_KOR", qOption.getOption(), keyword, 50, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("SECTION_TITLE_IDX", qOption.getOption(), CSartist_keyword, 100, qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), classic_kwd, 100));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, 100));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX", qOption.getOption(), keyword, 50));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX", qOption.getOption(), classic_kwd, 50));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX_KOR", qOption.getOption(), keyword, 50));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("SECTION_TITLE_IDX", qOption.getOption(), CSartist_keyword, 100));
+				}
+				classicMap.put("CLASSIC_IDX", 30);
+				classicMap.put("CLASSIC_IDX_KOR", 30);
+				
+				CSartist_keyword = "";
 			} else {
-				result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), classic_kwd, 100));
-				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-				result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, 100));
-				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-				result.add(new WhereSet("TITLE_IDX", qOption.getOption(), keyword, 50));
-				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-				result.add(new WhereSet("TITLE_IDX", qOption.getOption(), classic_kwd, 50));
-				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-				result.add(new WhereSet("TITLE_IDX_KOR", qOption.getOption(), keyword, 50));
+				if(qOption.isNofM()) {
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), classic_kwd, 100, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, 100, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX", qOption.getOption(), keyword, 50, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX", qOption.getOption(), classic_kwd, 50, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX_KOR", qOption.getOption(), keyword, 50, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("SECTION_TITLE_IDX", qOption.getOption(), classic_kwd, 100, qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), classic_kwd, 100));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, 100));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX", qOption.getOption(), keyword, 50));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX", qOption.getOption(), classic_kwd, 50));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX_KOR", qOption.getOption(), keyword, 50));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("SECTION_TITLE_IDX", qOption.getOption(), classic_kwd, 100));
+				}
+				classicMap.put("CLASSIC_IDX", 30);
+				classicMap.put("CLASSIC_IDX_KOR", 30);
 			}
-			classicMap.put("CLASSIC_IDX", 30);
-			classicMap.put("CLASSIC_IDX_KOR", 30);
 			
 			for (Entry<String, Integer> e : classicMap.entrySet()) {
 				if (result.size() > 0) {

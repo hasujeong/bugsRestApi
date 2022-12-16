@@ -69,6 +69,8 @@ public class FilterSetService {
         } else if(collection.equalsIgnoreCase(Collections.LYRICS)) {
         	filters.add(new FilterSet(Protocol.FilterSet.OP_MATCH, "SEARCH_EXCLUDE_YN", "N"));
         	filters.add(new FilterSet(Protocol.FilterSet.OP_MATCH, "STATUS", "Y"));
+        } else if(collection.equalsIgnoreCase(Collections.MV)) {
+        	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "ATTR_TP", "STA", 1000));
         }
         
         List<FilterNormalValueResult> normalFields = filterFieldParseResult.getFilterNormalValueResults();
