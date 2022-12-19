@@ -2005,9 +2005,9 @@ public class BugsRestService {
 			
 			if(!CSartist_keyword.equalsIgnoreCase("")) {
 				if(qOption.isNofM()) {
-					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), classic_kwd, 100, qOption.getNofmPercent()));
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), classic_kwd, 300, qOption.getNofmPercent()));
 					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, 100, qOption.getNofmPercent()));
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, 300, qOption.getNofmPercent()));
 					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 					result.add(new WhereSet("TITLE_IDX", qOption.getOption(), keyword, 50, qOption.getNofmPercent()));
 					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
@@ -2017,9 +2017,9 @@ public class BugsRestService {
 					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 					result.add(new WhereSet("SECTION_TITLE_IDX", qOption.getOption(), CSartist_keyword, 100, qOption.getNofmPercent()));
 				} else {
-					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), classic_kwd, 100));
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), classic_kwd, 300));
 					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, 100));
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, 300));
 					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 					result.add(new WhereSet("TITLE_IDX", qOption.getOption(), keyword, 50));
 					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
