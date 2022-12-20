@@ -38,6 +38,7 @@ import com.diquest.rest.nhn.filter.parse.SayclubFilterValue;
 import com.diquest.rest.nhn.filter.result.FilterFieldParseResult;
 import com.diquest.rest.nhn.result.NhnError;
 import com.diquest.rest.nhn.result.NhnResult;
+import com.diquest.rest.nhn.result.SayMallResult;
 import com.diquest.rest.nhn.result.SayclubResult;
 import com.diquest.rest.nhn.service.error.ErrorMessageService;
 import com.diquest.rest.nhn.service.error.logMessageService;
@@ -140,6 +141,7 @@ public class SayclubRestService {
 				query.setFilter(parseFilter(collection, RangeFilter, RangeKey));
 			}
 			query.setWhere(parseWhere(params, filterFieldParseResult, collection, OriginKwd));
+			query.setGroupBy(parseGroupBy(params));
 			query.setOrderby(parseOrderBy(params, collection));
 			query.setFrom(collection);
 			query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
@@ -200,6 +202,7 @@ public class SayclubRestService {
 						filterFieldParseResult = parseFilterParams(params);
 						query.setSelect(parseSelect(params));
 						query.setWhere(parseWhere(params, filterFieldParseResult, collection, OriginKwd));
+						query.setGroupBy(parseGroupBy(params));
 						query.setOrderby(parseOrderBy(params, getCollection(params)));
 						query.setFrom(collection);
 						query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
@@ -240,8 +243,14 @@ public class SayclubRestService {
 //			System.out.println(returnCode);
 //			System.out.println(commandSearchRequest.getResultSet().getResult(0).getTotalSize());
 			
-			String resultJson = gson.toJson(makeResult(commandSearchRequest.getResultSet().getResult(0), query, params, collection));
-
+			String resultJson = "";
+			
+			if(collection.equalsIgnoreCase(SayclubCollections.SAYMALL)) {
+				resultJson = gson.toJson(makeMallResult(commandSearchRequest.getResultSet().getResult(0), query, params, collection));
+			} else {
+				resultJson = gson.toJson(makeResult(commandSearchRequest.getResultSet().getResult(0), query, params, collection));
+			}
+			
 			ret = resultJson;
 			
 			logMessageService.receiveEnd(reqHeader, request);
@@ -457,14 +466,21 @@ public class SayclubRestService {
 	}
 	
 	public GroupBySet[] parseGroupBy(Map<String, String> params) {
-		String catGroup = RestUtils.getParam(params, "group");
-		if (catGroup.equals("")) {
+//		String catGroup = RestUtils.getParam(params, "group");
+		String cat2Group = RestUtils.getParam(params, "summary.CAT2_ID");
+		
+		List<GroupBySet> result = new ArrayList<GroupBySet>();
+		
+		if (!cat2Group.equals("")) {
+			result.add(new GroupBySet("CAT2_ID", (byte) (Protocol.GroupBySet.OP_COUNT | Protocol.GroupBySet.ORDER_COUNT), "DESC"));
+		} else {
 			return new GroupBySet[0];
 		}
-		List<GroupBySet> result = new ArrayList<GroupBySet>();
-		for (String g : catGroup.split(",")) {
-			result.add(new GroupBySet(g.toUpperCase(), (byte) (Protocol.GroupBySet.OP_COUNT | Protocol.GroupBySet.ORDER_COUNT), "DESC"));
-		}
+		
+//		for (String g : catGroup.split(",")) {
+//			result.add(new GroupBySet(g.toUpperCase(), (byte) (Protocol.GroupBySet.OP_COUNT | Protocol.GroupBySet.ORDER_COUNT), "DESC"));
+//		}
+		
 		return result.toArray(new GroupBySet[result.size()]);
 	}
 	
@@ -518,6 +534,10 @@ public class SayclubRestService {
 	
 	protected SayclubResult makeResult(Result result, Query query, Map<String, String> params, String collection) throws IRException {
 		return SayclubResult.makeSayclubResult(query, result, params, collection);
+	}
+	
+	protected SayMallResult makeMallResult(Result result, Query query, Map<String, String> params, String collection) throws IRException {
+		return SayMallResult.makeSayMallResult(query, result, params, collection);
 	}
 	
 	protected String parseQ(Map<String, String> params) {
