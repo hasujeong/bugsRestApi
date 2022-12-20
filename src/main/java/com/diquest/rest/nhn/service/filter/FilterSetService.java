@@ -69,11 +69,12 @@ public class FilterSetService {
         } else if(collection.equalsIgnoreCase(Collections.LYRICS)) {
         	filters.add(new FilterSet(Protocol.FilterSet.OP_MATCH, "SEARCH_EXCLUDE_YN", "N"));
         	filters.add(new FilterSet(Protocol.FilterSet.OP_MATCH, "STATUS", "Y"));
+        	filters.add(new FilterSet(Protocol.FilterSet.OP_MATCH, "INST_YN", "N"));
         } else if(collection.equalsIgnoreCase(Collections.MV)) {
         	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "ATTR_TP", "STA", 1000));
         } else if(collection.equalsIgnoreCase(Collections.ALBUM)) {
-        	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "ALBUM_TP", new String[]{"RL", "RM", "EP"}, 1000));
-        	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "ALBUM_TP", new String[]{"SL", "OS", "BS", "LV", "SP", "PO"}, 500));
+        	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "ALBUM_TP", new String[]{"RL", "RM", "EP"}, 500));
+        	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "ALBUM_TP", new String[]{"SL", "OS", "BS", "LV", "SP", "PO"}, 300));
         }
         
         List<FilterNormalValueResult> normalFields = filterFieldParseResult.getFilterNormalValueResults();

@@ -40,7 +40,7 @@ public class OrderBySetService {
 					return new OrderBySet(true, "SCORE", Protocol.OrderBySet.OP_POSTWEIGHT);
 				}
 			} else {
-				return new OrderBySet(true, "SCORE_ADDK", Protocol.OrderBySet.OP_ADDWEIGHT);
+				return new OrderBySet(true, "BUGS_WEIGHT", Protocol.OrderBySet.OP_ADDWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase(Collections.LYRICS)) {
 			if (ArrayValue[0].equalsIgnoreCase("track_title")) {
