@@ -342,7 +342,7 @@ public class SayclubRestService {
 				result.add(new WhereSet("ALL", searchOption, "A"));
 			} else {
 				for (Entry<String, Double> field : fieldOpt.entrySet()) {
-					String fieldNm = field.getKey();
+					String fieldNm = field.getKey().toUpperCase();
 					int weight = 0;
 					weight = (int) (field.getValue() * 100);
 					
@@ -360,25 +360,29 @@ public class SayclubRestService {
 			
 		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_ART)) {
 			
-			for (Entry<String, Double> field : fieldOpt.entrySet()) {
-				String fieldNm = field.getKey();
-				int weight = 0;
-				weight = (int) (field.getValue() * 100);
-				
-				sayArticleMap.put(fieldNm, weight);
-				sayArticleMap.put(fieldNm + "_WS", weight);
-			}
-			
-			for (Entry<String, Integer> e : sayArticleMap.entrySet()) {
-				if (result.size() > 0) {
-					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+			if(keyword.equalsIgnoreCase("")) {
+				result.add(new WhereSet("ALL", searchOption, "A"));
+			} else {
+				for (Entry<String, Double> field : fieldOpt.entrySet()) {
+					String fieldNm = field.getKey().toUpperCase();
+					int weight = 0;
+					weight = (int) (field.getValue() * 100);
+					
+					sayArticleMap.put(fieldNm, weight);
+					sayArticleMap.put(fieldNm + "_WS", weight);
 				}
-				result.add(new WhereSet(e.getKey(), searchOption, keyword, e.getValue()));
+				
+				for (Entry<String, Integer> e : sayArticleMap.entrySet()) {
+					if (result.size() > 0) {
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					}
+					result.add(new WhereSet(e.getKey(), searchOption, keyword, e.getValue()));
+				}
 			}
 			
 		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYMALL)) {
 			for (Entry<String, Double> field : fieldOpt.entrySet()) {
-				String fieldNm = field.getKey();
+				String fieldNm = field.getKey().toUpperCase();
 				int weight = 0;
 				weight = (int) (field.getValue() * 100);
 				
