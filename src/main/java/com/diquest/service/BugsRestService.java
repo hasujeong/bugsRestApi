@@ -193,6 +193,9 @@ public class BugsRestService {
 			if(params.get("q").isEmpty()){
 				return makeEmptyNhnData(params);
 			}
+			if(parseSize(params) == 0){
+				return makeEmptyNhnData(params);
+			}
 			String paramQ = parseQ(params);
 			String qValue = paramQ.replaceAll("\\s", "");
 			String col = getCollection(params);
@@ -855,6 +858,9 @@ public class BugsRestService {
 			if(params.get("q").isEmpty()){
 				return makeEmptyNhnData(params);
 			}
+			if(parseSize(params) == 0){
+				return makeEmptyNhnData(params);
+			}
 		} else {			
 			return makeEmptyNhnData(params);
 		}
@@ -1449,6 +1455,9 @@ public class BugsRestService {
 			if(params.get("q").isEmpty()){
 				return makeEmptyNhnData(params);
 			}
+			if(parseSize(params) == 0){
+				return makeEmptyNhnData(params);
+			}
 			String paramQ = parseQ(params);
 			String qValue = paramQ.replaceAll("\\s", "");
 			String col = getCollection(params);
@@ -1969,11 +1978,15 @@ public class BugsRestService {
 			}
 		} else if(collection.equalsIgnoreCase(Collections.MUSICPD)) {
 			if(idxField.equalsIgnoreCase("musicpd_album_idx")) {
-				musicpdMap.put("MUSICPD_ALBUM_IDX", 100);
-				musicpdMap.put("MUSICPD_ALBUM_IDX_WS", 100);
+				musicpdMap.put("TITLE_IDX", 100);
+				musicpdMap.put("TITLE_IDX_WS", 100);
+				musicpdMap.put("MUSICPD_ALBUM_IDX", 30);
+				musicpdMap.put("MUSICPD_ALBUM_IDX_WS", 30);
 			} else {
-				musicpdMap.put("MUSICPD_ALBUM_IDX", 100);
-				musicpdMap.put("MUSICPD_ALBUM_IDX_WS", 100);
+				musicpdMap.put("TITLE_IDX", 100);
+				musicpdMap.put("TITLE_IDX_WS", 100);
+				musicpdMap.put("MUSICPD_ALBUM_IDX", 30);
+				musicpdMap.put("MUSICPD_ALBUM_IDX_WS", 30);
 			}
 			
 			for (Entry<String, Integer> e : musicpdMap.entrySet()) {
