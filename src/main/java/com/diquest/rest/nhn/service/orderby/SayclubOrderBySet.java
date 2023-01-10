@@ -22,7 +22,8 @@ public class SayclubOrderBySet {
 		String[] ArrayValue = value.toUpperCase().split(" ");
 		
 		if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST)) {
-			return new OrderBySet(false, "REGDATE", Protocol.OrderBySet.OP_PREWEIGHT);
+//			return new OrderBySet(false, "REGDATE", Protocol.OrderBySet.OP_PREWEIGHT);
+			return new OrderBySet(true, "ONAIR", Protocol.OrderBySet.OP_POSTWEIGHT);
 			
 		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_ART)) {
 			if (ArrayValue[0].equalsIgnoreCase("REGDATE")) {

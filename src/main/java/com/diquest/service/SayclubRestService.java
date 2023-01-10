@@ -106,7 +106,7 @@ public class SayclubRestService {
 		String RangeFilter = "";
 		String RangeKey = "";
 		
-		if(collection.equalsIgnoreCase(SayclubCollections.CHATUSER)) {						
+		if(collection.equalsIgnoreCase(SayclubCollections.CHATUSER)) {				
 			if(FilterParams.indexOf("&") > -1) {
 				
         		String[] f = FilterParams.split("&");
@@ -123,6 +123,30 @@ public class SayclubRestService {
         			}
         		}
         		
+        	} else if(FilterParams.indexOf("|") > -1) {
+				
+        		String[] f = FilterParams.split("\\|");
+        		
+        		for(int i=0 ; i < f.length ; i++) {
+        			String key = f[i].split("=")[0].toUpperCase();
+        			String value = f[i].split("=")[1];
+        			
+        			if(key.equalsIgnoreCase("BYEAR")) {
+        				if(value.indexOf("[") > -1) {
+        					RangeFilter = value;
+        					RangeKey = key;
+        				}
+        			}
+        		}
+        		
+        	} else {
+        		if(FilterParams.indexOf("[") > -1) {
+        			String key = FilterParams.split("=")[0].toUpperCase();
+        			String value = FilterParams.split("=")[1];
+        			
+        			RangeFilter = value;
+					RangeKey = key;
+        		}
         	}
 		}
 		
@@ -406,11 +430,12 @@ public class SayclubRestService {
 		String[] fts;
         
         if(!paramFilter.equalsIgnoreCase("")) {
-        	if (result.size() > 0) {
-        		result.add(new WhereSet(Protocol.WhereSet.OP_AND));
-			}
         	  	
         	if(paramFilter.indexOf("|") > -1) {
+        		if (result.size() > 0) {
+            		result.add(new WhereSet(Protocol.WhereSet.OP_AND));
+    			}
+        		
         		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
         		
         		fts = paramFilter.split("\\|");
@@ -423,12 +448,14 @@ public class SayclubRestService {
         				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
         			}
         			result.add(new WhereSet(key, searchOption, value));
-        			
-//        			System.out.println("======1=========> " + key + " <==========> " + value);
         		}
         		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
         		
         	} else if(paramFilter.indexOf("&") > -1) {
+        		if (result.size() > 0) {
+            		result.add(new WhereSet(Protocol.WhereSet.OP_AND));
+    			}
+        		
         		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
         		
         		fts = paramFilter.split("&");
@@ -446,7 +473,6 @@ public class SayclubRestService {
         				result.add(new WhereSet(key, searchOption, value));
         				k++;
         			} 
-//        			System.out.println("=======2========> " + key + " <==========> " + value);
         		}
         		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
         		
@@ -456,9 +482,13 @@ public class SayclubRestService {
     			String key = fts[0].toUpperCase();
     			String value = fts[1];
     			
-    			result.add(new WhereSet(key, searchOption, value));
+    			if(value.indexOf("[") == -1) {
+    				if (result.size() > 0) {
+    	        		result.add(new WhereSet(Protocol.WhereSet.OP_AND));
+    				}
+    				result.add(new WhereSet(key, searchOption, value));
+    			}
     			
-//    			System.out.println("=======3========> " + key + " <==========> " + value);
         	}
         } 
 			
