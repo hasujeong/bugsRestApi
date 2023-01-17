@@ -132,7 +132,7 @@ public class OrderBySetService {
 				}
 			} 
 			else {													// 정확도순
-				return new OrderBySet(true, "POPULAR", Protocol.OrderBySet.OP_PREWEIGHT);
+				return new OrderBySet(true, "BUGS_WEIGHT", Protocol.OrderBySet.OP_ADDWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase(Collections.MUSICPOST)) {
 			if (ArrayValue[0].equalsIgnoreCase("release_ymd")) {			// 발매일순

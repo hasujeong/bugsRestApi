@@ -408,7 +408,7 @@ public class BugsRestService {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		int colSize = 0;
+		int colSize = 10;
 		String colSort = "";
 
 		String urlStr = "";
@@ -1925,8 +1925,8 @@ public class BugsRestService {
 				}
 				
 			} else {
-				artistMap.put("ARTIST_IDX", 200);
-				artistMap.put("ARTIST_IDX_WS", 200);
+				artistMap.put("ARTIST_IDX", 100);
+				artistMap.put("ARTIST_IDX_WS", 100);
 				artistMap.put("GRP_NM_IDX", 100);
 				artistMap.put("GRP_NM_IDX_WS", 100);
 				artistMap.put("SYN_ARTIST_IDX_KO", 10);
@@ -1947,7 +1947,6 @@ public class BugsRestService {
 		} else if(collection.equalsIgnoreCase(Collections.MV)) {
 			mvMap.put("MV_TRACK_IDX", 100);
 			mvMap.put("MV_TRACK_IDX_WS", 100);
-			mvMap.put("ARTIST_IDX", 300);
 			mvMap.put("MV_TRACK_ARTIST_ALBUM_IDX", 30);
 			mvMap.put("SYN_MV_TRACK_ARTIST_ALBUM_IDX", 30);
 			mvMap.put("MV_TRACK_ARTIST_ALBUM_IDX_WS", 30);
