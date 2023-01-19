@@ -142,7 +142,7 @@ public class OrderBySetService {
 					return new OrderBySet(true, "RELEASE_YMD", Protocol.OrderBySet.OP_POSTWEIGHT);
 				}
 			} else {													// 정확도순
-				return new OrderBySet(true, "POPULAR", Protocol.OrderBySet.OP_PREWEIGHT);
+				return new OrderBySet(true, "BUGS_WEIGHT", Protocol.OrderBySet.OP_PREWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase(Collections.CLASSIC)) {
 			if (ArrayValue[0].equalsIgnoreCase("popular")) {			// 인기순

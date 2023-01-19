@@ -1977,13 +1977,13 @@ public class BugsRestService {
 			}
 		} else if(collection.equalsIgnoreCase(Collections.MUSICPD)) {
 			if(idxField.equalsIgnoreCase("musicpd_album_idx")) {
-				musicpdMap.put("TITLE_IDX", 100);
-				musicpdMap.put("TITLE_IDX_WS", 100);
+				musicpdMap.put("TITLE_IDX", 1000);
+				musicpdMap.put("TITLE_IDX_WS", 1000);
 				musicpdMap.put("MUSICPD_ALBUM_IDX", 30);
 				musicpdMap.put("MUSICPD_ALBUM_IDX_WS", 30);
 			} else {
-				musicpdMap.put("TITLE_IDX", 100);
-				musicpdMap.put("TITLE_IDX_WS", 100);
+				musicpdMap.put("TITLE_IDX", 1000);
+				musicpdMap.put("TITLE_IDX_WS", 1000);
 				musicpdMap.put("MUSICPD_ALBUM_IDX", 30);
 				musicpdMap.put("MUSICPD_ALBUM_IDX_WS", 30);
 			}
@@ -1999,8 +1999,10 @@ public class BugsRestService {
 				}
 			}
 		} else if(collection.equalsIgnoreCase(Collections.MUSICPOST)) {
-			musicpostMap.put("MUSICPOST_IDX", 100);
-			musicpostMap.put("MUSICPOST_IDX_WS", 100);
+			musicpostMap.put("MUSICPOST_IDX", 30);
+			musicpostMap.put("MUSICPOST_IDX_WS", 30);
+			musicpostMap.put("TITLE_IDX", 200);
+			musicpostMap.put("TITLE_IDX_WS", 200);
 			
 			for (Entry<String, Integer> e : musicpostMap.entrySet()) {
 				if (result.size() > 0) {

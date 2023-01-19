@@ -19,15 +19,20 @@ import com.diquest.rest.nhn.service.select.AutoTotalSelectSet;
 public class AutoTotalResult {
 	private static String currTimezone = new SimpleDateFormat("XXX").format(new Date()).replace(":", "");
 	private static RestCommandExtractor restCommandExtractor = new RestCommandExtractor(Connection.IP, Connection.PORT);
+	private static int artistCnt = 0;
 
 	Meta meta;
 	
 	public AutoTotalResult(QuerySet q, ResultSet result, Map<String, String> map) throws IRException {
 		List<Map<String, Object>> items = makeTotalItems(q, result, map); 
 		Map<String, Object> artitems = makeArtistItems(q, result, map); 
-		items.add(0, artitems);
+
+		if(artistCnt > 0) {
+			items.add(0, artitems);
+		}
 		
 		this.meta = new Meta(items);
+		artistCnt = 0;
 	}
 	
 	public static AutoTotalResult makeAutoTotalResult(QuerySet query, ResultSet result, Map<String, String> map) throws IRException {
@@ -90,6 +95,7 @@ public class AutoTotalResult {
 			if (i == 0) {
 				firstValue = new ArtItem(q.getQuery(0), result.getResult(0), map, i).value;
 			}
+			artistCnt++;
 		}
 		
 		temp.put("meta", items);
