@@ -2427,8 +2427,10 @@ public class BugsRestService {
 				if(type.equalsIgnoreCase("intersection")) {
 					if (operand.startsWith("and")) {
 						result.add(new WhereSet(Protocol.WhereSet.OP_AND));
-			        } else {
+			        } else if (operand.startsWith("or")) {
 			        	result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+			        } else {
+			        	result.add(new WhereSet(Protocol.WhereSet.OP_AND));
 			        }
 				} else if(type.equalsIgnoreCase("exclusion")) {
 					result.add(new WhereSet(Protocol.WhereSet.OP_NOT));

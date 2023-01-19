@@ -62,6 +62,7 @@ public class FilterSetService {
         List<FilterSet> filters = new ArrayList<>();
         
         if(collection.equalsIgnoreCase(Collections.TRACK)) {
+        	filters.add(new FilterSet(Protocol.FilterSet.OP_MATCH, "STATUS", "Y"));
         	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "COVER_YN", "N", 1000));
         	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "MR_YN", "N", 1000));
         	
@@ -71,6 +72,7 @@ public class FilterSetService {
         	filters.add(new FilterSet(Protocol.FilterSet.OP_MATCH, "STATUS", "Y"));
         	filters.add(new FilterSet(Protocol.FilterSet.OP_MATCH, "INST_YN", "N"));
         } else if(collection.equalsIgnoreCase(Collections.MV)) {
+        	filters.add(new FilterSet(Protocol.FilterSet.OP_MATCH, "STATUS", "Y"));
         	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "ATTR_TP", "STA", 1000));
         } else if(collection.equalsIgnoreCase(Collections.ALBUM)) {
         	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "ALBUM_TP", new String[]{"RL", "RM", "EP"}, 500));
