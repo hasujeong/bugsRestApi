@@ -1865,12 +1865,12 @@ public class BugsRestService {
 				}
 			}
 		} else if(collection.equalsIgnoreCase(Collections.LYRICS)) {
-				lyricsMap.put("TRACK_IDX", 100);
-				lyricsMap.put("TRACK_IDX_WS", 100);
+				lyricsMap.put("TRACK_IDX", 200);
+				lyricsMap.put("TRACK_IDX_WS", 200);
 				lyricsMap.put("ARTIST_IDX", 300);
 				lyricsMap.put("ARTIST_IDX_WS", 300);
-				lyricsMap.put("LYRICS_IDX", 300);
-				lyricsMap.put("LYRICS_IDX_WS", 300);
+				lyricsMap.put("LYRICS_IDX", 100);
+				lyricsMap.put("LYRICS_IDX_WS", 100);
 				lyricsMap.put("TOTAL_LYRICS_IDX", 30);
 				lyricsMap.put("TOTAL_LYRICS_IDX_WS", 30);
 				

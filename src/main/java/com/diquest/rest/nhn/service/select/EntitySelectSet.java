@@ -71,6 +71,7 @@ public class EntitySelectSet {
 			list.add(new SelectSet("TRACK_ID"));
 			list.add(new SelectSet("TRACK_SEARCH_TITLE"));
 			list.add(new SelectSet("TRACK_TITLE"));
+			list.add(new SelectSet("EDITION_NO"));
 		} 
 		
 		return list;
