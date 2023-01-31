@@ -196,6 +196,12 @@ public class BugsRestService {
 			if(parseSize(params) == 0){
 				return makeEmptyNhnData(params);
 			}
+			String chkQ = parseQ(params);
+
+			if (!chkQ.matches(".*[0-9|a-z|A-Z|ㄱ-ㅎ|ㅏ-ㅣ|가-힝].*")) {
+				return makeEmptyNhnData(params);
+			}
+			
 			String paramQ = parseQ(params);
 			String qValue = paramQ.replaceAll("\\s", "");
 			String col = getCollection(params);
@@ -859,6 +865,11 @@ public class BugsRestService {
 				return makeEmptyNhnData(params);
 			}
 			if(parseSize(params) == 0){
+				return makeEmptyNhnData(params);
+			}
+			String chkQ = parseQ(params);
+
+			if (!chkQ.matches(".*[0-9|a-z|A-Z|ㄱ-ㅎ|ㅏ-ㅣ|가-힝].*")) {
 				return makeEmptyNhnData(params);
 			}
 		} else {			
@@ -2440,12 +2451,19 @@ public class BugsRestService {
 			}
 			
 			if(type.equalsIgnoreCase("intersection")) {
-				result.add(new WhereSet(name.toUpperCase(), option, keyword, 100));
+				if(name.toUpperCase().equalsIgnoreCase("ALBUM_IDX")) {
+					if(keyword.matches("[0-9]+집") == true) {
+						result.add(new WhereSet("EDITION_NO", option, keyword, 100));
+					} else {
+						result.add(new WhereSet(name.toUpperCase(), option, keyword, 100));
+					}
+				} else {
+					result.add(new WhereSet(name.toUpperCase(), option, keyword, 100));
+				}
 			} else if(type.equalsIgnoreCase("exclusion")) {
 				result.add(new WhereSet(name.toUpperCase(), option, keyword));
 			}
 		}
-//		
 //				
 //		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
 //		
