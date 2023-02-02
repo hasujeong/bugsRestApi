@@ -40,7 +40,7 @@ public class SayclubFilterSetService {
         String rangeStr = RangeFilter.replace("[", "").replace("]", "");
         rangeValues = rangeStr.split(",");
                 
-        if(collection.equalsIgnoreCase(SayclubCollections.CHATUSER)) {
+        if(collection.equalsIgnoreCase(SayclubCollections.CHATUSER_OLD)) {
         	filters.add(new FilterSet(Protocol.FilterSet.OP_RANGE, RangeKey, rangeValues));
         } 
                

@@ -172,7 +172,7 @@ public class SayclubResult {
 		String USER_NAME_OPENED;
 
 		public Item(Result result, SelectSet[] selectSet, Map<String, String> params, int resultIdx, String collection) {	
-			if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_ART)) {
+			if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_ART_OLD)) {
 				this.RANK = getSaycastArt(result, resultIdx, "_RANK");
 				this.DOCID = getSaycastArt(result, resultIdx, "_DOCID");
 				this.RELEVANCE = getSaycastArt(result, resultIdx, "WEIGHT");
@@ -186,7 +186,7 @@ public class SayclubResult {
 				this.NICK = getSaycastArt(result, resultIdx, "NICK");
 				this.REGDATE = getSaycastArt(result, resultIdx, "REGDATE");
 				this.SUBJECT = getSaycastArt(result, resultIdx, "SUBJECT");
-			} else if(collection.equalsIgnoreCase(SayclubCollections.SAYMALL)) {
+			} else if(collection.equalsIgnoreCase(SayclubCollections.SAYMALL_OLD)) {
 				this.RANK = getSaymall(result, resultIdx, "_RANK");
 				this.DOCID = getSaymall(result, resultIdx, "_DOCID");
 				this.RELEVANCE = getSaymall(result, resultIdx, "WEIGHT");
@@ -208,7 +208,7 @@ public class SayclubResult {
 				this.SELL_AMOUNT = getSaymall(result, resultIdx, "SELL_AMOUNT");
 				this.SEX = getSaymall(result, resultIdx, "SEX");
 				this.USE_TYPE = getSaymall(result, resultIdx, "USE_TYPE");
-			} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST)) {
+			} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_OLD)) {
 				this.RANK = getSaycast(result, resultIdx, "_RANK");
 				this.DOCID = getSaycast(result, resultIdx, "_DOCID");
 				this.RELEVANCE = getSaycast(result, resultIdx, "WEIGHT");
@@ -226,7 +226,7 @@ public class SayclubResult {
 				this.LASTUPDATE = getSaycast(result, resultIdx, "LASTUPDATE");
 				this.ONAIR = getSaycast(result, resultIdx, "ONAIR");
 				this.REGDATE = getSaycast(result, resultIdx, "REGDATE");
-			} else if(collection.equalsIgnoreCase(SayclubCollections.ALLUSER)) {
+			} else if(collection.equalsIgnoreCase(SayclubCollections.ALLUSER_OLD)) {
 				this.RANK = getAlluser(result, resultIdx, "_RANK");
 				this.DOCID = getAlluser(result, resultIdx, "_DOCID");
 				this.RELEVANCE = getAlluser(result, resultIdx, "WEIGHT");
@@ -243,7 +243,7 @@ public class SayclubResult {
 				this.SEX_BYEAR_CREGION = getAlluser(result, resultIdx, "SEX_BYEAR_CREGION");
 				this.USER_NAME = getAlluser(result, resultIdx, "USER_NAME");
 				this.USER_NICKNAME = getAlluser(result, resultIdx, "USER_NICKNAME");				
-			} else if(collection.equalsIgnoreCase(SayclubCollections.CHATUSER)) {
+			} else if(collection.equalsIgnoreCase(SayclubCollections.CHATUSER_OLD)) {
 				this.RANK = getChatuser(result, resultIdx, "_RANK");
 				this.DOCID = getChatuser(result, resultIdx, "_DOCID");
 				this.RELEVANCE = getChatuser(result, resultIdx, "WEIGHT");

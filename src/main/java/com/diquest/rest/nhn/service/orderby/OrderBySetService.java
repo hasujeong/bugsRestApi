@@ -114,7 +114,7 @@ public class OrderBySetService {
 					return new OrderBySet(true, "RELEASE_YMD", Protocol.OrderBySet.OP_POSTWEIGHT);
 				}
 			} else {													// 정확도순
-				return new OrderBySet(false, "BUGS_WEIGHT", Protocol.OrderBySet.OP_PRE_ADDWEIGHT);
+				return new OrderBySet(false, "POPULAR", Protocol.OrderBySet.OP_PREWEIGHT);
 			}
 		} else if(collection.equalsIgnoreCase(Collections.MUSICPD)) {
 			if (ArrayValue[0].equalsIgnoreCase("title")) {			// 뮤직pd앨범명순

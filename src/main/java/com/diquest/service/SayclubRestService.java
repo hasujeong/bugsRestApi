@@ -106,7 +106,7 @@ public class SayclubRestService {
 		String RangeFilter = "";
 		String RangeKey = "";
 		
-		if(collection.equalsIgnoreCase(SayclubCollections.CHATUSER)) {				
+		if(collection.equalsIgnoreCase(SayclubCollections.CHATUSER_OLD)) {				
 			if(FilterParams.indexOf("&") > -1) {
 				
         		String[] f = FilterParams.split("&");
@@ -269,7 +269,7 @@ public class SayclubRestService {
 			
 			String resultJson = "";
 			
-			if(collection.equalsIgnoreCase(SayclubCollections.SAYMALL)) {
+			if(collection.equalsIgnoreCase(SayclubCollections.SAYMALL_OLD)) {
 				resultJson = gson.toJson(makeMallResult(commandSearchRequest.getResultSet().getResult(0), query, params, collection));
 			} else {
 				resultJson = gson.toJson(makeResult(commandSearchRequest.getResultSet().getResult(0), query, params, collection));
@@ -360,7 +360,7 @@ public class SayclubRestService {
 		HashMap<String, Integer> sayArticleMap = new HashMap<String, Integer>();
 		HashMap<String, Integer> sayMallMap = new HashMap<String, Integer>();
 		
-		if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST)) {
+		if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_OLD)) {
 			
 			if(keyword.equalsIgnoreCase("")) {
 				result.add(new WhereSet("ALL", searchOption, "A"));
@@ -382,7 +382,7 @@ public class SayclubRestService {
 				}
 			}
 			
-		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_ART)) {
+		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_ART_OLD)) {
 			
 			if(keyword.equalsIgnoreCase("")) {
 				result.add(new WhereSet("ALL", searchOption, "A"));
@@ -404,7 +404,7 @@ public class SayclubRestService {
 				}
 			}
 			
-		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYMALL)) {
+		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYMALL_OLD)) {
 			for (Entry<String, Double> field : fieldOpt.entrySet()) {
 				String fieldNm = field.getKey().toUpperCase();
 				int weight = 0;
@@ -420,10 +420,10 @@ public class SayclubRestService {
 				}
 				result.add(new WhereSet(e.getKey(), searchOption, keyword, e.getValue()));
 			}
-		} else if(collection.equalsIgnoreCase(SayclubCollections.ALLUSER)) {
+		} else if(collection.equalsIgnoreCase(SayclubCollections.ALLUSER_OLD)) {
 			result.add(new WhereSet("ALL", searchOption, "A"));
 			
-		} else if(collection.equalsIgnoreCase(SayclubCollections.CHATUSER)) {
+		} else if(collection.equalsIgnoreCase(SayclubCollections.CHATUSER_OLD)) {
 			result.add(new WhereSet("ALL", searchOption, "A"));
 		}
 		

@@ -132,15 +132,15 @@ public class SayclubSelectSet {
 	public SelectSet[] makeSelectSet(Map<String, String> params) {
 		ArrayList<SelectSet> list = new ArrayList<SelectSet>();
 		String collection = params.get("collection");
-		if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_ART)) {
+		if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_ART_OLD)) {
 			list.addAll(getSayArtSelectList());
-		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST)) {
+		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_OLD)) {
 			list.addAll(getSayCastSelectList());
-		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYMALL)) {
+		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYMALL_OLD)) {
 			list.addAll(getSayMallSelectList());
-		} else if(collection.equalsIgnoreCase(SayclubCollections.ALLUSER)) {
+		} else if(collection.equalsIgnoreCase(SayclubCollections.ALLUSER_OLD)) {
 			list.addAll(getAlluserSelectList());
-		} else if(collection.equalsIgnoreCase(SayclubCollections.CHATUSER)) {
+		} else if(collection.equalsIgnoreCase(SayclubCollections.CHATUSER_OLD)) {
 			list.addAll(getChatuserSelectList());
 		} else {
 			list.addAll(getReturnParamSelectList(params));

@@ -21,11 +21,11 @@ public class SayclubOrderBySet {
 		
 		String[] ArrayValue = value.toUpperCase().split(" ");
 		
-		if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST)) {
+		if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_OLD)) {
 //			return new OrderBySet(false, "REGDATE", Protocol.OrderBySet.OP_PREWEIGHT);
 			return new OrderBySet(true, "ONAIR", Protocol.OrderBySet.OP_POSTWEIGHT);
 			
-		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_ART)) {
+		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_ART_OLD)) {
 			if (ArrayValue[0].equalsIgnoreCase("REGDATE")) {
 				if(ArrayValue[1].equalsIgnoreCase("ASC")) {
 					return new OrderBySet(true, "REGDATE", Protocol.OrderBySet.OP_POSTWEIGHT);
@@ -42,7 +42,7 @@ public class SayclubOrderBySet {
 				return new OrderBySet(false, "REGDATE", Protocol.OrderBySet.OP_PREWEIGHT);
 			}
 			
-		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYMALL)) {
+		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYMALL_OLD)) {
 			if (ArrayValue[0].equalsIgnoreCase("SELL_AMOUNT")) {
 				if(ArrayValue[1].equalsIgnoreCase("ASC")) {
 					return new OrderBySet(true, "SELL_AMOUNT", Protocol.OrderBySet.OP_POSTWEIGHT);
@@ -70,9 +70,9 @@ public class SayclubOrderBySet {
 			} else {
 				return new OrderBySet(false, "ITEM_NAME_FOR_SORT", Protocol.OrderBySet.OP_PREWEIGHT);
 			}
-		} else if(collection.equalsIgnoreCase(SayclubCollections.ALLUSER)) {
+		} else if(collection.equalsIgnoreCase(SayclubCollections.ALLUSER_OLD)) {
 			return new OrderBySet(false, "WEIGHT");
-		} else if(collection.equalsIgnoreCase(SayclubCollections.CHATUSER)) {
+		} else if(collection.equalsIgnoreCase(SayclubCollections.CHATUSER_OLD)) {
 			return new OrderBySet(false, "WEIGHT");
 		} 
 		

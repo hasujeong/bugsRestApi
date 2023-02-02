@@ -165,7 +165,7 @@ public class SayMallResult {
 		String USE_TYPE;
 		
 		public Item(Result result, SelectSet[] selectSet, Map<String, String> params, int resultIdx, String collection) {	
-			if(collection.equalsIgnoreCase(SayclubCollections.SAYMALL)) {
+			if(collection.equalsIgnoreCase(SayclubCollections.SAYMALL_OLD)) {
 				this.RANK = getSaymall(result, resultIdx, "_RANK");
 				this.DOCID = getSaymall(result, resultIdx, "_DOCID");
 				this.RELEVANCE = getSaymall(result, resultIdx, "WEIGHT");

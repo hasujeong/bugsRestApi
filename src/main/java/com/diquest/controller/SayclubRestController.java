@@ -25,11 +25,14 @@ public class SayclubRestController {
 	
 	private SayclubRestService sayclubRestService;
 	
-	public static String APP_KEY_SAYCAST = "saycast_alpha";
-	public static String APP_KEY_SAYCAST_ART = "saycast_article_alpha";
-	public static String APP_KEY_SAYMALL = "saymall_alpha";
-	public static String APP_KEY_ALLUSER = "alluser_alpha";
-	public static String APP_KEY_CHATUSER = "chatuser_alpha";
+	public static String APP_KEY_SAYCAST = "saycast";
+	public static String APP_KEY_SAYCAST_ART = "saycast_article";
+	
+	public static String APP_KEY_SAYCAST_OLD = "saycast_alpha";
+	public static String APP_KEY_SAYCAST_ART_OLD = "saycast_article_alpha";
+	public static String APP_KEY_SAYMALL_OLD = "saymall_alpha";
+	public static String APP_KEY_ALLUSER_OLD = "alluser_alpha";
+	public static String APP_KEY_CHATUSER_OLD = "chatuser_alpha";
 
 	public SayclubRestController(SayclubRestService sayclubRestService) {
 		this.sayclubRestService = sayclubRestService;
@@ -42,20 +45,20 @@ public class SayclubRestController {
 		
 		long time = System.currentTimeMillis();
 		
-		if (appKey.equals(APP_KEY_SAYCAST)) {
-			params.put("collection",SayclubCollections.SAYCAST);
+		if (appKey.equals(APP_KEY_SAYCAST_OLD)) {
+			params.put("collection",SayclubCollections.SAYCAST_OLD);
 			return sayclubRestService.saySearch(params, requestHeader, request);
-		} else if (appKey.equals(APP_KEY_SAYCAST_ART)) {
-			params.put("collection",SayclubCollections.SAYCAST_ART);
+		} else if (appKey.equals(APP_KEY_SAYCAST_ART_OLD)) {
+			params.put("collection",SayclubCollections.SAYCAST_ART_OLD);
 			return sayclubRestService.saySearch(params, requestHeader, request);
-		} else if (appKey.equals(APP_KEY_SAYMALL)) {
-			params.put("collection",SayclubCollections.SAYMALL);
+		} else if (appKey.equals(APP_KEY_SAYMALL_OLD)) {
+			params.put("collection",SayclubCollections.SAYMALL_OLD);
 			return sayclubRestService.saySearch(params, requestHeader, request);
-		} else if (appKey.equals(APP_KEY_ALLUSER)) {
-			params.put("collection",SayclubCollections.ALLUSER);
+		} else if (appKey.equals(APP_KEY_ALLUSER_OLD)) {
+			params.put("collection",SayclubCollections.ALLUSER_OLD);
 			return sayclubRestService.saySearch(params, requestHeader, request);
-		} else if (appKey.equals(APP_KEY_CHATUSER)) {
-			params.put("collection",SayclubCollections.CHATUSER);
+		} else if (appKey.equals(APP_KEY_CHATUSER_OLD)) {
+			params.put("collection",SayclubCollections.CHATUSER_OLD);
 			return sayclubRestService.saySearch(params, requestHeader, request);
 		}else {
 			return unknownRequest(params, time);

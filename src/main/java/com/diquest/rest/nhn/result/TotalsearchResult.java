@@ -77,10 +77,18 @@ public class TotalsearchResult {
             	// obj를 우선 JSONObject에 담음
                 JsonObject jsonMain = (JsonObject) obj;
                 JsonObject resultMain = (JsonObject) jsonMain.get("result");
-
-                query = gson.toJson(resultMain.get("query")).replaceAll("\"", "");
-                totalCnt += Integer.parseInt(gson.toJson(resultMain.get("total")).replaceAll("\"", ""));
                 
+                int resultCnt = 0;
+
+                if(resultMain != null) {
+	                query = gson.toJson(resultMain.get("query")).replaceAll("\"", "");
+	                resultCnt = Integer.parseInt(gson.toJson(resultMain.get("total")).replaceAll("\"", ""));
+                } else {
+                	query = "";
+                	resultCnt = 0;
+                }
+                
+                totalCnt += resultCnt;
             }
 			
 			this.itemCount = 10; //default 출력 count
@@ -133,27 +141,43 @@ public class TotalsearchResult {
 		String domain;
 
 		public TotalItem(Object obj, String collection) throws IRException {
-			List<Item> items = makeItems(obj); 
-			
-			Gson gson = new Gson();
 			
         	// obj를 우선 JSONObject에 담음
             JsonObject jsonMain = (JsonObject) obj;
             
             JsonObject resultMain = (JsonObject) jsonMain.get("result");
 //            JsonObject itemMain = (JsonObject) resultMain.get("itemList");
-            JsonObject statusList = (JsonObject) resultMain.get("status");
+            
+            if(resultMain != null) {
+            	List<Item> items = makeItems(obj); 
+    			
+    			Gson gson = new Gson();
+    			
+            	JsonObject statusList = (JsonObject) resultMain.get("status");
 
-            query = gson.toJson(resultMain.get("query")).replaceAll("\"", "");
-            			
-			this.status = new Status(statusList);
-			this.itemCount = Integer.parseInt(gson.toJson(resultMain.get("itemCount")).replaceAll("\"", ""));
-			this.itemList = new itemList(items);
-			this.query = query;
-			this.start = 1;
-			this.total = Integer.parseInt(gson.toJson(resultMain.get("total")).replaceAll("\"", ""));
-			this.terms = makeTerms(query);
-			this.domain = collection;			// 컬렉션명
+                query = gson.toJson(resultMain.get("query")).replaceAll("\"", "");
+                 			
+     			this.status = new Status(statusList);
+     			this.itemCount = Integer.parseInt(gson.toJson(resultMain.get("itemCount")).replaceAll("\"", ""));
+     			this.itemList = new itemList(items);
+     			this.query = query;
+     			this.start = 1;
+     			this.total = Integer.parseInt(gson.toJson(resultMain.get("total")).replaceAll("\"", ""));
+     			this.terms = makeTerms(query);
+     			this.domain = collection;			// 컬렉션명
+            } else { 			
+            	List<Item> items = new ArrayList<Item>();
+            	
+     			this.status = new Status();
+     			this.itemCount = 0;
+     			this.itemList = new itemList(items);
+     			this.query = "";
+     			this.start = 1;
+     			this.total = 0;
+     			this.terms = makeTerms(query);
+     			this.domain = collection;			// 컬렉션명
+            }
+           
 		}
 
 		private List<String> makeTerms(String searchKeyword) throws IRException {
