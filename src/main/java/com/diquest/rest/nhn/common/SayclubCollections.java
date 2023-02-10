@@ -4,6 +4,9 @@ public class SayclubCollections {
 	/** 방송국 컬렉션 **/
 	public static final String SAYCAST = "SAYCAST";
 	
+	/** 방송국 자동완성 컬렉션 **/
+	public static final String SAYCAST_AUTO = "SAYCAST_AUTO";
+	
 	/** 게시글 컬렉션 **/
 	public static final String SAYCAST_ART = "SAYCAST_ARTICLE";
 	

@@ -74,7 +74,28 @@ public class SayclubOrderBySet {
 			return new OrderBySet(false, "WEIGHT");
 		} else if(collection.equalsIgnoreCase(SayclubCollections.CHATUSER_OLD)) {
 			return new OrderBySet(false, "WEIGHT");
-		} 
+		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST)) {
+//			return new OrderBySet(false, "REGDATE", Protocol.OrderBySet.OP_PREWEIGHT);
+			return new OrderBySet(true, "ONAIR", Protocol.OrderBySet.OP_POSTWEIGHT);
+			
+		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_ART)) {
+			if (ArrayValue[0].equalsIgnoreCase("REGDATE")) {
+				if(ArrayValue[1].equalsIgnoreCase("ASC")) {
+					return new OrderBySet(true, "REGDATE", Protocol.OrderBySet.OP_POSTWEIGHT);
+				} else {
+					return new OrderBySet(false, "REGDATE", Protocol.OrderBySet.OP_POSTWEIGHT);
+				}
+			} else if (ArrayValue[0].equalsIgnoreCase("LASTUPDATE")) {
+				if(ArrayValue[1].equalsIgnoreCase("ASC")) {
+					return new OrderBySet(true, "LASTUPDATE", Protocol.OrderBySet.OP_POSTWEIGHT);
+				} else {
+					return new OrderBySet(false, "LASTUPDATE", Protocol.OrderBySet.OP_POSTWEIGHT);
+				}
+			} else {
+				return new OrderBySet(false, "REGDATE", Protocol.OrderBySet.OP_PREWEIGHT);
+			}
+			
+		}
 		
 		return new OrderBySet(false, "WEIGHT");
 	}

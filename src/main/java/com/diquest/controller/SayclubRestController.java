@@ -47,20 +47,27 @@ public class SayclubRestController {
 		
 		if (appKey.equals(APP_KEY_SAYCAST_OLD)) {
 			params.put("collection",SayclubCollections.SAYCAST_OLD);
-			return sayclubRestService.saySearch(params, requestHeader, request);
+			return sayclubRestService.sayOldSearch(params, requestHeader, request);
 		} else if (appKey.equals(APP_KEY_SAYCAST_ART_OLD)) {
 			params.put("collection",SayclubCollections.SAYCAST_ART_OLD);
-			return sayclubRestService.saySearch(params, requestHeader, request);
+			return sayclubRestService.sayOldSearch(params, requestHeader, request);
 		} else if (appKey.equals(APP_KEY_SAYMALL_OLD)) {
 			params.put("collection",SayclubCollections.SAYMALL_OLD);
-			return sayclubRestService.saySearch(params, requestHeader, request);
+			return sayclubRestService.sayOldSearch(params, requestHeader, request);
 		} else if (appKey.equals(APP_KEY_ALLUSER_OLD)) {
 			params.put("collection",SayclubCollections.ALLUSER_OLD);
-			return sayclubRestService.saySearch(params, requestHeader, request);
+			return sayclubRestService.sayOldSearch(params, requestHeader, request);
 		} else if (appKey.equals(APP_KEY_CHATUSER_OLD)) {
 			params.put("collection",SayclubCollections.CHATUSER_OLD);
-			return sayclubRestService.saySearch(params, requestHeader, request);
-		}else {
+			return sayclubRestService.sayOldSearch(params, requestHeader, request);
+		} 
+		else if (appKey.equals(APP_KEY_SAYCAST)) {
+			params.put("collection",SayclubCollections.SAYCAST);
+			return sayclubRestService.sayNewSearch(params, requestHeader, request);
+		} else if (appKey.equals(APP_KEY_SAYCAST_ART)) {
+			params.put("collection",SayclubCollections.SAYCAST_ART);
+			return sayclubRestService.sayNewSearch(params, requestHeader, request);
+		} else {
 			return unknownRequest(params, time);
 		}
 		

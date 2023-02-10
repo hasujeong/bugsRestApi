@@ -196,11 +196,11 @@ public class BugsRestService {
 			if(parseSize(params) == 0){
 				return makeEmptyNhnData(params);
 			}
-			String chkQ = parseQ(params);
-
-			if (!chkQ.matches(".*[0-9|a-z|A-Z|ㄱ-ㅎ|ㅏ-ㅣ|가-힝].*")) {
-				return makeEmptyNhnData(params);
-			}
+//			String chkQ = parseQ(params);
+//
+//			if (!chkQ.matches(".*[0-9|a-z|A-Z|ㄱ-ㅎ|ㅏ-ㅣ|가-힝].*")) {
+//				return makeEmptyNhnData(params);
+//			}
 			
 			String paramQ = parseQ(params);
 			String qValue = paramQ.replaceAll("\\s", "");
@@ -339,7 +339,7 @@ public class BugsRestService {
 						filterFieldParseResult = parseFilterParams(params);
 						query.setSelect(parseSelect(params));
 						query.setFilter(parseFilter(params, filterFieldParseResult, getCollection(params)));
-						query.setWhere(parseWhere(params, filterFieldParseResult, getCollection(params)));
+						query.setWhere(parseWhere2(params, filterFieldParseResult, getCollection(params)));
 //						query.setGroupBy(parseGroupBy(params));
 						query.setOrderby(parseOrderBy(params, getCollection(params)));
 						query.setFrom(getCollection(params));
@@ -867,11 +867,11 @@ public class BugsRestService {
 			if(parseSize(params) == 0){
 				return makeEmptyNhnData(params);
 			}
-			String chkQ = parseQ(params);
-
-			if (!chkQ.matches(".*[0-9|a-z|A-Z|ㄱ-ㅎ|ㅏ-ㅣ|가-힝].*")) {
-				return makeEmptyNhnData(params);
-			}
+//			String chkQ = parseQ(params);
+//
+//			if (!chkQ.matches(".*[0-9|a-z|A-Z|ㄱ-ㅎ|ㅏ-ㅣ|가-힝].*")) {
+//				return makeEmptyNhnData(params);
+//			}
 		} else {			
 			return makeEmptyNhnData(params);
 		}
@@ -1722,7 +1722,37 @@ public class BugsRestService {
 	
 	protected List<WhereSet> makeBaseWhereSet(Map<String, String> params, String collection) throws InvalidParameterException {
 		List<WhereSet> result = new ArrayList<WhereSet>();
-		String keyword = parseQ(params);
+		String orgKeyword = parseQ(params);
+		String keyword = "";
+
+		String[] matchSp = orgKeyword.split("\\s+");
+
+		if(!orgKeyword.matches(".*[0-9|a-z|A-Z|ㄱ-ㅎ|ㅏ-ㅣ|가-힝].*")) {
+			keyword = orgKeyword;
+		} else {
+			if(matchSp.length > 0) {
+				for(int m = 0; m < matchSp.length ; m++) {
+					if(!matchSp[m].matches(".*[0-9|a-z|A-Z|ㄱ-ㅎ|ㅏ-ㅣ|가-힝].*")) {
+						if(m-1 >= 0) {
+							matchSp[m] = matchSp[m];
+						} else {
+							matchSp[m+1] = matchSp[m] + matchSp[m+1];
+							matchSp[m]= "";
+						}
+					} else {
+						if(m == 0) {
+							matchSp[m] = matchSp[m];
+						} else {
+							matchSp[m] = " " + matchSp[m];
+						}
+					}
+					keyword += matchSp[m];
+				}
+			} else {
+				keyword = orgKeyword;
+			}
+		}
+		
 		String trimKeyword = keyword.replaceAll("\\s", "");
 		
 //		String collection = getCollection(params);
@@ -2013,6 +2043,467 @@ public class BugsRestService {
 			musicpostMap.put("MUSICPOST_IDX", 30);
 			musicpostMap.put("MUSICPOST_IDX_WS", 30);
 			musicpostMap.put("TITLE_IDX", 200);
+			musicpostMap.put("TITLE_IDX_WS", 200);
+			
+			for (Entry<String, Integer> e : musicpostMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				if (qOption.isNofM()) {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				}
+			}
+		} else if(collection.equalsIgnoreCase(Collections.CLASSIC)) {
+			String classic_kwd = keyword.replaceAll("\\s", "");
+			
+			if(!CSartist_keyword.equalsIgnoreCase("")) {
+				if(qOption.isNofM()) {
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), classic_kwd, 300, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, 300, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX", qOption.getOption(), keyword, 50, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX", qOption.getOption(), classic_kwd, 50, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX_KOR", qOption.getOption(), keyword, 50, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("SECTION_TITLE_IDX", qOption.getOption(), CSartist_keyword, 100, qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), classic_kwd, 300));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, 300));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX", qOption.getOption(), keyword, 50));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX", qOption.getOption(), classic_kwd, 50));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX_KOR", qOption.getOption(), keyword, 50));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("SECTION_TITLE_IDX", qOption.getOption(), CSartist_keyword, 100));
+				}
+				classicMap.put("CLASSIC_IDX", 30);
+				classicMap.put("CLASSIC_IDX_KOR", 30);
+				
+				CSartist_keyword = "";
+			} else {
+				if(qOption.isNofM()) {
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), classic_kwd, 100, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, 100, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX", qOption.getOption(), keyword, 50, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX", qOption.getOption(), classic_kwd, 50, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX_KOR", qOption.getOption(), keyword, 50, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("SECTION_TITLE_IDX", qOption.getOption(), classic_kwd, 100, qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), classic_kwd, 100));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, 100));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX", qOption.getOption(), keyword, 50));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX", qOption.getOption(), classic_kwd, 50));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("TITLE_IDX_KOR", qOption.getOption(), keyword, 50));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("SECTION_TITLE_IDX", qOption.getOption(), classic_kwd, 100));
+				}
+				classicMap.put("CLASSIC_IDX", 30);
+				classicMap.put("CLASSIC_IDX_KOR", 30);
+			}
+			
+			for (Entry<String, Integer> e : classicMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				if (qOption.isNofM()) {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				}
+			}
+		} else if(collection.equalsIgnoreCase(Collections.ENTITY)) {
+			if(idxField.equalsIgnoreCase("track_idx")) {
+				entityMap.put("TRACK_IDX", 100);
+			} else if(idxField.equalsIgnoreCase("album_idx")) {
+				entityMap.put("ALBUM_IDX", 100);
+			} else if(idxField.equalsIgnoreCase("artist_idx")) {
+				entityMap.put("ARTIST_IDX", 100);
+			} else if(idxField.equalsIgnoreCase("arranger_idx")) {
+				entityMap.put("ARRANGER_IDX", 100);
+			} else if(idxField.equalsIgnoreCase("composer_idx")) {
+				entityMap.put("COMPOSER_IDX", 100);
+			} else if(idxField.equalsIgnoreCase("featuring_idx")) {
+				entityMap.put("FEATURING_IDX", 100);
+			} else if(idxField.equalsIgnoreCase("lyricist_idx")) {
+				entityMap.put("LYRICIST_IDX", 100);
+			} else if(idxField.equalsIgnoreCase("genre_idx")) {
+				entityMap.put("GENRE_IDX", 100);
+			} else if(idxField.equalsIgnoreCase("artist_role_idx")) {
+				entityMap.put("ARTIST_ROLE_IDX", 100);
+			} else {
+				entityMap.put("TRACK_IDX", 100);
+			} 
+			
+			for (Entry<String, Integer> e : entityMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				if (qOption.isNofM()) {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				}
+			}
+		} 
+
+//		for (Entry<String, Integer> e : idxScoreMap.entrySet()) {
+//			if (result.size() > 0) {
+//				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+//			}
+//			if (qOption.isNofM()) {
+//				result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+//			} else {
+//				result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+//			}
+//		}
+		
+		return result;
+	}
+	
+	protected WhereSet[] parseWhere2(Map<String, String> params, FilterFieldParseResult filterFieldParseResult, String collection) throws InvalidParameterException {
+		return WhereSetService.getInstance().makeWhereSet(params, filterFieldParseResult, makeBaseWhereSet2(params, collection));
+	}
+	
+	protected List<WhereSet> makeBaseWhereSet2(Map<String, String> params, String collection) throws InvalidParameterException {
+		List<WhereSet> result = new ArrayList<WhereSet>();
+		String orgKeyword = parseQ(params);
+		String keyword = "";
+
+		String[] matchSp = orgKeyword.split("\\s+");
+
+		if(!orgKeyword.matches(".*[0-9|a-z|A-Z|ㄱ-ㅎ|ㅏ-ㅣ|가-힝].*")) {
+			keyword = orgKeyword;
+		} else {
+			if(matchSp.length > 0) {
+				for(int m = 0; m < matchSp.length ; m++) {
+					if(!matchSp[m].matches(".*[0-9|a-z|A-Z|ㄱ-ㅎ|ㅏ-ㅣ|가-힝].*")) {
+						if(m-1 >= 0) {
+							matchSp[m] = matchSp[m];
+						} else {
+							matchSp[m+1] = matchSp[m] + matchSp[m+1];
+							matchSp[m]= "";
+						}
+					} else {
+						if(m == 0) {
+							matchSp[m] = matchSp[m];
+						} else {
+							matchSp[m] = " " + matchSp[m];
+						}
+					}
+					keyword += matchSp[m];
+				}
+			} else {
+				keyword = orgKeyword;
+			}
+		}
+		
+		String trimKeyword = keyword.replaceAll("\\s", "");
+		
+//		String collection = getCollection(params);
+		searchQoption qOption = new searchQoption(RestUtils.getParam(params, "q_option"), collection);
+		
+		String idxField = qOption.getIndexField();
+				
+		HashMap<String, Integer> trackMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> lyricsMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> albumMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> artistMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> mvMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> musicpdMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> musicpostMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> musiccastMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> classicMap = new HashMap<String, Integer>();
+		HashMap<String, Integer> entityMap = new HashMap<String, Integer>();
+		
+		if(collection.equalsIgnoreCase(Collections.TRACK)) {
+			if(idxField.equalsIgnoreCase("track_idx")) {
+				if(qOption.isNofM()) {
+					result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, 100, qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, 100));
+				}
+				trackMap.put("TRACK_IDX", 100);
+				trackMap.put("TRACK_IDX_WS", 100);
+				trackMap.put("SYN_TRACK_IDX_KO", 30);
+				trackMap.put("SYN_TRACK_IDX_WS", 30);
+				trackMap.put("SYN_TRACK_IDX", 30);
+			} else if(idxField.equalsIgnoreCase("artist_idx")) {
+				trackMap.put("ARTIST_IDX", 100);
+				trackMap.put("ARTIST_IDX_WS", 100);
+				trackMap.put("SYN_ARTIST_IDX_WS", 30);
+				trackMap.put("SYN_ARTIST_IDX", 30);
+			} else if(idxField.equalsIgnoreCase("album_idx")) {
+				trackMap.put("ALBUM_IDX", 100);
+				trackMap.put("ALBUM_IDX_WS", 100);
+				trackMap.put("SYN_ALBUM_IDX", 30);
+				trackMap.put("SYN_ALBUM_IDX_KO", 30);
+				trackMap.put("SYN_ALBUM_IDX_WS", 30);
+			} else {
+				if(!artist_keyword.equalsIgnoreCase("")) {
+					if(qOption.isNofM()) {
+						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+						result.add(new WhereSet("TRACK_IDX", qOption.getOption(), keyword, track_score, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), keyword, track_score, qOption.getNofmPercent()));
+//						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+//						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, track_score, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), keyword, artist_score, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), trimKeyword, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("SYN_TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
+						
+						if(album_score == 1000) {
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ALBUM_IDX", qOption.getOption(), keyword, album_score, qOption.getNofmPercent()));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ALBUM_IDX_WS", qOption.getOption(), keyword, album_score, qOption.getNofmPercent()));
+						}
+						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+						
+						result.add(new WhereSet(Protocol.WhereSet.OP_WEIGHTAND));
+						
+						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+						result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_WEIGHTAND, artist_keyword, 500, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), artist_keyword, 500, qOption.getNofmPercent()));
+						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+					} else {
+						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+						result.add(new WhereSet("TRACK_IDX", qOption.getOption(), keyword, track_score));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), keyword, track_score));
+//						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+//						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, track_score));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), keyword, artist_score));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), keyword, 30));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), trimKeyword));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("SYN_TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30));
+						
+						if(album_score == 1000) {
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ALBUM_IDX", qOption.getOption(), keyword, album_score));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ALBUM_IDX_WS", qOption.getOption(), keyword, album_score));
+						}
+						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+						
+						result.add(new WhereSet(Protocol.WhereSet.OP_WEIGHTAND));
+						
+						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+						result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), artist_keyword, 500));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), artist_keyword, 500));
+						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+					}
+					artist_keyword = "";
+					
+				} else {
+					if(track_score != 0) {
+						if(qOption.isNofM()) {
+							result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), trimKeyword, qOption.getNofmPercent()));
+						} else {
+							result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), keyword, 30));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), trimKeyword));
+						}
+						trackMap.put("TRACK_IDX", track_score);
+						trackMap.put("TRACK_IDX_WS", track_score);
+						trackMap.put("ARTIST_IDX", artist_score);
+						trackMap.put("ARTIST_IDX_WS", artist_score);
+						
+						if(album_score == 1000) {
+							trackMap.put("ALBUM_IDX", album_score);
+							trackMap.put("ALBUM_IDX_WS", album_score);
+						}
+					}
+					trackMap.put("TRACK_ARTIST_ALBUM_IDX", 30);
+					trackMap.put("SYN_TRACK_ARTIST_ALBUM_IDX", 30);
+				}
+			}
+			
+			for (Entry<String, Integer> e : trackMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				if (qOption.isNofM()) {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				}
+			}
+		} else if(collection.equalsIgnoreCase(Collections.LYRICS)) {
+				lyricsMap.put("TRACK_IDX", 200);
+				lyricsMap.put("TRACK_IDX_WS", 200);
+				lyricsMap.put("ARTIST_IDX", 300);
+				lyricsMap.put("ARTIST_IDX_WS", 300);
+				lyricsMap.put("LYRICS_IDX", 100);
+				lyricsMap.put("LYRICS_IDX_WS", 100);
+				lyricsMap.put("TOTAL_LYRICS_IDX", 30);
+				lyricsMap.put("TOTAL_LYRICS_IDX_WS", 30);
+				
+				for (Entry<String, Integer> e : lyricsMap.entrySet()) {
+					if (result.size() > 0) {
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					}
+					if (qOption.isNofM()) {
+						result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+					} else {
+						result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+					}
+				}
+		} else if(collection.equalsIgnoreCase(Collections.ALBUM)) {
+			if(idxField.equalsIgnoreCase("album_idx")) {
+				albumMap.put("ALBUM_IDX", 100);
+				albumMap.put("ALBUM_IDX_WS", 100);
+				albumMap.put("SYN_ALBUM_IDX", 30);
+				albumMap.put("SYN_ALBUM_IDX_KO", 30);
+				albumMap.put("SYN_ALBUM_IDX_WS", 30);
+			} else if(idxField.equalsIgnoreCase("artist_idx")) {
+				albumMap.put("ARTIST_IDX", 100);
+				albumMap.put("ARTIST_IDX_WS", 100);
+				albumMap.put("SYN_ARTIST_IDX", 30);
+				albumMap.put("SYN_ARTIST_IDX_WS", 30);
+			} else {
+				albumMap.put("ALBUM_IDX", 100);
+				albumMap.put("ALBUM_IDX_WS", 100);
+				albumMap.put("ARTIST_IDX", 100);
+				albumMap.put("ARTIST_IDX_WS", 100);
+				albumMap.put("ARTIST_ALBUM_IDX", 30);
+				albumMap.put("ARTIST_ALBUM_IDX_WS", 30);
+				albumMap.put("SYN_ARTIST_ALBUM_IDX", 30);
+			}
+			
+			for (Entry<String, Integer> e : albumMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				if (qOption.isNofM()) {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				}
+			}
+		} else if(collection.equalsIgnoreCase(Collections.ARTIST)) {
+			if(idxField.equalsIgnoreCase("exact_artist_idx")) {
+				if(qOption.isNofM()) {
+					result.add(new WhereSet("EXACT_ARTIST_IDX", qOption.getOption(), trimKeyword, 100, qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet("EXACT_ARTIST_IDX", qOption.getOption(), trimKeyword, 100));
+				}
+				
+			} else {
+				artistMap.put("ARTIST_IDX", 100);
+				artistMap.put("ARTIST_IDX_WS", 100);
+				artistMap.put("GRP_NM_IDX", 100);
+				artistMap.put("GRP_NM_IDX_WS", 100);
+				artistMap.put("SYN_ARTIST_IDX_KO", 10);
+				artistMap.put("SYN_ARTIST_IDX", 10);
+				
+				for (Entry<String, Integer> e : artistMap.entrySet()) {
+					if (result.size() > 0) {
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					}
+					if (qOption.isNofM()) {
+						result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+					} else {
+						result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+					}
+				}
+			}
+				
+		} else if(collection.equalsIgnoreCase(Collections.MV)) {
+			mvMap.put("MV_TRACK_IDX", 100);
+			mvMap.put("MV_TRACK_IDX_WS", 100);
+			mvMap.put("MV_TRACK_ARTIST_ALBUM_IDX", 30);
+			mvMap.put("SYN_MV_TRACK_ARTIST_ALBUM_IDX", 30);
+			mvMap.put("MV_TRACK_ARTIST_ALBUM_IDX_WS", 30);
+			
+			for (Entry<String, Integer> e : mvMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				if (qOption.isNofM()) {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				}
+			}
+		} else if(collection.equalsIgnoreCase(Collections.MUSICCAST)) {
+			musiccastMap.put("MUSICCAST_IDX", 100);
+			musiccastMap.put("MUSICCAST_IDX_WS", 100);
+			
+			for (Entry<String, Integer> e : musiccastMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				if (qOption.isNofM()) {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				}
+			}
+		} else if(collection.equalsIgnoreCase(Collections.MUSICPD)) {
+			if(idxField.equalsIgnoreCase("musicpd_album_idx")) {
+				musicpdMap.put("TITLE_IDX", 1000);
+				musicpdMap.put("TITLE_IDX_WS", 1000);
+				musicpdMap.put("MUSICPD_ALBUM_IDX", 30);
+				musicpdMap.put("MUSICPD_ALBUM_IDX_WS", 30);
+			} else {
+				musicpdMap.put("TITLE_IDX", 1000);
+				musicpdMap.put("TITLE_IDX_WS", 1000);
+				musicpdMap.put("MUSICPD_ALBUM_IDX", 30);
+				musicpdMap.put("MUSICPD_ALBUM_IDX_WS", 30);
+			}
+			
+			for (Entry<String, Integer> e : musicpdMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				if (qOption.isNofM()) {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				}
+			}
+		} else if(collection.equalsIgnoreCase(Collections.MUSICPOST)) {
+//			musicpostMap.put("MUSICPOST_IDX", 30);
+			musicpostMap.put("MUSICPOST_IDX_WS", 30);
+//			musicpostMap.put("TITLE_IDX", 200);
 			musicpostMap.put("TITLE_IDX_WS", 200);
 			
 			for (Entry<String, Integer> e : musicpostMap.entrySet()) {
@@ -2458,7 +2949,12 @@ public class BugsRestService {
 						result.add(new WhereSet(name.toUpperCase(), option, keyword, 100));
 					}
 				} else {
-					result.add(new WhereSet(name.toUpperCase(), option, keyword, 100));
+					if (operand.startsWith("nofm")) {
+						result.add(new WhereSet(name.toUpperCase(), option, keyword, 100, 100));
+			        } else {
+			        	result.add(new WhereSet(name.toUpperCase(), option, keyword, 100));
+			        }
+					
 				}
 			} else if(type.equalsIgnoreCase("exclusion")) {
 				result.add(new WhereSet(name.toUpperCase(), option, keyword));
@@ -2489,6 +2985,7 @@ public class BugsRestService {
 	protected List<WhereSet> makeAutoWhereSet(Map<String, String> params, String collection, int num) throws InvalidParameterException {
 		List<WhereSet> result = new ArrayList<WhereSet>();
 		String keyword = parseQ(params);
+		
 		searchQoption qOption = new searchQoption(RestUtils.getParam(params, "q_option"), collection);
 				
 		idxScoreMap = new HashMap<String, Integer>();
