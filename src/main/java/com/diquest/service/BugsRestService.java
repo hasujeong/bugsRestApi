@@ -867,11 +867,7 @@ public class BugsRestService {
 			if(parseSize(params) == 0){
 				return makeEmptyNhnData(params);
 			}
-//			String chkQ = parseQ(params);
-//
-//			if (!chkQ.matches(".*[0-9|a-z|A-Z|ㄱ-ㅎ|ㅏ-ㅣ|가-힝].*")) {
-//				return makeEmptyNhnData(params);
-//			}
+
 		} else {			
 			return makeEmptyNhnData(params);
 		}
@@ -946,6 +942,74 @@ public class BugsRestService {
 				return commandSearchRequestErrorResponse(commandSearchRequest.getException().getErrorMessage());
 			} else {
 				logMessageService.messageReceived(reqHeader, request);
+				
+				if(colStr.equalsIgnoreCase(Collections.AUTO_TOTAL)) {
+					ResultSet resultSet = commandSearchRequest.getResultSet();
+	    			Result[] resultlist = resultSet.getResultList();
+	    			Result result1 = resultlist[1];
+	    			    			
+	    			int totalSize = 0;
+	    			String typoKwd = "";
+	    			
+	    			totalSize = result1.getTotalSize();
+	    			    			
+	    			if (totalSize == 0) {
+	    				if (result1.getValue("typo-result") != null) {
+	    					typoKwd = result1.getValue("typo-result");
+						}
+	    				
+	    				if (!typoKwd.equals("")) {
+	    					params.put("q", typoKwd);
+	    					querySet = new QuerySet(queryInt);
+							query = new Query();
+							    						
+							for(int i = 0 ; i < queryInt ; i++) {
+								query = new Query();
+								
+								FilterFieldParseResult filterFieldParseResult = parseFilterParams(params);
+								query.setSelect(parseAutoSelect(params, getCollection(params), i));
+								query.setWhere(parseAutoWhere2(params, filterFieldParseResult, getCollection(params), i, OriginKwd));
+								query.setOrderby(parseOrderBy(params, getCollection(params)));
+								query.setFrom(getCollection(params));
+								if(i == 1) {
+									query.setResult(parseStart(params) - 1, 19);
+									query.setSearchKeyword(parseQ(params));
+								} else {
+									query.setResult(parseStart(params) - 1, parseStart(params) + parseAutoSize(params, i) - 2);
+									query.setSearchKeyword(OriginKwd);
+								}
+								query.setFaultless(true);
+								query.setThesaurusOption((byte) (Protocol.ThesaurusOption.EQUIV_SYNONYM | Protocol.ThesaurusOption.QUASI_SYNONYM));
+								query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
+								query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
+								query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
+//								query.setLoggable(false);
+								query.setLoggable(getAutoLoggable(RestUtils.getParam(params, "search_tp")));
+								query.setLogKeyword(parseQ(params).toCharArray());
+								query.setPrintQuery(true);						// 실제 사용시 false
+								parseTrigger(params, query, getCollection(params));
+								
+								querySet.addQuery(query);
+							
+								String queryStr = parser.queryToString(query);
+	//							System.out.println(" :::::::::: query ::::::: " + queryStr);
+							}
+	    					
+	    					commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
+	    							
+	    					returnCode = commandSearchRequest.request(querySet);
+	    					
+	    					if (returnCode <= -100) {
+	    						ErrorMessageService.getInstance().minusReturnCodeLog(returnCode, commandSearchRequest.getException(), req);
+	    						logMessageService.receiveEnd(reqHeader, request);
+	    						return commandSearchRequestErrorResponse(commandSearchRequest.getException().getErrorMessage());
+	    					} else {
+	    						logMessageService.messageReceived(reqHeader, request);
+	    					}
+	    				}
+	    			}
+	    			params.put("q", OriginKwd);
+				}
 			}
 					
 			String resultJson = "";
@@ -1966,6 +2030,11 @@ public class BugsRestService {
 				}
 				
 			} else {
+				if(qOption.isNofM()) {
+					result.add(new WhereSet("EXACT_ARTIST_IDX", qOption.getOption(), trimKeyword, 100, qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet("EXACT_ARTIST_IDX", qOption.getOption(), trimKeyword, 100));
+				}
 				artistMap.put("ARTIST_IDX", 100);
 				artistMap.put("ARTIST_IDX_WS", 100);
 				artistMap.put("GRP_NM_IDX", 100);
@@ -2040,10 +2109,12 @@ public class BugsRestService {
 				}
 			}
 		} else if(collection.equalsIgnoreCase(Collections.MUSICPOST)) {
-			musicpostMap.put("MUSICPOST_IDX", 30);
-			musicpostMap.put("MUSICPOST_IDX_WS", 30);
-			musicpostMap.put("TITLE_IDX", 200);
-			musicpostMap.put("TITLE_IDX_WS", 200);
+			musicpostMap.put("MUSICPOST_IDX", 10);
+			musicpostMap.put("MUSICPOST_IDX_WS", 10);
+			musicpostMap.put("ARTIST_NM_IDX", 100);
+			musicpostMap.put("ARTIST_NM_IDX_WS", 100);
+			musicpostMap.put("TITLE_IDX", 300);
+			musicpostMap.put("TITLE_IDX_WS", 300);
 			
 			for (Entry<String, Integer> e : musicpostMap.entrySet()) {
 				if (result.size() > 0) {
@@ -3004,6 +3075,50 @@ public class BugsRestService {
 //				idxScoreMap.put("FKEY", 50);
 //				idxScoreMap.put("BKEY", 30);
 				
+				result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+				result.add(new WhereSet("FKEY", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 1000));
+				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				result.add(new WhereSet("BKEY", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 0));
+				result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+				result.add(new WhereSet(Protocol.WhereSet.OP_NOT));
+				result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", "")));
+			}
+		}
+		
+		for (Entry<String, Integer> e : idxScoreMap.entrySet()) {
+			if (result.size() > 0) {
+				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+			}
+			if (qOption.isNofM()) {
+				result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+			} else {
+				result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+			}
+		}
+		
+		return result;
+	}
+	
+	protected WhereSet[] parseAutoWhere2(Map<String, String> params, FilterFieldParseResult filterFieldParseResult, String collection, int num, String kwd) throws InvalidParameterException {
+		return WhereSetService.getInstance().makeWhereSet(params, filterFieldParseResult, makeAutoWhereSet2(params, collection, num, kwd));
+	}
+	
+	protected List<WhereSet> makeAutoWhereSet2(Map<String, String> params, String collection, int num, String kwd) throws InvalidParameterException {
+		List<WhereSet> result = new ArrayList<WhereSet>();
+		String keyword = parseQ(params);
+		
+		searchQoption qOption = new searchQoption(RestUtils.getParam(params, "q_option"), collection);
+				
+		idxScoreMap = new HashMap<String, Integer>();
+
+		if(collection.equalsIgnoreCase(Collections.AUTO_TAG)) {
+			idxScoreMap.put("FKEY_NOSP", 100);
+			idxScoreMap.put("FKEY", 50);
+			idxScoreMap.put("BKEY", 30);
+		} else {
+			if(num == 0) {
+				result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALL, kwd.replaceAll("\\s", ""), 100));
+			} else {
 				result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
 				result.add(new WhereSet("FKEY", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 1000));
 				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
