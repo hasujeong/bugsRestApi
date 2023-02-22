@@ -298,7 +298,7 @@ public class BugsRestService {
 			query.setExtData(RestUtils.getParam(params, "pr")); // pr (app,web,pc)
 			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 			query.setLogKeyword(parseQ(params).toCharArray());
-			query.setPrintQuery(true); // 실제 사용시 false
+			query.setPrintQuery(false); // 실제 사용시 false
 			parseTrigger(params, query, getCollection(params));
 			query.setResultModifier("typo");
 			query.setValue("typo-parameters", OriginKwd);
@@ -360,7 +360,7 @@ public class BugsRestService {
 						query.setExtData(RestUtils.getParam(params, "pr")); // pr (app,web,pc)
 						query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 						query.setLogKeyword(parseQ(params).toCharArray());
-						query.setPrintQuery(true); // 실제 사용시 false
+						query.setPrintQuery(false); // 실제 사용시 false
 						parseTrigger(params, query, getCollection(params));
 
 						querySet.addQuery(query);
@@ -811,7 +811,7 @@ public class BugsRestService {
 				query.setExtData(RestUtils.getParam(params, "pr")); // pr (app,web,pc)
 				query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 				query.setLogKeyword(parseQ(params).toCharArray());
-				query.setPrintQuery(true); // 실제 사용시 false
+				query.setPrintQuery(false); // 실제 사용시 false
 				parseTrigger(params, query, colArray[i]);
 				query.setResultModifier("typo");
 
@@ -932,7 +932,7 @@ public class BugsRestService {
 //				query.setLoggable(false);
 				query.setLoggable(getAutoLoggable(RestUtils.getParam(params, "search_tp")));
 				query.setLogKeyword(parseQ(params).toCharArray());
-				query.setPrintQuery(true); // 실제 사용시 false
+				query.setPrintQuery(false); // 실제 사용시 false
 				parseTrigger(params, query, getCollection(params));
 				query.setResultModifier("typo");
 				query.setValue("typo-parameters", OriginKwd);
@@ -1003,7 +1003,7 @@ public class BugsRestService {
 //								query.setLoggable(false);
 								query.setLoggable(getAutoLoggable(RestUtils.getParam(params, "search_tp")));
 								query.setLogKeyword(parseQ(params).toCharArray());
-								query.setPrintQuery(true); // 실제 사용시 false
+								query.setPrintQuery(false); // 실제 사용시 false
 								parseTrigger(params, query, getCollection(params));
 
 								querySet.addQuery(query);
@@ -1092,7 +1092,7 @@ public class BugsRestService {
 			query.setFaultless(true);
 			query.setSearchOption(Protocol.SearchOption.CACHE);
 			query.setLoggable(false);
-			query.setPrintQuery(true); // 실제 사용시 false
+			query.setPrintQuery(false); // 실제 사용시 false
 			parseTrigger(params, query, getCollection(params));
 //			query.setQueryModifier("diver");
 			query.setResultModifier("typo");
@@ -1192,7 +1192,7 @@ public class BugsRestService {
 			query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM	| Protocol.CategoryRankingOption.QUASI_SYNONYM));
 			query.setLoggable(false);
-			query.setPrintQuery(true); // 실제 사용시 false
+			query.setPrintQuery(false); // 실제 사용시 false
 			query.setResultModifier("typo");
 
 			querySet.addQuery(query);
@@ -1282,7 +1282,7 @@ public class BugsRestService {
 			query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM	| Protocol.CategoryRankingOption.QUASI_SYNONYM));
 			query.setLoggable(false);
-			query.setPrintQuery(true); // 실제 사용시 false
+			query.setPrintQuery(false); // 실제 사용시 false
 			query.setResultModifier("typo");
 
 			querySet.addQuery(query);
@@ -1380,7 +1380,7 @@ public class BugsRestService {
 				query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 				query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM	| Protocol.CategoryRankingOption.QUASI_SYNONYM));
 				query.setLoggable(false);
-				query.setPrintQuery(true); // 실제 사용시 false
+				query.setPrintQuery(false); // 실제 사용시 false
 				query.setResultModifier("typo");
 
 				querySet.addQuery(query);
@@ -1484,7 +1484,7 @@ public class BugsRestService {
 			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM	| Protocol.CategoryRankingOption.QUASI_SYNONYM));
 			query.setLoggable(false);
 			query.setLogKeyword(q.toCharArray());
-			query.setPrintQuery(true); // 실제 사용시 false
+			query.setPrintQuery(false); // 실제 사용시 false
 			query.setResultModifier("typo");
 
 			querySet.addQuery(query);
@@ -1631,7 +1631,7 @@ public class BugsRestService {
 			query.setExtData(RestUtils.getParam(params, "pr")); // pr (app,web,pc)
 			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 			query.setLogKeyword(parseQ(params).toCharArray());
-			query.setPrintQuery(true); // 실제 사용시 false
+			query.setPrintQuery(false); // 실제 사용시 false
 			parseTrigger(params, query, getCollection(params));
 			query.setResultModifier("typo");
 			query.setValue("typo-parameters", OriginKwd);
@@ -1692,7 +1692,7 @@ public class BugsRestService {
 						query.setExtData(RestUtils.getParam(params, "pr")); // pr (app,web,pc)
 						query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 						query.setLogKeyword(parseQ(params).toCharArray());
-						query.setPrintQuery(true); // 실제 사용시 false
+						query.setPrintQuery(false); // 실제 사용시 false
 						parseTrigger(params, query, getCollection(params));
 
 						querySet.addQuery(query);
