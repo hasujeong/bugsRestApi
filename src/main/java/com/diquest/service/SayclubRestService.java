@@ -33,21 +33,26 @@ import com.diquest.ir.rest.json.gson.GsonLoader;
 import com.diquest.ir.rest.util.RestUtils;
 import com.diquest.mapper.AdminMapper;
 import com.diquest.rest.nhn.common.SayclubCollections;
+import com.diquest.rest.nhn.common.Collections;
 import com.diquest.rest.nhn.common.Connection;
 import com.diquest.rest.nhn.filter.parse.SayclubFilterValue;
 import com.diquest.rest.nhn.filter.result.FilterFieldParseResult;
 import com.diquest.rest.nhn.result.NhnError;
 import com.diquest.rest.nhn.result.NhnResult;
 import com.diquest.rest.nhn.result.SayMallResult;
+import com.diquest.rest.nhn.result.SayclubNewResult;
 import com.diquest.rest.nhn.result.SayclubResult;
+import com.diquest.rest.nhn.result.SayclubTotalResult;
 import com.diquest.rest.nhn.service.error.ErrorMessageService;
 import com.diquest.rest.nhn.service.error.logMessageService;
 import com.diquest.rest.nhn.service.filter.SayclubFilterSetService;
 import com.diquest.rest.nhn.service.orderby.SayclubOrderBySet;
+import com.diquest.rest.nhn.service.select.SayclubNewSelectSet;
 import com.diquest.rest.nhn.service.select.SayclubSelectSet;
 import com.diquest.rest.nhn.service.trigger.TriggerFieldService;
 import com.diquest.rest.nhn.service.where.SayclubWhereSet;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 @Service
 public class SayclubRestService {
@@ -105,11 +110,14 @@ public class SayclubRestService {
 		
 		Gson gson = new Gson();
 		
+		char[] startTag = "<b>".toCharArray(); // Highlight tag 설정 startTag
+		char[] endTag = "</b>".toCharArray(); // Highlight tag 설정 endTag
+		
 		QueryParser parser = new QueryParser();
 		
 		QuerySet querySet = new QuerySet(1);
-		Query query = new Query();
-			
+		Query query = new Query(startTag, endTag);
+		
 		try {
 			
 			FilterFieldParseResult filterFieldParseResult = parseFilterParams(params);
@@ -136,7 +144,7 @@ public class SayclubRestService {
 			parseTrigger(params, query, collection);
 			query.setResultModifier("typo");
 			query.setValue("typo-parameters", OriginKwd);
-	    	query.setValue("typo-options", "ALPHABETS_TO_HANGUL|HANGUL_TO_HANGUL");
+	    	query.setValue("typo-options", "ALPHABETS_TO_HANGUL|HANGUL_TO_ALPHABETS");
 	    	query.setValue("typo-correct-result-num", "1");
 			
 			querySet.addQuery(query);
@@ -144,7 +152,7 @@ public class SayclubRestService {
 			String queryStr = parser.queryToString(query);
 //			System.out.println(" :::::::::: query ::::::: " + queryStr);
 			
-			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 10000, 50, 50);
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 5000, 50, 50);
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 					
 			int returnCode = commandSearchRequest.request(querySet);
@@ -177,10 +185,10 @@ public class SayclubRestService {
 						query = new Query();
 						    						
 						filterFieldParseResult = parseFilterParams(params);
-						query.setSelect(parseSelect(params));
-						query.setWhere(parseWhere(params, filterFieldParseResult, collection, OriginKwd));
-						query.setGroupBy(parseGroupBy(params));
-						query.setOrderby(parseOrderBy(params, getCollection(params)));
+						query.setSelect(parseNewSelect(params));
+						query.setWhere(parseNewWhere(params, filterFieldParseResult, collection, parseQ(params)));
+						query.setGroupBy(parseNewGroupBy(params));
+						query.setOrderby(parseNewOrderBy(params, getCollection(params)));
 						query.setFrom(collection);
 						query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
 						query.setSearchKeyword(parseQ(params));
@@ -222,17 +230,294 @@ public class SayclubRestService {
 			
 			String resultJson = "";
 			
-			if(collection.equalsIgnoreCase(SayclubCollections.SAYMALL_OLD)) {
-				resultJson = gson.toJson(makeMallResult(commandSearchRequest.getResultSet().getResult(0), query, params, collection));
-			} else {
-				resultJson = gson.toJson(makeResult(commandSearchRequest.getResultSet().getResult(0), query, params, collection));
-			}
+			resultJson = gson.toJson(makeNewResult(commandSearchRequest.getResultSet().getResult(0), query, params, collection));
 			
 			ret = resultJson;
 			
 			logMessageService.receiveEnd(reqHeader, request);
 			
 //			System.out.println(ret);
+			
+		} catch (InvalidParameterException e) {
+			ErrorMessageService.getInstance().invalidParameterLog(req, e);
+			logMessageService.receiveEnd(reqHeader, request);
+			return invalidParameterResponse(e);
+		} catch (Exception e) {
+			ErrorMessageService.getInstance().InternalServerErrorLog(req, e);
+			logMessageService.receiveEnd(reqHeader, request);
+			return internalServerResponse(e);
+		}
+		
+		return ret;
+		
+	}
+	
+	// 방송국 자동완성 API 
+	public String sayAutosearch(Map<String, String> params, Map<String, Object> reqHeader, HttpServletRequest request) {
+
+		String req = "";
+		req += "Host: " + (String) reqHeader.get("host") + "\n";
+		req += "Connection: " + (String) reqHeader.get("connection") + "\n";
+		req += "Upgrade-Insecure-Requests: " + (String) reqHeader.get("upgrade-insecure-requests") + "\n";
+		req += "User-Agent: " + (String) reqHeader.get("user-agent") + "\n";
+		req += "Accept: " + (String) reqHeader.get("accept") + "\n";
+		req += "Accept-Encoding: " + (String) reqHeader.get("accept-encoding") + "\n";
+		req += "Accept-Language: " + (String) reqHeader.get("accept-language");
+		
+		String OriginKwd = "";
+		
+		if(params.get("q") != null) {
+			OriginKwd = parseQ(params);		
+		} else {			
+			OriginKwd = "";
+//			return makeEmptyNhnData(params);
+		}
+		
+		logMessageService.requestReceived(reqHeader, request);
+		
+		String collection = getCollection(params);
+		String ret = "";
+		
+		Gson gson = new Gson();
+		
+		QueryParser parser = new QueryParser();
+		
+		QuerySet querySet = new QuerySet(1);
+		Query query = new Query();
+			
+		try {
+			
+			FilterFieldParseResult filterFieldParseResult = parseFilterParams(params);
+			query.setSelect(parseNewSelect(params));
+			query.setWhere(parseNewWhere(params, filterFieldParseResult, collection, OriginKwd));
+			query.setOrderby(parseNewOrderBy(params, collection));
+			query.setFrom(collection);
+			query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
+			query.setSearchKeyword(OriginKwd);
+			query.setFaultless(true);
+			query.setThesaurusOption((byte) (Protocol.ThesaurusOption.EQUIV_SYNONYM | Protocol.ThesaurusOption.QUASI_SYNONYM));
+			query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
+			query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
+			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
+//			query.setUserName(getUserName(params));										// 로그인 사용자 ID 기록
+			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
+			query.setLogKeyword(parseQ(params).toCharArray());
+			query.setPrintQuery(true);						// 실제 사용시 false
+			parseTrigger(params, query, collection);
+			query.setResultModifier("typo");
+			query.setValue("typo-parameters", OriginKwd);
+	    	query.setValue("typo-options", "ALPHABETS_TO_HANGUL|HANGUL_TO_ALPHABETS");
+	    	query.setValue("typo-correct-result-num", "1");
+			
+			querySet.addQuery(query);
+		
+			String queryStr = parser.queryToString(query);
+//			System.out.println(" :::::::::: query ::::::: " + queryStr);
+			
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 5000, 50, 50);
+			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
+					
+			int returnCode = commandSearchRequest.request(querySet);
+			
+			if (returnCode <= -100) {
+				ErrorMessageService.getInstance().minusReturnCodeLog(returnCode, commandSearchRequest.getException(), req);
+				logMessageService.receiveEnd(reqHeader, request);
+				return commandSearchRequestErrorResponse(commandSearchRequest.getException().getErrorMessage());
+			} else {
+				logMessageService.messageReceived(reqHeader, request);
+				
+				ResultSet resultSet = commandSearchRequest.getResultSet();
+    			Result[] resultlist = resultSet.getResultList();
+    			Result result1 = resultlist[0];
+    			    			
+    			int totalSize = 0;
+    			String typoKwd = "";
+    			
+    			totalSize = result1.getTotalSize();
+    			    			
+    			if (totalSize == 0) {
+    				if (result1.getValue("typo-result") != null) {
+    					typoKwd = result1.getValue("typo-result");
+					}
+    				
+    				if (!typoKwd.equals("")) {
+    					params.put("q", typoKwd);
+    					querySet = new QuerySet(1);
+    					
+						query = new Query();
+						    						
+						filterFieldParseResult = parseFilterParams(params);
+						query.setSelect(parseNewSelect(params));
+						query.setWhere(parseNewWhere(params, filterFieldParseResult, collection, parseQ(params)));
+						query.setOrderby(parseNewOrderBy(params, getCollection(params)));
+						query.setFrom(collection);
+						query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
+						query.setSearchKeyword(parseQ(params));
+						query.setFaultless(true);
+						query.setThesaurusOption((byte) (Protocol.ThesaurusOption.EQUIV_SYNONYM | Protocol.ThesaurusOption.QUASI_SYNONYM));
+						query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
+						query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
+						query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
+//						query.setUserName(getUserName(params));										// 로그인 사용자 ID 기록
+						query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
+						query.setLogKeyword(parseQ(params).toCharArray());
+						query.setPrintQuery(true);						// 실제 사용시 false
+						parseTrigger(params, query, collection);
+						
+						querySet.addQuery(query);
+					
+						queryStr = parser.queryToString(query);
+//						System.out.println(" :::::::::: query ::::::: " + queryStr);
+    					
+    					commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
+    							
+    					returnCode = commandSearchRequest.request(querySet);
+    					
+    					if (returnCode <= -100) {
+    						ErrorMessageService.getInstance().minusReturnCodeLog(returnCode, commandSearchRequest.getException(), req);
+    						logMessageService.receiveEnd(reqHeader, request);
+    						return commandSearchRequestErrorResponse(commandSearchRequest.getException().getErrorMessage());
+    					} else {
+    						logMessageService.messageReceived(reqHeader, request);
+    					}
+    				}
+    			}
+    			params.put("q", OriginKwd);
+			}
+			
+//			System.out.println(returnCode);
+//			System.out.println(commandSearchRequest.getResultSet().getResult(0).getTotalSize());
+			
+			String resultJson = "";
+			
+			resultJson = gson.toJson(makeNewResult(commandSearchRequest.getResultSet().getResult(0), query, params, collection));
+			
+			ret = resultJson;
+			
+			logMessageService.receiveEnd(reqHeader, request);
+			
+//			System.out.println(ret);
+			
+		} catch (InvalidParameterException e) {
+			ErrorMessageService.getInstance().invalidParameterLog(req, e);
+			logMessageService.receiveEnd(reqHeader, request);
+			return invalidParameterResponse(e);
+		} catch (Exception e) {
+			ErrorMessageService.getInstance().InternalServerErrorLog(req, e);
+			logMessageService.receiveEnd(reqHeader, request);
+			return internalServerResponse(e);
+		}
+		
+		return ret;
+		
+	}
+	
+	// 리뉴얼 통합검색
+	public String sayNewTotalSearch(Map<String, String> params, Map<String, Object> reqHeader, HttpServletRequest request) {
+		
+		String req = "";
+		req += "Host: " + (String) reqHeader.get("host") + "\n";
+		req += "Connection: " + (String) reqHeader.get("connection") + "\n";
+		req += "Upgrade-Insecure-Requests: " + (String) reqHeader.get("upgrade-insecure-requests") + "\n";
+		req += "User-Agent: " + (String) reqHeader.get("user-agent") + "\n";
+		req += "Accept: " + (String) reqHeader.get("accept") + "\n";
+		req += "Accept-Encoding: " + (String) reqHeader.get("accept-encoding") + "\n";
+		req += "Accept-Language: " + (String) reqHeader.get("accept-language");
+		
+		String OriginKwd = "";
+		
+		if(params.get("q") != null) {
+			OriginKwd = parseQ(params);		
+		} else {			
+			OriginKwd = "";
+//				return makeEmptyNhnData(params);
+		}
+		
+		logMessageService.requestReceived(reqHeader, request);
+		
+		String colStr = params.get("collection");
+		String[] colArray = getTotalCollection(params);
+		int queryInt = 1;
+			
+		if(colStr.equalsIgnoreCase(Collections.TOTAL)) {
+			queryInt = colArray.length; 
+		} else {
+			queryInt = 1;
+		}
+		
+		String ret = "";
+		
+		Gson gson = new Gson();
+		
+		char[] startTag = "<b>".toCharArray(); // Highlight tag 설정 startTag
+		char[] endTag = "</b>".toCharArray(); // Highlight tag 설정 endTag
+		
+		QueryParser parser = new QueryParser();
+		
+		QuerySet querySet = new QuerySet(queryInt);
+		Query query = new Query(startTag, endTag);
+		
+		try {
+			for(int i = 0 ; i < colArray.length ; i++) {
+				
+				FilterFieldParseResult filterFieldParseResult = parseFilterParams(params);
+				query.setSelect(parseNewSelect(params));
+	//				if(!RangeFilter.equalsIgnoreCase("")) {
+	//					query.setFilter(parseFilter(collection, RangeFilter, RangeKey));
+	//				}
+				query.setWhere(parseNewWhere(params, filterFieldParseResult, colArray[i], OriginKwd));
+				query.setGroupBy(parseNewGroupBy(params));
+//				query.setOrderby(parseNewOrderBy(params, colArray[i]));
+				query.setFrom(colArray[i]);
+				query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
+				query.setSearchKeyword(OriginKwd);
+				query.setFaultless(true);
+				query.setThesaurusOption((byte) (Protocol.ThesaurusOption.EQUIV_SYNONYM | Protocol.ThesaurusOption.QUASI_SYNONYM));
+				query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
+				query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
+				query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
+				query.setUserName(getUserName(params));										// 로그인 사용자 ID 기록
+				query.setExtData(RestUtils.getParam(params, "pr"));							// pr (app,web,pc)
+				query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
+				query.setLogKeyword(parseQ(params).toCharArray());
+				query.setPrintQuery(true);						// 실제 사용시 false
+				parseTrigger(params, query, colArray[i]);
+				query.setResultModifier("typo");
+				query.setValue("typo-parameters", OriginKwd);
+		    	query.setValue("typo-options", "ALPHABETS_TO_HANGUL|HANGUL_TO_ALPHABETS");
+		    	query.setValue("typo-correct-result-num", "1");
+				
+				querySet.addQuery(query);
+			
+				String queryStr = parser.queryToString(query);
+	//				System.out.println(" :::::::::: query ::::::: " + queryStr);
+			}
+				
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 5000, 50, 50);
+			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
+					
+			int returnCode = commandSearchRequest.request(querySet);
+			
+			if (returnCode <= -100) {
+				ErrorMessageService.getInstance().minusReturnCodeLog(returnCode, commandSearchRequest.getException(), req);
+				logMessageService.receiveEnd(reqHeader, request);
+				return commandSearchRequestErrorResponse(commandSearchRequest.getException().getErrorMessage());
+			} else {
+				logMessageService.messageReceived(reqHeader, request);
+			}
+			
+//				System.out.println(returnCode);
+//				System.out.println(commandSearchRequest.getResultSet().getResult(0).getTotalSize());
+			
+			String resultJson = "";
+			
+			resultJson += gson.toJson(makeTotalResult(commandSearchRequest.getResultSet(), querySet, params));
+			
+			ret = resultJson;
+			
+			logMessageService.receiveEnd(reqHeader, request);
+			
+//				System.out.println(ret);
 			
 		} catch (InvalidParameterException e) {
 			ErrorMessageService.getInstance().invalidParameterLog(req, e);
@@ -355,7 +640,7 @@ public class SayclubRestService {
 			parseTrigger(params, query, collection);
 			query.setResultModifier("typo");
 			query.setValue("typo-parameters", OriginKwd);
-	    	query.setValue("typo-options", "ALPHABETS_TO_HANGUL|HANGUL_TO_HANGUL");
+	    	query.setValue("typo-options", "ALPHABETS_TO_HANGUL|HANGUL_TO_ALPHABETS");
 	    	query.setValue("typo-correct-result-num", "1");
 			
 			querySet.addQuery(query);
@@ -363,7 +648,7 @@ public class SayclubRestService {
 			String queryStr = parser.queryToString(query);
 //			System.out.println(" :::::::::: query ::::::: " + queryStr);
 			
-			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 10000, 50, 50);
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 5000, 50, 50);
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 					
 			int returnCode = commandSearchRequest.request(querySet);
@@ -397,7 +682,7 @@ public class SayclubRestService {
 						    						
 						filterFieldParseResult = parseFilterParams(params);
 						query.setSelect(parseSelect(params));
-						query.setWhere(parseWhere(params, filterFieldParseResult, collection, OriginKwd));
+						query.setWhere(parseWhere(params, filterFieldParseResult, collection, parseQ(params)));
 						query.setGroupBy(parseGroupBy(params));
 						query.setOrderby(parseOrderBy(params, getCollection(params)));
 						query.setFrom(collection);
@@ -478,10 +763,17 @@ public class SayclubRestService {
 		return params.get("collection");
 	}
 	
-	protected String getTotalCollection(Map<String, String> params) {		
-		String collection= params.get("collection");
+	protected String[] getTotalCollection(Map<String, String> params) {		
+		String collec = params.get("collection");
+		String[] colArray = {};
 		
-		return collection;
+		if(collec.equalsIgnoreCase(Collections.TOTAL)) {
+			colArray = colArray = new String[] {SayclubCollections.SAYCAST, SayclubCollections.SAYCAST_CJ};
+		} else {
+			colArray = new String[] {collec};
+		}
+		
+		return colArray;
 	}
 	
 	private FilterFieldParseResult parseFilterParams(Map<String, String> params) {
@@ -577,7 +869,30 @@ public class SayclubRestService {
 				}
 			}
 			
-		} 
+		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_AUTO)) {
+			
+			result.add(new WhereSet("FKEY", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 500));
+			result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+			result.add(new WhereSet("BKEY", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 0));
+		
+		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_CJ)) {
+			
+			for (Entry<String, Double> field : fieldOpt.entrySet()) {
+				String fieldNm = field.getKey().toUpperCase();
+				int weight = 0;
+				weight = (int) (field.getValue() * 100);
+				
+				sayCastMap.put(fieldNm, weight);
+				sayCastMap.put(fieldNm + "_WS", weight);
+			}
+			
+			for (Entry<String, Integer> e : sayCastMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				result.add(new WhereSet(e.getKey(), searchOption, keyword, e.getValue()));
+			}
+		}
 		
 		String[] fts;
         
@@ -829,7 +1144,7 @@ public class SayclubRestService {
 	
 	// 리뉴얼 select
 	private SelectSet[] parseNewSelect(Map<String, String> params) {
-		return SayclubSelectSet.getInstance().makeSelectSet(params);
+		return SayclubNewSelectSet.getInstance().makeSelectSet(params);
 	}
 	
 	// 기존 select
@@ -937,6 +1252,14 @@ public class SayclubRestService {
 	
 	protected SayMallResult makeMallResult(Result result, Query query, Map<String, String> params, String collection) throws IRException {
 		return SayMallResult.makeSayMallResult(query, result, params, collection);
+	}
+	
+	protected SayclubNewResult makeNewResult(Result result, Query query, Map<String, String> params, String collection) throws IRException {
+		return SayclubNewResult.makeSayclubResult(query, result, params, collection);
+	}
+	
+	protected SayclubTotalResult makeTotalResult(ResultSet result, QuerySet query, Map<String, String> params) throws IRException {
+		return SayclubTotalResult.makeTotalResult(query, result, params);
 	}
 	
 	protected String parseQ(Map<String, String> params) {

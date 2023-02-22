@@ -27,6 +27,9 @@ public class SayclubRestController {
 	
 	public static String APP_KEY_SAYCAST = "saycast";
 	public static String APP_KEY_SAYCAST_ART = "saycast_article";
+	public static String APP_KEY_SAYCAST_AUTO = "saycast_auto";
+	public static String APP_KEY_SAYCAST_CJ = "saycast_cj";
+	public static String APP_KEY_TOTAL = "total";
 	
 	public static String APP_KEY_SAYCAST_OLD = "saycast_alpha";
 	public static String APP_KEY_SAYCAST_ART_OLD = "saycast_article_alpha";
@@ -67,6 +70,15 @@ public class SayclubRestController {
 		} else if (appKey.equals(APP_KEY_SAYCAST_ART)) {
 			params.put("collection",SayclubCollections.SAYCAST_ART);
 			return sayclubRestService.sayNewSearch(params, requestHeader, request);
+		} else if (appKey.equals(APP_KEY_SAYCAST_AUTO)) {
+			params.put("collection",SayclubCollections.SAYCAST_AUTO);
+			return sayclubRestService.sayAutosearch(params, requestHeader, request);
+		} else if (appKey.equals(APP_KEY_SAYCAST_CJ)) {
+			params.put("collection",SayclubCollections.SAYCAST_CJ);
+			return sayclubRestService.sayNewSearch(params, requestHeader, request);
+		} else if (appKey.equals(APP_KEY_TOTAL)) {
+			params.put("collection",SayclubCollections.TOTAL);
+			return sayclubRestService.sayNewTotalSearch(params, requestHeader, request);
 		} else {
 			return unknownRequest(params, time);
 		}

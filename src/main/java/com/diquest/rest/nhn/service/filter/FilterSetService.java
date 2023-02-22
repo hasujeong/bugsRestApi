@@ -65,6 +65,7 @@ public class FilterSetService {
         	filters.add(new FilterSet(Protocol.FilterSet.OP_MATCH, "STATUS", "Y"));
         	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "COVER_YN", "N", 1000));
         	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "MR_YN", "N", 1000));
+        	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "MULTI_ARTIST_YN", "Y", -300));
         	
 //        	filters.add(new FilterSet((byte) (Protocol.FilterSet.OP_MATCH|Protocol.FilterSet.OP_WEIGHT_ADJUST), "ALBUM_TP", new String[]{"SP", "RL", "SL"}, 500));
         } else if(collection.equalsIgnoreCase(Collections.LYRICS)) {

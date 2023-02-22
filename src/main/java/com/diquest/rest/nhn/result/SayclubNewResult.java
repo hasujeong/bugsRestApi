@@ -169,6 +169,11 @@ public class SayclubNewResult {
 		String LOCATION_WAIT;
 		String MSG_ACCEPT;
 		String USER_NAME_OPENED;
+		String ROSECNT;
+		String VIEWCNT;
+		String TAILCNT;
+		String HAVE_ROSE;
+		String PF;
 
 		public Item(Result result, SelectSet[] selectSet, Map<String, String> params, int resultIdx, String collection) {	
 			if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_ART)) {
@@ -185,6 +190,10 @@ public class SayclubNewResult {
 				this.NICK = getSaycastArt(result, resultIdx, "NICK");
 				this.REGDATE = getSaycastArt(result, resultIdx, "REGDATE");
 				this.SUBJECT = getSaycastArt(result, resultIdx, "SUBJECT");
+				this.ROSECNT = getSaycastArt(result, resultIdx, "ROSECNT");
+				this.VIEWCNT = getSaycastArt(result, resultIdx, "VIEWCNT");
+				this.TAILCNT = getSaycastArt(result, resultIdx, "TAILCNT");
+				this.HAVE_ROSE = getSaycastArt(result, resultIdx, "HAVE_ROSE");
 			} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST)) {
 				this.RANK = getSaycast(result, resultIdx, "_RANK");
 				this.DOCID = getSaycast(result, resultIdx, "_DOCID");
@@ -203,6 +212,15 @@ public class SayclubNewResult {
 				this.LASTUPDATE = getSaycast(result, resultIdx, "LASTUPDATE");
 				this.ONAIR = getSaycast(result, resultIdx, "ONAIR");
 				this.REGDATE = getSaycast(result, resultIdx, "REGDATE");
+			} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_CJ)) {
+				this.RANK = getSaycastCj(result, resultIdx, "_RANK");
+				this.DOCID = getSaycastCj(result, resultIdx, "_DOCID");
+				this.RELEVANCE = getSaycastCj(result, resultIdx, "WEIGHT");
+				this.ID = getSaycastCj(result, resultIdx, "ID");
+				this.CJID = getSaycastCj(result, resultIdx, "CJID");
+				this.CJMSRL = getSaycastCj(result, resultIdx, "CJMSRL");
+				this.CJNAME = getSaycastCj(result, resultIdx, "CJNAME");
+				this.PF = getSaycastCj(result, resultIdx, "PF");
 			} else {
 				this.RANK = getSaycastArt(result, resultIdx, "_RANK");
 				this.DOCID = getSaycastArt(result, resultIdx, "_DOCID");
@@ -217,6 +235,10 @@ public class SayclubNewResult {
 		
 		private String getSaycast(Result result, int resultIdx, String field) {
 			return SayclubNewSelectSet.getInstance().getSaycast(result, resultIdx, field);
+		}
+		
+		private String getSaycastCj(Result result, int resultIdx, String field) {
+			return SayclubNewSelectSet.getInstance().getSaycastCj(result, resultIdx, field);
 		}
 	}
 	

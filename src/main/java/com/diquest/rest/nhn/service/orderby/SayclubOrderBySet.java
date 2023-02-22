@@ -95,6 +95,9 @@ public class SayclubOrderBySet {
 				return new OrderBySet(false, "REGDATE", Protocol.OrderBySet.OP_PREWEIGHT);
 			}
 			
+		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_CJ)) {
+			return new OrderBySet(true, "CJNAME", Protocol.OrderBySet.OP_PREWEIGHT);
+			
 		}
 		
 		return new OrderBySet(false, "WEIGHT");
