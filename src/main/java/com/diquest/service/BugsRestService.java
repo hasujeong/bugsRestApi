@@ -700,8 +700,7 @@ public class BugsRestService {
 	}
 
 	// 통합검색 API (기존)
-	public String TestTotalsearch(Map<String, String> params, Map<String, Object> reqHeader,
-			HttpServletRequest request) {
+	public String TestTotalsearch(Map<String, String> params, Map<String, Object> reqHeader, HttpServletRequest request) {
 
 		List<Map<String, String>> fieldMap = self.fieldSelector();
 
@@ -1143,8 +1142,7 @@ public class BugsRestService {
 	}
 
 	// 구매한 곡 검색 API
-	public String purchasedSearch(Map<String, Object> params, Map<String, Object> document,
-			Map<String, Object> reqHeader, HttpServletRequest request) {
+	public String purchasedSearch(Map<String, Object> params, Map<String, Object> document, Map<String, Object> reqHeader, HttpServletRequest request) {
 
 		List<Map<String, String>> index = (List<Map<String, String>>) params.get("index");
 //		Map<String, Object> document = (Map<String, Object>) params.get("document");
@@ -1233,8 +1231,7 @@ public class BugsRestService {
 	}
 
 	// 구매한 영상 검색 API
-	public String purchasedMvSearch(Map<String, Object> params, Map<String, Object> document,
-			Map<String, Object> reqHeader, HttpServletRequest request) {
+	public String purchasedMvSearch(Map<String, Object> params, Map<String, Object> document, Map<String, Object> reqHeader, HttpServletRequest request) {
 
 		List<Map<String, String>> index = (List<Map<String, String>>) params.get("index");
 //		Map<String, Object> document = (Map<String, Object>) params.get("document");
@@ -1323,8 +1320,7 @@ public class BugsRestService {
 	}
 
 	// 유사곡 검색 API
-	public String similarSearch(List<Map<String, String>> index, Map<String, Object> document,
-			Map<String, Object> reqHeader, HttpServletRequest request) {
+	public String similarSearch(List<Map<String, String>> index, Map<String, Object> document, Map<String, Object> reqHeader, HttpServletRequest request) {
 
 		Map<String, String> params = new HashMap<String, String>();
 
@@ -1526,8 +1522,7 @@ public class BugsRestService {
 	}
 
 	// 세이클럽 음악 검색
-	public String SayMusicSearch(Map<String, String> params, Map<String, Object> reqHeader,
-			HttpServletRequest request) {
+	public String SayMusicSearch(Map<String, String> params, Map<String, Object> reqHeader, HttpServletRequest request) {
 
 		List<Map<String, String>> fieldMap = self.fieldSelector();
 
@@ -2086,14 +2081,18 @@ public class BugsRestService {
 
 			} else {
 				if (qOption.isNofM()) {
-					result.add(new WhereSet("EXACT_ARTIST_IDX", qOption.getOption(), trimKeyword, 100, qOption.getNofmPercent()));
+					result.add(new WhereSet("EXACT_ARTIST_IDX", qOption.getOption(), trimKeyword, 1000, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("GRP_NM_IDX_WS", qOption.getOption(), keyword));
 				} else {
-					result.add(new WhereSet("EXACT_ARTIST_IDX", qOption.getOption(), trimKeyword, 100));
+					result.add(new WhereSet("EXACT_ARTIST_IDX", qOption.getOption(), trimKeyword, 1000));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("GRP_NM_IDX_WS", qOption.getOption(), keyword));
 				}
 				artistMap.put("ARTIST_IDX", 100);
 				artistMap.put("ARTIST_IDX_WS", 100);
 				artistMap.put("GRP_NM_IDX", 100);
-				artistMap.put("GRP_NM_IDX_WS", 100);
+//				artistMap.put("GRP_NM_IDX_WS", 1);
 				artistMap.put("SYN_ARTIST_IDX_KO", 10);
 				artistMap.put("SYN_ARTIST_IDX", 10);
 
@@ -2565,10 +2564,19 @@ public class BugsRestService {
 				}
 
 			} else {
+				if (qOption.isNofM()) {
+					result.add(new WhereSet("EXACT_ARTIST_IDX", qOption.getOption(), trimKeyword, 1000, qOption.getNofmPercent()));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("GRP_NM_IDX_WS", qOption.getOption(), keyword));
+				} else {
+					result.add(new WhereSet("EXACT_ARTIST_IDX", qOption.getOption(), trimKeyword, 1000));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet("GRP_NM_IDX_WS", qOption.getOption(), keyword));
+				}
 				artistMap.put("ARTIST_IDX", 100);
 				artistMap.put("ARTIST_IDX_WS", 100);
 				artistMap.put("GRP_NM_IDX", 100);
-				artistMap.put("GRP_NM_IDX_WS", 100);
+//				artistMap.put("GRP_NM_IDX_WS", 1);
 				artistMap.put("SYN_ARTIST_IDX_KO", 10);
 				artistMap.put("SYN_ARTIST_IDX", 10);
 
@@ -2577,8 +2585,7 @@ public class BugsRestService {
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 					}
 					if (qOption.isNofM()) {
-						result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(),
-								qOption.getNofmPercent()));
+						result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
 					} else {
 						result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
 					}
