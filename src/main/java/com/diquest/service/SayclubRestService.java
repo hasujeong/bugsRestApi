@@ -462,9 +462,9 @@ public class SayclubRestService {
 	//				if(!RangeFilter.equalsIgnoreCase("")) {
 	//					query.setFilter(parseFilter(collection, RangeFilter, RangeKey));
 	//				}
-				query.setWhere(parseNewWhere(params, filterFieldParseResult, colArray[i], OriginKwd));
-				query.setGroupBy(parseNewGroupBy(params));
-//				query.setOrderby(parseNewOrderBy(params, colArray[i]));
+				query.setWhere(parseTotalNewWhere(params, filterFieldParseResult, colArray[i], OriginKwd));
+//				query.setGroupBy(parseNewGroupBy(params));
+				query.setOrderby(parseNewOrderBy(params, colArray[i]));
 				query.setFrom(colArray[i]);
 				query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
 				query.setSearchKeyword(OriginKwd);
@@ -508,6 +508,7 @@ public class SayclubRestService {
 			
 			String resultJson = "";
 			
+//			resultJson += gson.toJson(makeTotalResult(commandSearchRequest.getResultSet(), querySet, params, colArray));
 			resultJson += gson.toJson(makeTotalResult(commandSearchRequest.getResultSet(), querySet, params));
 			
 			ret = resultJson;
@@ -964,6 +965,45 @@ public class SayclubRestService {
         	}
         } 
 			
+		return result;
+	}
+	
+	// 리뉴얼 통합검색 조건
+	protected WhereSet[] parseTotalNewWhere(Map<String, String> params, FilterFieldParseResult filterFieldParseResult, String collection, String OriginKwd) throws InvalidParameterException {
+		return SayclubWhereSet.getInstance().makeWhereSet(params, filterFieldParseResult, makeNewTotalWhereSet(params, collection, OriginKwd));
+	}
+	
+	protected List<WhereSet> makeNewTotalWhereSet(Map<String, String> params, String collection, String OriginKwd) throws InvalidParameterException {
+		List<WhereSet> result = new ArrayList<WhereSet>();
+		String keyword = OriginKwd;
+
+		if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST)) {
+			result.add(new WhereSet("CASTNAME", Protocol.WhereSet.OP_HASALL, keyword, 100));
+			result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+			result.add(new WhereSet("CASTNAME_WS", Protocol.WhereSet.OP_HASALL, keyword, 100));
+			result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+			result.add(new WhereSet("CASTMENT", Protocol.WhereSet.OP_HASALL, keyword, 50));
+			result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+			result.add(new WhereSet("CASTMENTF_WS", Protocol.WhereSet.OP_HASALL, keyword, 50));
+			result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+			result.add(new WhereSet("CJNAME", Protocol.WhereSet.OP_HASALL, keyword, 30));
+			result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+			result.add(new WhereSet("CJNAME_WS", Protocol.WhereSet.OP_HASALL, keyword, 30));
+			
+		} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST_CJ)) {
+			result.add(new WhereSet("STATUS", Protocol.WhereSet.OP_HASALL, "Y"));
+			result.add(new WhereSet(Protocol.WhereSet.OP_AND));
+			result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+			result.add(new WhereSet("CJNAME", Protocol.WhereSet.OP_HASALL, keyword, 100));
+			result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+			result.add(new WhereSet("CJNAME_WS", Protocol.WhereSet.OP_HASALL, keyword, 100));
+			result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+			result.add(new WhereSet("PF", Protocol.WhereSet.OP_HASALL, keyword, 30));
+			result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+			result.add(new WhereSet("PF_WS", Protocol.WhereSet.OP_HASALL, keyword, 30));
+			result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));			
+		}
+
 		return result;
 	}
 	
