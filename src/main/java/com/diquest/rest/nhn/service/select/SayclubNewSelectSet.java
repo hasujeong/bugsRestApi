@@ -223,6 +223,10 @@ public class SayclubNewSelectSet {
 	public String getSaycastCj(Result result, int resultIdx, String field) {
 		return String.valueOf(result.getResult(resultIdx, sayCast_CjMap.get(field)));
 	}
+	
+	public String getSayAuto(Result result, int resultIdx, String field) {
+		return String.valueOf(result.getResult(resultIdx, sayCastAuto_Map.get(field)));
+	}
 
 	public int getSayArtFieldSize() {
 		return sayCast_ArticleMap.size();

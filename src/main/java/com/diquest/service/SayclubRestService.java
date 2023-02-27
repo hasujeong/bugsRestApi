@@ -40,6 +40,7 @@ import com.diquest.rest.nhn.filter.result.FilterFieldParseResult;
 import com.diquest.rest.nhn.result.NhnError;
 import com.diquest.rest.nhn.result.NhnResult;
 import com.diquest.rest.nhn.result.SayMallResult;
+import com.diquest.rest.nhn.result.SayclubAutoResult;
 import com.diquest.rest.nhn.result.SayclubNewResult;
 import com.diquest.rest.nhn.result.SayclubResult;
 import com.diquest.rest.nhn.result.SayclubTotalResult;
@@ -72,14 +73,9 @@ public class SayclubRestService {
 	protected static int artist_score = 100;
 	
 	protected static String artist_keyword = "";
-//	protected static String a_keyword = "";
 	
 	public SayclubRestService() {
-//		idxScoreMap.put("TRACK_TITLE", 100);
-//		idxScoreMap.put("CATEGORY_2_NAME", 50);
-//		idxScoreMap.put("CATEGORY_3_NAME", 50);
-//		idxScoreMap.put("SELLER_TAGS_NAME", 20);
-//		idxScoreMap.put("SHOPPING_IDX", 10);
+
 	}
 	
 	// 리뉴얼 검색
@@ -126,7 +122,7 @@ public class SayclubRestService {
 //				query.setFilter(parseFilter(collection, RangeFilter, RangeKey));
 //			}
 			query.setWhere(parseNewWhere(params, filterFieldParseResult, collection, OriginKwd));
-			query.setGroupBy(parseNewGroupBy(params));
+//			query.setGroupBy(parseNewGroupBy(params));
 			query.setOrderby(parseNewOrderBy(params, collection));
 			query.setFrom(collection);
 			query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
@@ -187,7 +183,7 @@ public class SayclubRestService {
 						filterFieldParseResult = parseFilterParams(params);
 						query.setSelect(parseNewSelect(params));
 						query.setWhere(parseNewWhere(params, filterFieldParseResult, collection, parseQ(params)));
-						query.setGroupBy(parseNewGroupBy(params));
+//						query.setGroupBy(parseNewGroupBy(params));
 						query.setOrderby(parseNewOrderBy(params, getCollection(params)));
 						query.setFrom(collection);
 						query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
@@ -390,7 +386,8 @@ public class SayclubRestService {
 			
 			String resultJson = "";
 			
-			resultJson = gson.toJson(makeNewResult(commandSearchRequest.getResultSet().getResult(0), query, params, collection));
+			JsonObject jsonElement = gson.toJsonTree(makeAutoResult(commandSearchRequest.getResultSet().getResult(0), query, params)).getAsJsonObject();
+			resultJson = gson.toJson(jsonElement.get("result"));
 			
 			ret = resultJson;
 			
@@ -892,6 +889,14 @@ public class SayclubRestService {
 				}
 				result.add(new WhereSet(e.getKey(), searchOption, keyword, e.getValue()));
 			}
+			
+			if (result.size() > 0) {
+				result.add(new WhereSet(Protocol.WhereSet.OP_AND));
+				result.add(new WhereSet("STATUS", Protocol.WhereSet.OP_HASALL, "Y"));
+			} else {
+				result.add(new WhereSet("STATUS", Protocol.WhereSet.OP_HASALL, "Y"));
+			}
+			
 		}
 		
 		String[] fts;
@@ -1260,6 +1265,10 @@ public class SayclubRestService {
 	
 	protected SayclubTotalResult makeTotalResult(ResultSet result, QuerySet query, Map<String, String> params) throws IRException {
 		return SayclubTotalResult.makeTotalResult(query, result, params);
+	}
+	
+	protected SayclubAutoResult makeAutoResult(Result result, Query query, Map<String, String> params) throws IRException {
+		return SayclubAutoResult.makeAutoTagResult(query, result, params);
 	}
 	
 	protected String parseQ(Map<String, String> params) {
