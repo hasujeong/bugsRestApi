@@ -1198,7 +1198,7 @@ public class BugsRestService {
 			String queryStr = parser.queryToString(query);
 //				System.out.println(" :::::::::: query ::::::: " + queryStr);
 
-			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 5000, 50, 50);
+			CommandSearchRequest.setProps("localhost", Connection.PORT, 60000, 50, 50);
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 
 			int returnCode = commandSearchRequest.request(querySet);
@@ -1886,10 +1886,10 @@ public class BugsRestService {
 						result.add(new WhereSet("TRACK_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, track_score_100, qOption.getNofmPercent()));
 //						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 //						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, track_score, qOption.getNofmPercent()));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score, qOption.getNofmPercent()));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), keyword, artist_score, qOption.getNofmPercent()));
+//						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+//						result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score, qOption.getNofmPercent()));
+//						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+//						result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), keyword, artist_score, qOption.getNofmPercent()));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
@@ -1900,12 +1900,24 @@ public class BugsRestService {
 						result.add(new WhereSet("SYN_TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("EXACT_IDX", qOption.getOption(), trimKeyword, 100, qOption.getNofmPercent()));
+						
+						if(artist_score == 1000) {
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, artist_score, qOption.getNofmPercent()));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ARTIST_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, artist_score, qOption.getNofmPercent()));
+						} else {
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score, qOption.getNofmPercent()));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), keyword, artist_score, qOption.getNofmPercent()));
+						}
 
 						if (album_score == 1000) {
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-							result.add(new WhereSet("ALBUM_IDX", qOption.getOption(), keyword, album_score, qOption.getNofmPercent()));
+							result.add(new WhereSet("ALBUM_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, album_score, qOption.getNofmPercent()));
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-							result.add(new WhereSet("ALBUM_IDX_WS", qOption.getOption(), keyword, album_score, qOption.getNofmPercent()));
+							result.add(new WhereSet("ALBUM_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, album_score, qOption.getNofmPercent()));
 						}
 						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
 
@@ -1923,10 +1935,10 @@ public class BugsRestService {
 						result.add(new WhereSet("TRACK_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, track_score_100));
 //						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 //						result.add(new WhereSet("TRACK_IDX_WS", qOption.getOption(), trimKeyword, track_score));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), keyword, artist_score));
+//						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+//						result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score));
+//						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+//						result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), keyword, artist_score));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
@@ -1937,12 +1949,24 @@ public class BugsRestService {
 						result.add(new WhereSet("SYN_TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("EXACT_IDX", qOption.getOption(), trimKeyword, 100));
+						
+						if(artist_score == 1000) {
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, artist_score));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ARTIST_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, artist_score));
+						} else {
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), keyword, artist_score));
+						}
 
 						if (album_score == 1000) {
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-							result.add(new WhereSet("ALBUM_IDX", qOption.getOption(), keyword, album_score));
+							result.add(new WhereSet("ALBUM_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, album_score));
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-							result.add(new WhereSet("ALBUM_IDX_WS", qOption.getOption(), keyword, album_score));
+							result.add(new WhereSet("ALBUM_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, album_score));
 						}
 						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
 
@@ -1970,6 +1994,26 @@ public class BugsRestService {
 							result.add(new WhereSet("EXACT_IDX", qOption.getOption(), trimKeyword, 100, qOption.getNofmPercent()));
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 							result.add(new WhereSet("EXACT_ARTIST_IDX", qOption.getOption(), trimKeyword, 200, qOption.getNofmPercent()));
+							
+							if(artist_score == 1000) {
+								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+								result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, artist_score, qOption.getNofmPercent()));
+								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+								result.add(new WhereSet("ARTIST_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, artist_score, qOption.getNofmPercent()));
+							} else {
+								trackMap.put("ARTIST_IDX", artist_score);
+								trackMap.put("ARTIST_IDX_WS", artist_score);
+							}
+							
+							if(album_score == 1000) {
+								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+								result.add(new WhereSet("ALBUM_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, album_score, qOption.getNofmPercent()));
+								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+								result.add(new WhereSet("ALBUM_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, album_score, qOption.getNofmPercent()));
+							} else {
+								trackMap.put("ALBUM_IDX", album_score);
+								trackMap.put("ALBUM_IDX_WS", album_score);
+							}
 						} else {
 							result.add(new WhereSet("TRACK_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, track_score_150));
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
@@ -1982,16 +2026,36 @@ public class BugsRestService {
 							result.add(new WhereSet("EXACT_IDX", qOption.getOption(), trimKeyword, 100));
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 							result.add(new WhereSet("EXACT_ARTIST_IDX", qOption.getOption(), trimKeyword, 200));
+							
+							if(artist_score == 1000) {
+								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+								result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, artist_score));
+								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+								result.add(new WhereSet("ARTIST_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, artist_score));
+							} else {
+								trackMap.put("ARTIST_IDX", artist_score);
+								trackMap.put("ARTIST_IDX_WS", artist_score);
+							}
+							
+							if(album_score == 1000) {
+								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+								result.add(new WhereSet("ALBUM_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, album_score));
+								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+								result.add(new WhereSet("ALBUM_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, album_score));
+							} else {
+								trackMap.put("ALBUM_IDX", album_score);
+								trackMap.put("ALBUM_IDX_WS", album_score);
+							}
 						}
 //						trackMap.put("TRACK_IDX", track_score_150);
 //						trackMap.put("TRACK_IDX_WS", track_score_100);
-						trackMap.put("ARTIST_IDX", artist_score);
-						trackMap.put("ARTIST_IDX_WS", artist_score);
+//						trackMap.put("ARTIST_IDX", artist_score);
+//						trackMap.put("ARTIST_IDX_WS", artist_score);
 
-						if (album_score == 1000) {
-							trackMap.put("ALBUM_IDX", album_score);
-							trackMap.put("ALBUM_IDX_WS", album_score);
-						}
+//						if (album_score == 1000) {
+//							trackMap.put("ALBUM_IDX", album_score);
+//							trackMap.put("ALBUM_IDX_WS", album_score);
+//						}
 					}
 					trackMap.put("TRACK_ARTIST_ALBUM_IDX", 30);
 					trackMap.put("SYN_TRACK_ARTIST_ALBUM_IDX", 30);
@@ -2390,10 +2454,6 @@ public class BugsRestService {
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("TRACK_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, track_score_100, qOption.getNofmPercent()));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score, qOption.getNofmPercent()));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), keyword, artist_score, qOption.getNofmPercent()));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
@@ -2403,12 +2463,24 @@ public class BugsRestService {
 						result.add(new WhereSet("SYN_TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30, qOption.getNofmPercent()));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("EXACT_IDX", qOption.getOption(), trimKeyword, 100, qOption.getNofmPercent()));
+						
+						if(artist_score == 1000) {
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, artist_score, qOption.getNofmPercent()));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ARTIST_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, artist_score, qOption.getNofmPercent()));
+						} else {
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score, qOption.getNofmPercent()));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), keyword, artist_score, qOption.getNofmPercent()));
+						}
 
 						if (album_score == 1000) {
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-							result.add(new WhereSet("ALBUM_IDX", qOption.getOption(), keyword, album_score, qOption.getNofmPercent()));
+							result.add(new WhereSet("ALBUM_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, album_score, qOption.getNofmPercent()));
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-							result.add(new WhereSet("ALBUM_IDX_WS", qOption.getOption(), keyword, album_score, qOption.getNofmPercent()));
+							result.add(new WhereSet("ALBUM_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, album_score, qOption.getNofmPercent()));
 						}
 						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
 
@@ -2423,10 +2495,6 @@ public class BugsRestService {
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("TRACK_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, track_score_100));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-						result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), keyword, artist_score));
-						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("TRACK_ARTIST_ALBUM_IDX_WS", qOption.getOption(), keyword, 30));
@@ -2436,12 +2504,24 @@ public class BugsRestService {
 						result.add(new WhereSet("SYN_TRACK_ARTIST_ALBUM_IDX", qOption.getOption(), keyword, 30));
 						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 						result.add(new WhereSet("EXACT_IDX", qOption.getOption(), trimKeyword, 100));
+						
+						if(artist_score == 1000) {
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, artist_score));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ARTIST_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, artist_score));
+						} else {
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ARTIST_IDX", qOption.getOption(), keyword, artist_score));
+							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+							result.add(new WhereSet("ARTIST_IDX_WS", qOption.getOption(), keyword, artist_score));
+						}
 
 						if (album_score == 1000) {
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-							result.add(new WhereSet("ALBUM_IDX", qOption.getOption(), keyword, album_score));
+							result.add(new WhereSet("ALBUM_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, album_score));
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-							result.add(new WhereSet("ALBUM_IDX_WS", qOption.getOption(), keyword, album_score));
+							result.add(new WhereSet("ALBUM_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, album_score));
 						}
 						result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
 
@@ -2467,6 +2547,26 @@ public class BugsRestService {
 							result.add(new WhereSet("EXACT_IDX", qOption.getOption(), trimKeyword, 100, qOption.getNofmPercent()));
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 							result.add(new WhereSet("EXACT_ARTIST_IDX", qOption.getOption(), trimKeyword, 200, qOption.getNofmPercent()));
+							
+							if(artist_score == 1000) {
+								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+								result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, artist_score, qOption.getNofmPercent()));
+								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+								result.add(new WhereSet("ARTIST_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, artist_score, qOption.getNofmPercent()));
+							} else {
+								trackMap.put("ARTIST_IDX", artist_score);
+								trackMap.put("ARTIST_IDX_WS", artist_score);
+							}
+							
+							if(album_score == 1000) {
+								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+								result.add(new WhereSet("ALBUM_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, album_score, qOption.getNofmPercent()));
+								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+								result.add(new WhereSet("ALBUM_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, album_score, qOption.getNofmPercent()));
+							} else {
+								trackMap.put("ALBUM_IDX", album_score);
+								trackMap.put("ALBUM_IDX_WS", album_score);
+							}
 						} else {
 							result.add(new WhereSet("TRACK_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, track_score_150));
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
@@ -2479,13 +2579,26 @@ public class BugsRestService {
 							result.add(new WhereSet("EXACT_IDX", qOption.getOption(), trimKeyword, 100));
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 							result.add(new WhereSet("EXACT_ARTIST_IDX", qOption.getOption(), trimKeyword, 200));
-						}
-						trackMap.put("ARTIST_IDX", artist_score);
-						trackMap.put("ARTIST_IDX_WS", artist_score);
-
-						if (album_score == 1000) {
-							trackMap.put("ALBUM_IDX", album_score);
-							trackMap.put("ALBUM_IDX_WS", album_score);
+							
+							if(artist_score == 1000) {
+								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+								result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, artist_score));
+								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+								result.add(new WhereSet("ARTIST_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, artist_score));
+							} else {
+								trackMap.put("ARTIST_IDX", artist_score);
+								trackMap.put("ARTIST_IDX_WS", artist_score);
+							}
+							
+							if(album_score == 1000) {
+								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+								result.add(new WhereSet("ALBUM_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, album_score));
+								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+								result.add(new WhereSet("ALBUM_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, album_score));
+							} else {
+								trackMap.put("ALBUM_IDX", album_score);
+								trackMap.put("ALBUM_IDX_WS", album_score);
+							}
 						}
 					}
 					trackMap.put("TRACK_ARTIST_ALBUM_IDX", 30);
