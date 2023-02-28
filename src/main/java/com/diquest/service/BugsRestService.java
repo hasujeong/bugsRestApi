@@ -2010,9 +2010,6 @@ public class BugsRestService {
 								result.add(new WhereSet("ALBUM_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, album_score, qOption.getNofmPercent()));
 								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 								result.add(new WhereSet("ALBUM_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, album_score, qOption.getNofmPercent()));
-							} else {
-								trackMap.put("ALBUM_IDX", album_score);
-								trackMap.put("ALBUM_IDX_WS", album_score);
 							}
 						} else {
 							result.add(new WhereSet("TRACK_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, track_score_150));
@@ -2042,10 +2039,7 @@ public class BugsRestService {
 								result.add(new WhereSet("ALBUM_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, album_score));
 								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 								result.add(new WhereSet("ALBUM_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, album_score));
-							} else {
-								trackMap.put("ALBUM_IDX", album_score);
-								trackMap.put("ALBUM_IDX_WS", album_score);
-							}
+							} 
 						}
 //						trackMap.put("TRACK_IDX", track_score_150);
 //						trackMap.put("TRACK_IDX_WS", track_score_100);
@@ -2563,10 +2557,7 @@ public class BugsRestService {
 								result.add(new WhereSet("ALBUM_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, album_score, qOption.getNofmPercent()));
 								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 								result.add(new WhereSet("ALBUM_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, album_score, qOption.getNofmPercent()));
-							} else {
-								trackMap.put("ALBUM_IDX", album_score);
-								trackMap.put("ALBUM_IDX_WS", album_score);
-							}
+							} 
 						} else {
 							result.add(new WhereSet("TRACK_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, track_score_150));
 							result.add(new WhereSet(Protocol.WhereSet.OP_OR));
@@ -2595,10 +2586,7 @@ public class BugsRestService {
 								result.add(new WhereSet("ALBUM_IDX", Protocol.WhereSet.OP_HASALLONE, keyword, album_score));
 								result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 								result.add(new WhereSet("ALBUM_IDX_WS", Protocol.WhereSet.OP_HASALLONE, keyword, album_score));
-							} else {
-								trackMap.put("ALBUM_IDX", album_score);
-								trackMap.put("ALBUM_IDX_WS", album_score);
-							}
+							} 
 						}
 					}
 					trackMap.put("TRACK_ARTIST_ALBUM_IDX", 30);
