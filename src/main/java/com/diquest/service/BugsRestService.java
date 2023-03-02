@@ -76,6 +76,7 @@ import com.diquest.rest.nhn.service.filter.EntityFilterSetService;
 import com.diquest.rest.nhn.service.filter.FilterSetService;
 import com.diquest.rest.nhn.service.filter.TotalFilterSetService;
 import com.diquest.rest.nhn.service.option.searchQoption;
+import com.diquest.rest.nhn.service.orderby.OrderBySetSearchService;
 import com.diquest.rest.nhn.service.orderby.OrderBySetService;
 import com.diquest.rest.nhn.service.select.AutoTagSelectSet;
 import com.diquest.rest.nhn.service.select.AutoTotalSelectSet;
@@ -285,7 +286,7 @@ public class BugsRestService {
 			query.setFilter(parseFilter(params, filterFieldParseResult, getCollection(params)));
 			query.setWhere(parseWhere(params, filterFieldParseResult, getCollection(params)));
 //			query.setGroupBy(parseGroupBy(params));
-			query.setOrderby(parseOrderBy(params, getCollection(params)));
+			query.setOrderby(parseOrderBySearch(params, getCollection(params)));
 			query.setFrom(getCollection(params));
 			query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
 			query.setSearchKeyword(parseQ(params));
@@ -347,7 +348,7 @@ public class BugsRestService {
 						query.setFilter(parseFilter(params, filterFieldParseResult, getCollection(params)));
 						query.setWhere(parseWhere2(params, filterFieldParseResult, getCollection(params)));
 //						query.setGroupBy(parseGroupBy(params));
-						query.setOrderby(parseOrderBy(params, getCollection(params)));
+						query.setOrderby(parseOrderBySearch(params, getCollection(params)));
 						query.setFrom(getCollection(params));
 						query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
 						query.setSearchKeyword(parseQ(params));
@@ -1190,7 +1191,7 @@ public class BugsRestService {
 			query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM	| Protocol.CategoryRankingOption.QUASI_SYNONYM));
 			query.setLoggable(false);
-			query.setPrintQuery(false); // 실제 사용시 false
+			query.setPrintQuery(true); // 실제 사용시 false
 			query.setResultModifier("typo");
 
 			querySet.addQuery(query);
@@ -3240,34 +3241,30 @@ public class BugsRestService {
 			idxScoreMap.put("FKEY_NOSP", 100);
 			idxScoreMap.put("FKEY", 50);
 			idxScoreMap.put("BKEY", 30);
+			
+			for (Entry<String, Integer> e : idxScoreMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				if (qOption.isNofM()) {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				}
+			}
 		} else {
 			if (num == 0) {
 				result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 100));
-//				idxScoreMap.put("ARTIST_IDX", 100);
 			} else {
-//				idxScoreMap.put("ARTR_IDX", 1000); 
-//				idxScoreMap.put("FKEY_NOSP", 100);
-//				idxScoreMap.put("FKEY", 50);
-//				idxScoreMap.put("BKEY", 30);
-
-				result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+//				result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
 				result.add(new WhereSet("FKEY", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 1000));
 				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 				result.add(new WhereSet("BKEY", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 0));
-				result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-				result.add(new WhereSet(Protocol.WhereSet.OP_NOT));
-				result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", "")));
-			}
-		}
-
-		for (Entry<String, Integer> e : idxScoreMap.entrySet()) {
-			if (result.size() > 0) {
 				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-			}
-			if (qOption.isNofM()) {
-				result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
-			} else {
-				result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 2000));
+//				result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+//				result.add(new WhereSet(Protocol.WhereSet.OP_NOT));
+//				result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", "")));
 			}
 		}
 
@@ -3291,28 +3288,26 @@ public class BugsRestService {
 			idxScoreMap.put("FKEY_NOSP", 100);
 			idxScoreMap.put("FKEY", 50);
 			idxScoreMap.put("BKEY", 30);
+			
+			for (Entry<String, Integer> e : idxScoreMap.entrySet()) {
+				if (result.size() > 0) {
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				}
+				if (qOption.isNofM()) {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+				} else {
+					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				}
+			}
 		} else {
 			if (num == 0) {
-				result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALL, kwd.replaceAll("\\s", ""), 100));
+				result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 100));
 			} else {
-				result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
 				result.add(new WhereSet("FKEY", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 1000));
 				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
 				result.add(new WhereSet("BKEY", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 0));
-				result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
-				result.add(new WhereSet(Protocol.WhereSet.OP_NOT));
-				result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", "")));
-			}
-		}
-
-		for (Entry<String, Integer> e : idxScoreMap.entrySet()) {
-			if (result.size() > 0) {
 				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-			}
-			if (qOption.isNofM()) {
-				result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
-			} else {
-				result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+				result.add(new WhereSet("ARTIST_IDX", Protocol.WhereSet.OP_HASALL, keyword.replaceAll("\\s", ""), 2000));
 			}
 		}
 
@@ -3334,6 +3329,10 @@ public class BugsRestService {
 
 	protected OrderBySet[] parseOrderBy(Map<String, String> params, String collection) {
 		return new OrderBySet[] {OrderBySetService.getInstance().getOrderBySet(RestUtils.getParam(params, "sort"), collection) };
+	}
+	
+	protected OrderBySet[] parseOrderBySearch(Map<String, String> params, String collection) throws InvalidParameterException {
+		return new OrderBySet[] {OrderBySetSearchService.getInstance().getOrderBySetSearch(params, collection) };
 	}
 
 	protected int parseStart(Map<String, String> params) {

@@ -102,7 +102,7 @@ public abstract class Qoption {
 	            throw new InvalidParameterException("not exist index : (" + indexField + ")");
 	        }
     	} else if(collection.equalsIgnoreCase(Collections.ARTIST)) {
-	        if (!indexField.equalsIgnoreCase("exact_artist_idx") && !indexField.equalsIgnoreCase(getUseIndexField(collection))) {
+	        if (!indexField.equalsIgnoreCase("exact_artist_idx") && !indexField.equalsIgnoreCase("partner_artist_idx") && !indexField.equalsIgnoreCase(getUseIndexField(collection))) {
 	            throw new InvalidParameterException("not exist index : (" + indexField + ")");
 	        }
       	} else if(collection.equalsIgnoreCase(Collections.ENTITY)) {
