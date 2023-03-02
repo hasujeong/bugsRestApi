@@ -878,6 +878,9 @@ public class BugsRestService {
 			if (params.get("q").isEmpty()) {
 				return makeEmptyNhnData(params);
 			}
+			if (params.get("q").replaceAll("\\s", "").equalsIgnoreCase("")) {
+				return makeEmptyNhnData(params);
+			}
 			if (parseSize(params) == 0) {
 				return makeEmptyNhnData(params);
 			}
@@ -1191,7 +1194,7 @@ public class BugsRestService {
 			query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM	| Protocol.CategoryRankingOption.QUASI_SYNONYM));
 			query.setLoggable(false);
-			query.setPrintQuery(true); // 실제 사용시 false
+			query.setPrintQuery(false); // 실제 사용시 false
 			query.setResultModifier("typo");
 
 			querySet.addQuery(query);
