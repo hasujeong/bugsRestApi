@@ -119,24 +119,27 @@ public class AutoTotalResult {
 		public Item(Query q, Result result, Map<String, String> map, int resultIdx) {
 			String tp = getTypetotal(result, resultIdx);
 
-			this.value = getValuetotal(result, resultIdx);
+//			this.value = getValuetotal(result, resultIdx);
 			if(tp.equalsIgnoreCase("TR")) {
 				this.type = getTypetotal(result, resultIdx);
 				this.ranking = getRankingtotal(result, resultIdx);
 				this.track_id = getTrack(result, resultIdx);
 				this.album_id = getAlbum(result, resultIdx);
 				this.artist_id = getArtisttotal(result, resultIdx);
+				this.value = getValuetotal(result, resultIdx);
 			} else if(tp.equalsIgnoreCase("AL")) {
 				this.type = getTypetotal(result, resultIdx);
 				this.ranking = getRankingtotal(result, resultIdx);
 				this.album_id = getAlbum(result, resultIdx);
 				this.artist_id = getArtisttotal(result, resultIdx);
+				this.value = getValuetotal(result, resultIdx);
 			} else if(tp.equalsIgnoreCase("TR_AR")) {
 				this.type = getTypetotal(result, resultIdx);
 				this.ranking = getRankingtotal(result, resultIdx);
 				this.track_id = getTrack(result, resultIdx);
 				this.album_id = getAlbum(result, resultIdx);
 				this.artist_id = getArtisttotal(result, resultIdx);
+				this.value = getValuetotal(result, resultIdx);
 			} else if(tp.equalsIgnoreCase("AR")) {
 				this.type = getTypetotal(result, resultIdx);
 				this.ranking = getRankingtotal(result, resultIdx);
@@ -145,11 +148,13 @@ public class AutoTotalResult {
 				this.genre_cd = getGenretotal(result, resultIdx);
 				this.grp_cd = getGrpcdtotal(result, resultIdx);
 				this.sex_cd = getSexcdtotal(result, resultIdx);
+				this.value = getArNmtotal(result, resultIdx);
 			} else {
 				this.type = getTypetotal(result, resultIdx);
 				this.ranking = getRankingtotal(result, resultIdx);
 				this.album_id = getAlbum(result, resultIdx);
 				this.artist_id = getArtisttotal(result, resultIdx);
+				this.value = getValuetotal(result, resultIdx);
 			} 
 		}
 		
@@ -183,6 +188,9 @@ public class AutoTotalResult {
 		}
 		private String getSexcdtotal(Result result, int resultIdx) {
 			return AutoTotalSelectSet.getInstance().getSexcdtotal(result, resultIdx);
+		}
+		private String getArNmtotal(Result result, int resultIdx) {
+			return AutoTotalSelectSet.getInstance().getArNmtotal(result, resultIdx);
 		}
 	}
 	

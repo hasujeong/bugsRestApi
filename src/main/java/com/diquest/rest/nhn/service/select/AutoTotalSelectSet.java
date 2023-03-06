@@ -23,6 +23,7 @@ public class AutoTotalSelectSet {
 	public static String VALUE = "KWD";
 	public static String TRACKID = "TRACK_ID";
 	public static String ALBUMID = "ALBUM_ID";
+	public static String ARTISTNM = "ARTIST_NM";
 	
 	public static LinkedHashMap<String, Integer> fixedFieldMap = new LinkedHashMap<String, Integer>();
 	static {
@@ -33,7 +34,7 @@ public class AutoTotalSelectSet {
 		fixedFieldMap.put(GENRECD, 4);
 		fixedFieldMap.put(GRP_CD, 5);
 		fixedFieldMap.put(SEX_CD, 6);
-		fixedFieldMap.put(VALUE, 7);
+		fixedFieldMap.put(ARTISTNM, 7);
 	}
 	
 	public static LinkedHashMap<String, Integer> fixedTotalFieldMap = new LinkedHashMap<String, Integer>();
@@ -49,6 +50,7 @@ public class AutoTotalSelectSet {
 		fixedTotalFieldMap.put(GENRECD, 7);
 		fixedTotalFieldMap.put(GRP_CD, 8);
 		fixedTotalFieldMap.put(SEX_CD, 9);
+		fixedTotalFieldMap.put(ARTISTNM, 10);
 	}
 
 	private static AutoTotalSelectSet instance = null;
@@ -125,7 +127,7 @@ public class AutoTotalSelectSet {
 	}
 	
 	public String getValue(Result result, int resultIdx) {
-		return new String(result.getResult(resultIdx, fixedFieldMap.get(VALUE)));
+		return new String(result.getResult(resultIdx, fixedFieldMap.get(ARTISTNM)));
 	}
 	
 	/* ******** fixedTotalFieldMap ************ */
@@ -168,6 +170,10 @@ public class AutoTotalSelectSet {
 	
 	public String getSexcdtotal(Result result, int resultIdx) {
 		return new String(result.getResult(resultIdx, fixedTotalFieldMap.get(SEX_CD)));
+	}
+	
+	public String getArNmtotal(Result result, int resultIdx) {
+		return new String(result.getResult(resultIdx, fixedTotalFieldMap.get(ARTISTNM)));
 	}
 	 
 	public Entry<String, Object> getSourceData(String key, String value) {

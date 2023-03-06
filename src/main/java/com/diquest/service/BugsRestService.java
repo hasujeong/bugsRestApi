@@ -986,16 +986,14 @@ public class BugsRestService {
 
 								FilterFieldParseResult filterFieldParseResult = parseFilterParams(params);
 								query.setSelect(parseAutoSelect(params, getCollection(params), i));
-								query.setWhere(parseAutoWhere2(params, filterFieldParseResult, getCollection(params), i,
-										OriginKwd));
+								query.setWhere(parseAutoWhere2(params, filterFieldParseResult, getCollection(params), i));
 								query.setOrderby(parseOrderBy(params, getCollection(params)));
 								query.setFrom(getCollection(params));
 								if (i == 1) {
 									query.setResult(parseStart(params) - 1, 19);
 									query.setSearchKeyword(parseQ(params));
 								} else {
-									query.setResult(parseStart(params) - 1,
-											parseStart(params) + parseAutoSize(params, i) - 2);
+									query.setResult(parseStart(params) - 1, parseStart(params) + parseAutoSize(params, i) - 2);
 									query.setSearchKeyword(OriginKwd);
 								}
 								query.setFaultless(true);
@@ -1003,7 +1001,6 @@ public class BugsRestService {
 								query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
 								query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 								query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));
-//								query.setLoggable(false);
 								query.setLoggable(getAutoLoggable(RestUtils.getParam(params, "search_tp")));
 								query.setLogKeyword(parseQ(params).toCharArray());
 								query.setPrintQuery(false); // 실제 사용시 false
@@ -3274,12 +3271,11 @@ public class BugsRestService {
 		return result;
 	}
 
-	protected WhereSet[] parseAutoWhere2(Map<String, String> params, FilterFieldParseResult filterFieldParseResult, String collection, int num, String kwd) throws InvalidParameterException {
-		return WhereSetService.getInstance().makeWhereSet(params, filterFieldParseResult,
-				makeAutoWhereSet2(params, collection, num, kwd));
+	protected WhereSet[] parseAutoWhere2(Map<String, String> params, FilterFieldParseResult filterFieldParseResult, String collection, int num) throws InvalidParameterException {
+		return WhereSetService.getInstance().makeWhereSet(params, filterFieldParseResult, makeAutoWhereSet2(params, collection, num));
 	}
 
-	protected List<WhereSet> makeAutoWhereSet2(Map<String, String> params, String collection, int num, String kwd) throws InvalidParameterException {
+	protected List<WhereSet> makeAutoWhereSet2(Map<String, String> params, String collection, int num) throws InvalidParameterException {
 		List<WhereSet> result = new ArrayList<WhereSet>();
 		String keyword = parseQ(params);
 
