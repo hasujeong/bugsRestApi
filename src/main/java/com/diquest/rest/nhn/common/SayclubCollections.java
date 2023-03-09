@@ -1,8 +1,6 @@
 package com.diquest.rest.nhn.common;
 
 public class SayclubCollections {
-	/** 방송국 컬렉션 **/
-	public static final String TOTAL = "TOTAL";
 	
 	/** 방송국 컬렉션 **/
 	public static final String SAYCAST = "SAYCAST";

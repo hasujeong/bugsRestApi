@@ -45,6 +45,7 @@ public class SayclubNewSelectSet {
 		sayCast_ArticleMap.put("VIEWCNT", 14);
 		sayCast_ArticleMap.put("TAILCNT", 15);
 		sayCast_ArticleMap.put("HAVE_ROSE", 16);
+		sayCast_ArticleMap.put("LUSRID", 17);
 	}
 	static {
 		sayCastAuto_Map.put(_RANK, 0);
@@ -134,7 +135,7 @@ public class SayclubNewSelectSet {
 		
 		List<SelectSet> sets = new ArrayList<SelectSet>();
 		for (Entry<String, Integer> entry : sayCast_ArticleMap.entrySet()) {
-			if(entry.getKey().equalsIgnoreCase("SUBJECT") || entry.getKey().equalsIgnoreCase("CONTENT")) {
+			if(entry.getKey().equalsIgnoreCase("SUBJECT") || entry.getKey().equalsIgnoreCase("CONTENT") || entry.getKey().equalsIgnoreCase("NICK") || entry.getKey().equalsIgnoreCase("LUSRID")) {
 				String fieldNm = ("passage." + entry.getKey()).toLowerCase();
 				
 				pass_field = RestUtils.getParam(params, fieldNm);

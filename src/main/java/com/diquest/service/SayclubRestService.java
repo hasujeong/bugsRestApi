@@ -43,7 +43,6 @@ import com.diquest.rest.nhn.result.SayMallResult;
 import com.diquest.rest.nhn.result.SayclubAutoResult;
 import com.diquest.rest.nhn.result.SayclubNewResult;
 import com.diquest.rest.nhn.result.SayclubResult;
-import com.diquest.rest.nhn.result.SayclubTotalResult;
 import com.diquest.rest.nhn.service.error.ErrorMessageService;
 import com.diquest.rest.nhn.service.error.logMessageService;
 import com.diquest.rest.nhn.service.filter.SayclubFilterSetService;
@@ -394,128 +393,6 @@ public class SayclubRestService {
 			logMessageService.receiveEnd(reqHeader, request);
 			
 //			System.out.println(ret);
-			
-		} catch (InvalidParameterException e) {
-			ErrorMessageService.getInstance().invalidParameterLog(req, e);
-			logMessageService.receiveEnd(reqHeader, request);
-			return invalidParameterResponse(e);
-		} catch (Exception e) {
-			ErrorMessageService.getInstance().InternalServerErrorLog(req, e);
-			logMessageService.receiveEnd(reqHeader, request);
-			return internalServerResponse(e);
-		}
-		
-		return ret;
-		
-	}
-	
-	// 리뉴얼 통합검색
-	public String sayNewTotalSearch(Map<String, String> params, Map<String, Object> reqHeader, HttpServletRequest request) {
-		
-		String req = "";
-		req += "Host: " + (String) reqHeader.get("host") + "\n";
-		req += "Connection: " + (String) reqHeader.get("connection") + "\n";
-		req += "Upgrade-Insecure-Requests: " + (String) reqHeader.get("upgrade-insecure-requests") + "\n";
-		req += "User-Agent: " + (String) reqHeader.get("user-agent") + "\n";
-		req += "Accept: " + (String) reqHeader.get("accept") + "\n";
-		req += "Accept-Encoding: " + (String) reqHeader.get("accept-encoding") + "\n";
-		req += "Accept-Language: " + (String) reqHeader.get("accept-language");
-		
-		String OriginKwd = "";
-		
-		if(params.get("q") != null) {
-			OriginKwd = parseQ(params);		
-		} else {			
-			OriginKwd = "";
-//				return makeEmptyNhnData(params);
-		}
-		
-		logMessageService.requestReceived(reqHeader, request);
-		
-		String colStr = params.get("collection");
-		String[] colArray = getTotalCollection(params);
-		int queryInt = 1;
-			
-		if(colStr.equalsIgnoreCase(Collections.TOTAL)) {
-			queryInt = colArray.length; 
-		} else {
-			queryInt = 1;
-		}
-		
-		String ret = "";
-		
-		Gson gson = new Gson();
-		
-		char[] startTag = "<b>".toCharArray(); // Highlight tag 설정 startTag
-		char[] endTag = "</b>".toCharArray(); // Highlight tag 설정 endTag
-		
-		QueryParser parser = new QueryParser();
-		
-		QuerySet querySet = new QuerySet(queryInt);
-		Query query = new Query(startTag, endTag);
-		
-		try {
-			for(int i = 0 ; i < colArray.length ; i++) {
-				
-				FilterFieldParseResult filterFieldParseResult = parseFilterParams(params);
-				query.setSelect(parseNewSelect(params));
-	//				if(!RangeFilter.equalsIgnoreCase("")) {
-	//					query.setFilter(parseFilter(collection, RangeFilter, RangeKey));
-	//				}
-				query.setWhere(parseTotalNewWhere(params, filterFieldParseResult, colArray[i], OriginKwd));
-//				query.setGroupBy(parseNewGroupBy(params));
-				query.setOrderby(parseNewOrderBy(params, colArray[i]));
-				query.setFrom(colArray[i]);
-				query.setResult(parseStart(params) - 1, parseStart(params) + parseSize(params) - 2);
-				query.setSearchKeyword(OriginKwd);
-				query.setFaultless(true);
-				query.setThesaurusOption((byte) (Protocol.ThesaurusOption.EQUIV_SYNONYM | Protocol.ThesaurusOption.QUASI_SYNONYM));
-				query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
-				query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
-				query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
-				query.setUserName(getUserName(params));										// 로그인 사용자 ID 기록
-				query.setExtData(RestUtils.getParam(params, "pr"));							// pr (app,web,pc)
-				query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
-				query.setLogKeyword(parseQ(params).toCharArray());
-				query.setPrintQuery(true);						// 실제 사용시 false
-				parseTrigger(params, query, colArray[i]);
-				query.setResultModifier("typo");
-				query.setValue("typo-parameters", OriginKwd);
-		    	query.setValue("typo-options", "ALPHABETS_TO_HANGUL|HANGUL_TO_ALPHABETS");
-		    	query.setValue("typo-correct-result-num", "1");
-				
-				querySet.addQuery(query);
-			
-				String queryStr = parser.queryToString(query);
-	//				System.out.println(" :::::::::: query ::::::: " + queryStr);
-			}
-				
-			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 5000, 50, 50);
-			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
-					
-			int returnCode = commandSearchRequest.request(querySet);
-			
-			if (returnCode <= -100) {
-				ErrorMessageService.getInstance().minusReturnCodeLog(returnCode, commandSearchRequest.getException(), req);
-				logMessageService.receiveEnd(reqHeader, request);
-				return commandSearchRequestErrorResponse(commandSearchRequest.getException().getErrorMessage());
-			} else {
-				logMessageService.messageReceived(reqHeader, request);
-			}
-			
-//				System.out.println(returnCode);
-//				System.out.println(commandSearchRequest.getResultSet().getResult(0).getTotalSize());
-			
-			String resultJson = "";
-			
-//			resultJson += gson.toJson(makeTotalResult(commandSearchRequest.getResultSet(), querySet, params, colArray));
-			resultJson += gson.toJson(makeTotalResult(commandSearchRequest.getResultSet(), querySet, params));
-			
-			ret = resultJson;
-			
-			logMessageService.receiveEnd(reqHeader, request);
-			
-//				System.out.println(ret);
 			
 		} catch (InvalidParameterException e) {
 			ErrorMessageService.getInstance().invalidParameterLog(req, e);
@@ -1301,10 +1178,6 @@ public class SayclubRestService {
 	
 	protected SayclubNewResult makeNewResult(Result result, Query query, Map<String, String> params, String collection) throws IRException {
 		return SayclubNewResult.makeSayclubResult(query, result, params, collection);
-	}
-	
-	protected SayclubTotalResult makeTotalResult(ResultSet result, QuerySet query, Map<String, String> params) throws IRException {
-		return SayclubTotalResult.makeTotalResult(query, result, params);
 	}
 	
 	protected SayclubAutoResult makeAutoResult(Result result, Query query, Map<String, String> params) throws IRException {
