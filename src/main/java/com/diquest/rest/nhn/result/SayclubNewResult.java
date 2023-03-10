@@ -173,6 +173,7 @@ public class SayclubNewResult {
 		String VIEWCNT;
 		String TAILCNT;
 		String HAVE_ROSE;
+		String LUSRID;
 		String PF;
 
 		public Item(Result result, SelectSet[] selectSet, Map<String, String> params, int resultIdx, String collection) {	
@@ -194,6 +195,7 @@ public class SayclubNewResult {
 				this.VIEWCNT = getSaycastArt(result, resultIdx, "VIEWCNT");
 				this.TAILCNT = getSaycastArt(result, resultIdx, "TAILCNT");
 				this.HAVE_ROSE = getSaycastArt(result, resultIdx, "HAVE_ROSE");
+				this.LUSRID = getSaycastArt(result, resultIdx, "LUSRID");
 			} else if(collection.equalsIgnoreCase(SayclubCollections.SAYCAST)) {
 				this.RANK = getSaycast(result, resultIdx, "_RANK");
 				this.DOCID = getSaycast(result, resultIdx, "_DOCID");

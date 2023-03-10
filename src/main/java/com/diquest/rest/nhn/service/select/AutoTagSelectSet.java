@@ -71,10 +71,10 @@ public class AutoTagSelectSet {
 	}
 
 	private List<SelectSet> getFixedSelectList(Map<String, String> params) {
-		String filter = RestUtils.getParam(params, "filter.use_esalbum_yn");
+		String filter = RestUtils.getParam(params, "filter.use_type");
 		List<SelectSet> sets = new ArrayList<SelectSet>();
 		
-		if(filter.equalsIgnoreCase("")) {
+		if(filter.equalsIgnoreCase("") || filter.equalsIgnoreCase("TAG")) {
 			for (Entry<String, Integer> entry : fixedFieldMap.entrySet()) {
 				sets.add(new SelectSet(entry.getKey()));
 			}

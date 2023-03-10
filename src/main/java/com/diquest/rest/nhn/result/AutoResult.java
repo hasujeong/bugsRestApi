@@ -95,7 +95,7 @@ public class AutoResult {
 		String musiccast_cnt;
 		
 		public Item(Result result, SelectSet[] selectSet, Map<String, String> params, int resultIdx, String tag) {
-			if(!tag.equalsIgnoreCase("")) {
+			if(tag.equalsIgnoreCase("ES")) {
 				this.value = getValuetag(result, resultIdx);
 				this.type = "TAG";
 				this.weight = getRelevance(result, resultIdx);

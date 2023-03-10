@@ -897,7 +897,8 @@ public class BugsRestService {
 		Gson gson = new Gson();
 
 		QueryParser parser = new QueryParser();
-
+		
+		String tag = "";
 		String colStr = params.get("collection");
 		int queryInt = 1;
 
@@ -905,6 +906,7 @@ public class BugsRestService {
 			queryInt = 2;
 		} else {
 			queryInt = 1;
+			tag = RestUtils.getParam(params, "filter.use_type");
 		}
 
 		QuerySet querySet = new QuerySet(queryInt);
@@ -917,7 +919,7 @@ public class BugsRestService {
 				FilterFieldParseResult filterFieldParseResult = parseFilterParams(params);
 				query.setSelect(parseAutoSelect(params, getCollection(params), i));
 //				query.setFilter(parseFilter(params, filterFieldParseResult, getCollection(params)));
-				query.setWhere(parseAutoWhere(params, filterFieldParseResult, getCollection(params), i));
+				query.setWhere(parseAutoWhere(params, filterFieldParseResult, getCollection(params), i, tag));
 				// query.setGroupBy(parseGroupBy(params));
 				query.setOrderby(parseOrderBy(params, getCollection(params)));
 				query.setFrom(getCollection(params));
@@ -3225,11 +3227,11 @@ public class BugsRestService {
 		return result;
 	}
 
-	protected WhereSet[] parseAutoWhere(Map<String, String> params, FilterFieldParseResult filterFieldParseResult, String collection, int num) throws InvalidParameterException {
-		return WhereSetService.getInstance().makeWhereSet(params, filterFieldParseResult, makeAutoWhereSet(params, collection, num));
+	protected WhereSet[] parseAutoWhere(Map<String, String> params, FilterFieldParseResult filterFieldParseResult, String collection, int num, String tag) throws InvalidParameterException {
+		return WhereSetService.getInstance().makeWhereSet(params, filterFieldParseResult, makeAutoWhereSet(params, collection, num, tag));
 	}
 
-	protected List<WhereSet> makeAutoWhereSet(Map<String, String> params, String collection, int num) throws InvalidParameterException {
+	protected List<WhereSet> makeAutoWhereSet(Map<String, String> params, String collection, int num, String tag) throws InvalidParameterException {
 		List<WhereSet> result = new ArrayList<WhereSet>();
 		String keyword = parseQ(params);
 
@@ -3238,18 +3240,31 @@ public class BugsRestService {
 		idxScoreMap = new HashMap<String, Integer>();
 
 		if (collection.equalsIgnoreCase(Collections.AUTO_TAG)) {
-			idxScoreMap.put("FKEY_NOSP", 100);
-			idxScoreMap.put("FKEY", 50);
-			idxScoreMap.put("BKEY", 30);
-			
-			for (Entry<String, Integer> e : idxScoreMap.entrySet()) {
-				if (result.size() > 0) {
-					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-				}
-				if (qOption.isNofM()) {
-					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
-				} else {
-					result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+			if(tag.equalsIgnoreCase("")) {
+				result.add(new WhereSet("USE_TYPE", Protocol.WhereSet.OP_HASALL, "TAG"));
+				result.add(new WhereSet(Protocol.WhereSet.OP_AND));
+				
+				result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+				result.add(new WhereSet("FKEY_NOSP", Protocol.WhereSet.OP_HASALL, keyword, 100));
+				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				result.add(new WhereSet("FKEY", Protocol.WhereSet.OP_HASALL, keyword, 50));
+				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+				result.add(new WhereSet("BKEY", Protocol.WhereSet.OP_HASALL, keyword, 30));
+				result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+			} else {
+				idxScoreMap.put("FKEY_NOSP", 100);
+				idxScoreMap.put("FKEY", 50);
+				idxScoreMap.put("BKEY", 30);
+				
+				for (Entry<String, Integer> e : idxScoreMap.entrySet()) {
+					if (result.size() > 0) {
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					}
+					if (qOption.isNofM()) {
+						result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue(), qOption.getNofmPercent()));
+					} else {
+						result.add(new WhereSet(e.getKey(), qOption.getOption(), keyword, e.getValue()));
+					}
 				}
 			}
 		} else {
@@ -3468,7 +3483,7 @@ public class BugsRestService {
 	}
 
 	protected AutoResult makeAutoTagResult(Result result, Query query, Map<String, String> params) throws IRException {
-		String tag = RestUtils.getParam(params, "filter.use_esalbum_yn");
+		String tag = RestUtils.getParam(params, "filter.use_type");
 
 		return AutoResult.makeAutoTagResult(query, result, params, tag);
 	}
