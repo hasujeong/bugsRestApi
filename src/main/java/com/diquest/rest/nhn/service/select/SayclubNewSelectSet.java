@@ -186,7 +186,7 @@ public class SayclubNewSelectSet {
 		
 		List<SelectSet> sets = new ArrayList<SelectSet>();
 		for (Entry<String, Integer> entry : sayCast_CjMap.entrySet()) {
-			if(entry.getKey().equalsIgnoreCase("CJNAME") || entry.getKey().equalsIgnoreCase("PF")) {
+			if(entry.getKey().equalsIgnoreCase("CJNAME") || entry.getKey().equalsIgnoreCase("CJID")) {
 				String fieldNm = ("passage." + entry.getKey()).toLowerCase();
 				
 				pass_field = RestUtils.getParam(params, fieldNm);

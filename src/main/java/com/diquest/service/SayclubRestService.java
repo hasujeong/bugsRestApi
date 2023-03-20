@@ -131,7 +131,7 @@ public class SayclubRestService {
 			query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
 			query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
-			query.setUserName(getUserName(params));										// 로그인 사용자 ID 기록
+			query.setUserName(RestUtils.getParam(params, "usr"));										// 로그인 사용자 ID 기록
 			query.setExtData(RestUtils.getParam(params, "pr"));							// pr (app,web,pc)
 			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 			query.setLogKeyword(parseQ(params).toCharArray());
@@ -192,7 +192,7 @@ public class SayclubRestService {
 						query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
 						query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 						query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
-						query.setUserName(getUserName(params));										// 로그인 사용자 ID 기록
+						query.setUserName(RestUtils.getParam(params, "usr"));										// 로그인 사용자 ID 기록
 						query.setExtData(RestUtils.getParam(params, "pr"));							// pr (app,web,pc)
 						query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 						query.setLogKeyword(parseQ(params).toCharArray());
@@ -294,7 +294,7 @@ public class SayclubRestService {
 			query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
 			query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
-//			query.setUserName(getUserName(params));										// 로그인 사용자 ID 기록
+//			query.setUserName(RestUtils.getParam(params, "usr"));										// 로그인 사용자 ID 기록
 			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 			query.setLogKeyword(parseQ(params).toCharArray());
 			query.setPrintQuery(true);						// 실제 사용시 false
@@ -353,7 +353,7 @@ public class SayclubRestService {
 						query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
 						query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 						query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
-//						query.setUserName(getUserName(params));										// 로그인 사용자 ID 기록
+//						query.setUserName(RestUtils.getParam(params, "usr"));										// 로그인 사용자 ID 기록
 						query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 						query.setLogKeyword(parseQ(params).toCharArray());
 						query.setPrintQuery(true);						// 실제 사용시 false
@@ -507,7 +507,7 @@ public class SayclubRestService {
 			query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
 			query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
-			query.setUserName(getUserName(params));										// 로그인 사용자 ID 기록
+			query.setUserName(RestUtils.getParam(params, "usr"));										// 로그인 사용자 ID 기록
 			query.setExtData(RestUtils.getParam(params, "pr"));							// pr (app,web,pc)
 			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 			query.setLogKeyword(parseQ(params).toCharArray());
@@ -568,7 +568,7 @@ public class SayclubRestService {
 						query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
 						query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 						query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
-						query.setUserName(getUserName(params));										// 로그인 사용자 ID 기록
+						query.setUserName(RestUtils.getParam(params, "usr"));										// 로그인 사용자 ID 기록
 						query.setExtData(RestUtils.getParam(params, "pr"));							// pr (app,web,pc)
 						query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 						query.setLogKeyword(parseQ(params).toCharArray());

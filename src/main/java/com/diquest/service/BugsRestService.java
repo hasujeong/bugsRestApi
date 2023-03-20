@@ -295,7 +295,7 @@ public class BugsRestService {
 			query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD	| Protocol.SearchOption.CACHE));
 			query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM	| Protocol.CategoryRankingOption.QUASI_SYNONYM));
-			query.setUserName(getUserName(params)); // 로그인 사용자 ID 기록
+			query.setUserName(RestUtils.getParam(params, "usr")); // 로그인 사용자 ID 기록
 			query.setExtData(RestUtils.getParam(params, "pr")); // pr (app,web,pc)
 			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 			query.setLogKeyword(parseQ(params).toCharArray());
@@ -357,7 +357,7 @@ public class BugsRestService {
 						query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD	| Protocol.SearchOption.CACHE));
 						query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 						query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM	| Protocol.CategoryRankingOption.QUASI_SYNONYM));
-						query.setUserName(getUserName(params)); // 로그인 사용자 ID 기록
+						query.setUserName(RestUtils.getParam(params, "usr")); // 로그인 사용자 ID 기록
 						query.setExtData(RestUtils.getParam(params, "pr")); // pr (app,web,pc)
 						query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 						query.setLogKeyword(parseQ(params).toCharArray());
@@ -428,12 +428,17 @@ public class BugsRestService {
 		String colStr = "";
 
 		String prValue = "";
+		String usrValue = "";
 		String searchTpValue = "";
 
 		if (!RestUtils.getParam(params, "pr").equalsIgnoreCase("")) {
 			prValue = "&pr=" + RestUtils.getParam(params, "pr");
 		}
-
+		
+		if (!RestUtils.getParam(params, "usr").equalsIgnoreCase("")) {
+			usrValue = "&usr=" + RestUtils.getParam(params, "usr");
+		}
+		
 		if (!RestUtils.getParam(params, "search_tp").equalsIgnoreCase("")) {
 			searchTpValue = "&search_tp=" + RestUtils.getParam(params, "search_tp");
 		}
@@ -451,7 +456,7 @@ public class BugsRestService {
 				}
 
 				urlStr += "http://api-alar-kr-tcc.qpit.ai/7S4pV1yEaFoWJsj/v1/search/advanced.search?filter.search_exclude_yn=N&q="
-						+ keyword + prValue + searchTpValue + "&q_option=and,exact_artist_idx&size=" + colSize + colSort
+						+ keyword + prValue + usrValue + searchTpValue + "&q_option=and,exact_artist_idx&size=" + colSize + colSort
 						+ "##";
 				colSort = "";
 			}
@@ -465,7 +470,7 @@ public class BugsRestService {
 				}
 
 				urlStr += "http://api-track-kr-tcc.qpit.ai/lZjTO0HlFg91HwD/v1/search/advanced.search?filter.search_exclude_yn=N&q="
-						+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+						+ keyword + prValue + usrValue  + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			}
 			if (colArray[i].equalsIgnoreCase(Collections.ALBUM)) {
@@ -478,7 +483,7 @@ public class BugsRestService {
 				}
 
 				urlStr += "http://api-alar-kr-tcc.qpit.ai/vbmKja0BuYy35Ok/v1/search/advanced.search?filter.search_exclude_yn=N&q="
-						+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+						+ keyword + prValue + usrValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			}
 			if (colArray[i].equalsIgnoreCase(Collections.ARTIST)) {
@@ -491,7 +496,7 @@ public class BugsRestService {
 				}
 
 				urlStr += "http://api-alar-kr-tcc.qpit.ai/7S4pV1yEaFoWJsj/v1/search/advanced.search?filter.search_exclude_yn=N&q="
-						+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+						+ keyword + prValue + usrValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			}
 			if (colArray[i].equalsIgnoreCase(Collections.MV)) {
@@ -504,7 +509,7 @@ public class BugsRestService {
 				}
 
 				urlStr += "http://api-etc-kr-tcc.qpit.ai/58IHeEjp2lyoR4M/v1/search/advanced.search?filter.search_exclude_yn=N&q="
-						+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+						+ keyword + prValue + usrValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			}
 			if (colArray[i].equalsIgnoreCase(Collections.MUSICCAST)) {
@@ -517,7 +522,7 @@ public class BugsRestService {
 				}
 
 				urlStr += "http://api-etc-kr-tcc.qpit.ai/7ZEz9GaqpMRc5DH/v1/search/advanced.search?q=" + keyword
-						+ prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+						+ prValue + usrValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			}
 			if (colArray[i].equalsIgnoreCase(Collections.MUSICPD)) {
@@ -530,7 +535,7 @@ public class BugsRestService {
 				}
 
 				urlStr += "http://api-etc-kr-tcc.qpit.ai/6Jfys7XEvdQ0KuU/v1/search/advanced.search?filter.search_exclude_yn=N&q="
-						+ keyword + prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+						+ keyword + prValue + usrValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			}
 			if (colArray[i].equalsIgnoreCase(Collections.MUSICPOST)) {
@@ -543,7 +548,7 @@ public class BugsRestService {
 				}
 
 				urlStr += "http://api-etc-kr-tcc.qpit.ai/SVmCkyjdYM9n3go/v1/search/advanced.search?q=" + keyword
-						+ prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+						+ prValue + usrValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			}
 			if (colArray[i].equalsIgnoreCase(Collections.CLASSIC)) {
@@ -556,7 +561,7 @@ public class BugsRestService {
 				}
 
 				urlStr += "http://api-etc-kr-tcc.qpit.ai/0WleItZOyGJbrVF/v1/search/advanced.search?q=" + keyword
-						+ prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+						+ prValue + usrValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			}
 			if (colArray[i].equalsIgnoreCase(Collections.LYRICS)) {
@@ -569,7 +574,7 @@ public class BugsRestService {
 				}
 
 				urlStr += "http://api-alar-kr-tcc.qpit.ai/M2NjMWRjOWMwOGN/v1/search/advanced.search?q=" + keyword
-						+ prValue + searchTpValue + "&size=" + colSize + colSort + "##";
+						+ prValue + usrValue + searchTpValue + "&size=" + colSize + colSort + "##";
 				colSort = "";
 			}
 		}
@@ -807,7 +812,7 @@ public class BugsRestService {
 				query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD	| Protocol.SearchOption.CACHE));
 				query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 				query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM	| Protocol.CategoryRankingOption.QUASI_SYNONYM));
-				query.setUserName(getUserName(params)); // 로그인 사용자 ID 기록
+				query.setUserName(RestUtils.getParam(params, "usr")); // 로그인 사용자 ID 기록
 				query.setExtData(RestUtils.getParam(params, "pr")); // pr (app,web,pc)
 				query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 				query.setLogKeyword(parseQ(params).toCharArray());
@@ -1625,7 +1630,7 @@ public class BugsRestService {
 			query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD | Protocol.SearchOption.CACHE));
 			query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM	| Protocol.CategoryRankingOption.QUASI_SYNONYM));
-			query.setUserName(getUserName(params)); // 로그인 사용자 ID 기록
+			query.setUserName(RestUtils.getParam(params, "usr")); // 로그인 사용자 ID 기록
 			query.setExtData(RestUtils.getParam(params, "pr")); // pr (app,web,pc)
 			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 			query.setLogKeyword(parseQ(params).toCharArray());
@@ -1641,7 +1646,7 @@ public class BugsRestService {
 			String queryStr = parser.queryToString(query);
 //			System.out.println(" :::::::::: query ::::::: " + queryStr);
 
-			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 5000, 50, 50);
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 10000, 50, 50);
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 
 			int returnCode = commandSearchRequest.request(querySet);
@@ -1686,7 +1691,7 @@ public class BugsRestService {
 						query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD	| Protocol.SearchOption.CACHE));
 						query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 						query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM	| Protocol.CategoryRankingOption.QUASI_SYNONYM));
-						query.setUserName(getUserName(params)); // 로그인 사용자 ID 기록
+						query.setUserName(RestUtils.getParam(params, "usr")); // 로그인 사용자 ID 기록
 						query.setExtData(RestUtils.getParam(params, "pr")); // pr (app,web,pc)
 						query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
 						query.setLogKeyword(parseQ(params).toCharArray());
@@ -3189,6 +3194,8 @@ public class BugsRestService {
 					result.add(new WhereSet(Protocol.WhereSet.OP_NOT));
 				}
 			}
+			
+			String trimKeyword = keyword.replaceAll("\\s", "");
 
 			if (type.equalsIgnoreCase("intersection")) {
 				if (name.toUpperCase().equalsIgnoreCase("ALBUM_IDX")) {
@@ -3196,7 +3203,14 @@ public class BugsRestService {
 						result.add(new WhereSet("EDITION_NO", option, keyword, 100));
 					} else {
 						result.add(new WhereSet(name.toUpperCase(), option, keyword, 100));
+						result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+						result.add(new WhereSet(name.toUpperCase()+"_WS", option, trimKeyword, 100));
 					}
+				} else if (name.toUpperCase().equalsIgnoreCase("TRACK_IDX")) {
+					result.add(new WhereSet(name.toUpperCase(), option, keyword, 100));
+					result.add(new WhereSet(Protocol.WhereSet.OP_OR));
+					result.add(new WhereSet(name.toUpperCase()+"_WS", option, trimKeyword, 100));
+					
 				} else {
 					if (operand.startsWith("nofm")) {
 						result.add(new WhereSet(name.toUpperCase(), option, keyword, 100, 100));
@@ -3209,20 +3223,6 @@ public class BugsRestService {
 				result.add(new WhereSet(name.toUpperCase(), option, keyword));
 			}
 		}
-//				
-//		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
-//		
-//		int opValue = 0;
-//		
-//		for (Entry<String, Integer> e : idxScoreMap.entrySet()) {
-//			if (opValue > 0) {
-//				result.add(new WhereSet(Protocol.WhereSet.OP_OR));
-//			}
-//					
-//			result.add(new WhereSet(e.getKey(), option, keyword, e.getValue()));
-//			opValue = 1;
-//		}
-//		result.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
 
 		return result;
 	}
