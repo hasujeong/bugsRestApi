@@ -21,6 +21,7 @@ public class SayclubMusicSelectSet {
 	
 	public static LinkedHashMap<String, Integer> trackMap = new LinkedHashMap<String, Integer>();
 	public static LinkedHashMap<String, Integer> artistMap = new LinkedHashMap<String, Integer>();
+	public static LinkedHashMap<String, Integer> lyricsMap = new LinkedHashMap<String, Integer>();
 
 	static {
 		trackMap.put(_RANK, 0);
@@ -37,6 +38,16 @@ public class SayclubMusicSelectSet {
 		artistMap.put(ID, 3);
 		artistMap.put("ARTIST_NM", 4);
 		artistMap.put("ARTIST_ID", 5);
+	}
+	static {
+		lyricsMap.put(_RANK, 0);
+		lyricsMap.put(_DOCID, 1);
+		lyricsMap.put(WEIGHT, 2);
+		lyricsMap.put(ID, 3);
+		lyricsMap.put("TRACK_ID", 4);
+		lyricsMap.put("TRACK_TITLE", 5);
+		lyricsMap.put("ARTIST_NM", 6);
+		lyricsMap.put("LYRICS", 7);
 	}
 	
 	private static SayclubMusicSelectSet instance = null;
@@ -55,6 +66,8 @@ public class SayclubMusicSelectSet {
 			list.addAll(getSayTrackSelectList());
 		} else if(collection.equalsIgnoreCase(Collections.ARTIST)) {
 			list.addAll(getSayArtistSelectList());
+		} else if(collection.equalsIgnoreCase(Collections.LYRICS)) {
+			list.addAll(getSayLyricsSelectList());
 		} else {
 			list.addAll(getReturnParamSelectList(params));
 			list.addAll(getTriggerSelectList(params));
@@ -95,12 +108,24 @@ public class SayclubMusicSelectSet {
 		return sets;
 	}
 	
+	private List<SelectSet> getSayLyricsSelectList() {
+		List<SelectSet> sets = new ArrayList<SelectSet>();
+		for (Entry<String, Integer> entry : lyricsMap.entrySet()) {
+			sets.add(new SelectSet(entry.getKey()));
+		}
+		return sets;
+	}
+	
 	public String getSayTrack(Result result, int resultIdx, String field) {
 		return String.valueOf(result.getResult(resultIdx, trackMap.get(field)));
 	}
 	
 	public String getSayArtist(Result result, int resultIdx, String field) {
 		return String.valueOf(result.getResult(resultIdx, artistMap.get(field)));
+	}
+	
+	public String getSayLyrics(Result result, int resultIdx, String field) {
+		return String.valueOf(result.getResult(resultIdx, lyricsMap.get(field)));
 	}
 	
 }

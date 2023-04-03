@@ -60,7 +60,7 @@ public class BugsRestController {
 		if (appKey.equals(APP_KEY_TRACK)) {
 			params.put("collection",Collections.TRACK);
 			
-			if(prValue.indexOf("sayclub_web") > -1) {
+			if(prValue.indexOf("sayclub_web") > -1 || prValue.indexOf("sayclub_recommend") > -1) {
 				return bugsRestService.SayMusicSearch(params, requestHeader, request);
 			} else {
 				return bugsRestService.search(params, requestHeader, request);
@@ -68,14 +68,20 @@ public class BugsRestController {
 			
 		} else if (appKey.equals(APP_KEY_LYRICS)) {
 			params.put("collection",Collections.LYRICS);
-			return bugsRestService.search(params, requestHeader, request);
+			
+			if(prValue.indexOf("sayclub_web") > -1 || prValue.indexOf("sayclub_recommend") > -1) {
+				return bugsRestService.SayLyricsSearch(params, requestHeader, request);
+			} else {
+				return bugsRestService.search(params, requestHeader, request);
+			}
+			
 		} else if (appKey.equals(APP_KEY_ALBUM)) {
 			params.put("collection",Collections.ALBUM);
 			return bugsRestService.search(params, requestHeader, request);
 		} else if (appKey.equals(APP_KEY_ARTIST)) {
 			params.put("collection",Collections.ARTIST);
 			
-			if(prValue.indexOf("sayclub_web") > -1) {
+			if(prValue.indexOf("sayclub_web") > -1 || prValue.indexOf("sayclub_recommend") > -1) {
 				return bugsRestService.SayMusicSearch(params, requestHeader, request);
 			} else {
 				return bugsRestService.search(params, requestHeader, request);

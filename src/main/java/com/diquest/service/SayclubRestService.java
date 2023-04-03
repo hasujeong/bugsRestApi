@@ -133,7 +133,7 @@ public class SayclubRestService {
 			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
 			query.setUserName(RestUtils.getParam(params, "usr"));										// 로그인 사용자 ID 기록
 			query.setExtData(RestUtils.getParam(params, "pr"));							// pr (app,web,pc)
-			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
+			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp"),OriginKwd));
 			query.setLogKeyword(parseQ(params).toCharArray());
 			query.setPrintQuery(true);						// 실제 사용시 false
 			parseTrigger(params, query, collection);
@@ -194,7 +194,7 @@ public class SayclubRestService {
 						query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
 						query.setUserName(RestUtils.getParam(params, "usr"));										// 로그인 사용자 ID 기록
 						query.setExtData(RestUtils.getParam(params, "pr"));							// pr (app,web,pc)
-						query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
+						query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp"),parseQ(params)));
 						query.setLogKeyword(parseQ(params).toCharArray());
 						query.setPrintQuery(true);						// 실제 사용시 false
 						parseTrigger(params, query, collection);
@@ -295,9 +295,9 @@ public class SayclubRestService {
 			query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
 //			query.setUserName(RestUtils.getParam(params, "usr"));										// 로그인 사용자 ID 기록
-			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
+			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp"), OriginKwd));
 			query.setLogKeyword(parseQ(params).toCharArray());
-			query.setPrintQuery(true);						// 실제 사용시 false
+			query.setPrintQuery(false);						// 실제 사용시 false
 			parseTrigger(params, query, collection);
 			query.setResultModifier("typo");
 			query.setValue("typo-parameters", OriginKwd);
@@ -354,9 +354,9 @@ public class SayclubRestService {
 						query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 						query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
 //						query.setUserName(RestUtils.getParam(params, "usr"));										// 로그인 사용자 ID 기록
-						query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
+						query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp"),parseQ(params)));
 						query.setLogKeyword(parseQ(params).toCharArray());
-						query.setPrintQuery(true);						// 실제 사용시 false
+						query.setPrintQuery(false);						// 실제 사용시 false
 						parseTrigger(params, query, collection);
 						
 						querySet.addQuery(query);
@@ -509,7 +509,7 @@ public class SayclubRestService {
 			query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
 			query.setUserName(RestUtils.getParam(params, "usr"));										// 로그인 사용자 ID 기록
 			query.setExtData(RestUtils.getParam(params, "pr"));							// pr (app,web,pc)
-			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
+			query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp"), OriginKwd));
 			query.setLogKeyword(parseQ(params).toCharArray());
 			query.setPrintQuery(false);						// 실제 사용시 false
 			parseTrigger(params, query, collection);
@@ -570,7 +570,7 @@ public class SayclubRestService {
 						query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM | Protocol.CategoryRankingOption.QUASI_SYNONYM));	
 						query.setUserName(RestUtils.getParam(params, "usr"));										// 로그인 사용자 ID 기록
 						query.setExtData(RestUtils.getParam(params, "pr"));							// pr (app,web,pc)
-						query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp")));
+						query.setLoggable(getLoggable(RestUtils.getParam(params, "search_tp"),parseQ(params)));
 						query.setLogKeyword(parseQ(params).toCharArray());
 						query.setPrintQuery(false);						// 실제 사용시 false
 						parseTrigger(params, query, collection);
@@ -1112,13 +1112,22 @@ public class SayclubRestService {
 		return userName;
 	}
 	
-	protected boolean getLoggable(String value) {
+	protected boolean getLoggable(String value, String q) {
 		if (value.equalsIgnoreCase("sb")) {
-			return true;
+			if(q.matches(".*[ㄱ-ㅎㅏ-ㅣ]+.*")) {
+				return false;
+			} else {
+				return true;
+			}
 		} else if (value.equalsIgnoreCase("ign")) {
 			return false;
 		}
-		return true;
+		
+		if(q.matches(".*[ㄱ-ㅎㅏ-ㅣ]+.*")) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 	
 	protected FilterSet[] parseFilter(String collection, String RangeFilter, String RangeKey) throws InvalidParameterException {

@@ -122,6 +122,7 @@ public class SayMusicResult {
 		String TRACK_ID;
 		String ARTIST_ID;
 		String ARTIST_NM;
+		String LYRICS;
 		
 		public Item(Result result, SelectSet[] selectSet, Map<String, String> params, int resultIdx, String collection) {	
 			if(collection.equalsIgnoreCase(Collections.TRACK)) {
@@ -138,7 +139,16 @@ public class SayMusicResult {
 				this._ID = getSayArtist(result, resultIdx, "ID");
 				this.ARTIST_ID = getSayArtist(result, resultIdx, "ARTIST_ID");
 				this.ARTIST_NM = getSayArtist(result, resultIdx, "ARTIST_NM");
-			} else {
+			} else if(collection.equalsIgnoreCase(Collections.LYRICS)) {
+				this.RANK = getSayLyrics(result, resultIdx, "_RANK");
+				this.DOCID = getSayLyrics(result, resultIdx, "_DOCID");
+				this.RELEVANCE = getSayLyrics(result, resultIdx, "WEIGHT");
+				this._ID = getSayLyrics(result, resultIdx, "ID");
+				this.TRACK_ID = getSayLyrics(result, resultIdx, "TRACK_ID");
+				this.TRACK_TITLE = getSayLyrics(result, resultIdx, "TRACK_TITLE");
+				this.ARTIST_NM = getSayLyrics(result, resultIdx, "ARTIST_NM");
+				this.LYRICS = getSayLyrics(result, resultIdx, "LYRICS");
+			}else {
 				this.RANK = getSayTrack(result, resultIdx, "_RANK");
 				this.DOCID = getSayTrack(result, resultIdx, "_DOCID");
 				this.RELEVANCE = getSayTrack(result, resultIdx, "WEIGHT");
@@ -152,6 +162,10 @@ public class SayMusicResult {
 		
 		private String getSayArtist(Result result, int resultIdx, String field) {
 			return SayclubMusicSelectSet.getInstance().getSayArtist(result, resultIdx, field);
+		}
+		
+		private String getSayLyrics(Result result, int resultIdx, String field) {
+			return SayclubMusicSelectSet.getInstance().getSayLyrics(result, resultIdx, field);
 		}
 	}
 	
