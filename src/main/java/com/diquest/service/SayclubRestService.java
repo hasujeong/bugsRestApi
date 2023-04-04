@@ -1114,7 +1114,7 @@ public class SayclubRestService {
 	
 	protected boolean getLoggable(String value, String q) {
 		if (value.equalsIgnoreCase("sb")) {
-			if(q.matches(".*[ㄱ-ㅎㅏ-ㅣ]+.*")) {
+			if(q.matches(".*[ㅏ-ㅣ]+.*")) {
 				return false;
 			} else {
 				return true;
@@ -1123,7 +1123,7 @@ public class SayclubRestService {
 			return false;
 		}
 		
-		if(q.matches(".*[ㄱ-ㅎㅏ-ㅣ]+.*")) {
+		if(q.matches(".*[ㅏ-ㅣ]+.*")) {
 			return false;
 		} else {
 			return true;
