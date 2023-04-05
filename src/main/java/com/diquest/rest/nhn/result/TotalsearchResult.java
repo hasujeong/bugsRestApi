@@ -102,7 +102,7 @@ public class TotalsearchResult {
 			this.status = new Status();
 			this.itemList = new itemList2(items);
 			
-			// 검색어 통합 집계 api 요청
+			// 검색어 통합 집계 api 요청 
 			if (totalCnt > 0) {
 				try {
 					String keyword = URLEncoder.encode(this.query, "UTF-8");
