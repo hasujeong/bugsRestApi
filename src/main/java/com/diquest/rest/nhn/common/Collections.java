@@ -45,5 +45,8 @@ public class Collections {
 	
 	/** 인기검색어 컬렉션 **/
 	public static final String HOTKEYWORD = "HOTKEYWORD";
+	
+	/** 검색어 통합 집계 컬렉션 **/
+	public static final String TOTAL_KEYWORD = "TOTAL_KEYWORD";
 
 }

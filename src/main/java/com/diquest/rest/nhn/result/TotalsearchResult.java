@@ -1,5 +1,8 @@
 package com.diquest.rest.nhn.result;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -98,6 +101,37 @@ public class TotalsearchResult {
 			this.domainCount = totalList.size();
 			this.status = new Status();
 			this.itemList = new itemList2(items);
+			
+			// 검색어 통합 집계 api 요청
+			if (totalCnt > 0) {
+				try {
+					String keyword = URLEncoder.encode(this.query, "UTF-8");
+					String url = "http://api-etc-kr-tcc.qpit.ai/NGRkZDhhM2JiZjg/v1/totkeyword?q=" + keyword;
+					
+					HttpURLConnection totalConnection = (HttpURLConnection) new URL(url).openConnection();
+
+					totalConnection.setRequestMethod("GET");
+					totalConnection.setRequestProperty("Content-Type", "application/json;");
+					totalConnection.setRequestProperty("Accept", "application/json");
+					totalConnection.setConnectTimeout(1000);
+					totalConnection.setReadTimeout(1000);
+					totalConnection.setDoOutput(true);
+
+					try {
+						int totalCode = totalConnection.getResponseCode();
+
+						if (totalCode == 400 || totalCode == 401 || totalCode == 500) {
+							System.out.println(totalCode + " Error! == NGRkZDhhM2JiZjg");
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+
+					totalConnection.disconnect();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		
 		private List<TotalItem> makeTotalItems(List<Map<Integer, Object>> totalList) throws IRException {

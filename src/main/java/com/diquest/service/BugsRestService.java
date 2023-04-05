@@ -1148,6 +1148,93 @@ public class BugsRestService {
 		return ret;
 
 	}
+	
+	// 검색어 통합 집계 API
+	public String totKeyword(Map<String, String> params, Map<String, Object> reqHeader, HttpServletRequest request) {
+
+		String req = "";
+		req += "Host: " + (String) reqHeader.get("host") + "\n";
+		req += "Connection: " + (String) reqHeader.get("connection") + "\n";
+		req += "Upgrade-Insecure-Requests: " + (String) reqHeader.get("upgrade-insecure-requests") + "\n";
+		req += "User-Agent: " + (String) reqHeader.get("user-agent") + "\n";
+		req += "Accept: " + (String) reqHeader.get("accept") + "\n";
+		req += "Accept-Encoding: " + (String) reqHeader.get("accept-encoding") + "\n";
+		req += "Accept-Language: " + (String) reqHeader.get("accept-language");
+
+		logMessageService.requestReceived(reqHeader, request);
+
+		String ret = "";
+
+		QueryParser parser = new QueryParser();
+
+		QuerySet querySet = new QuerySet(1);
+		Query query = new Query();
+
+		try {
+			SelectSet[] selectSets = selectSets = new SelectSet[]{
+					new SelectSet("ALL", Protocol.SelectSet.NONE)
+			};
+			
+			ArrayList<WhereSet> whereSetList = new ArrayList<WhereSet>();
+	        WhereSet[] whereSets = null;
+	        
+	        whereSetList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_OPEN));
+        	whereSetList.add(new WhereSet("ALL", Protocol.WhereSet.OP_HASALL, parseQ(params)));
+        	whereSetList.add(new WhereSet(Protocol.WhereSet.OP_OR));
+        	whereSetList.add(new WhereSet("ALL", Protocol.WhereSet.OP_HASALL, "A"));
+        	whereSetList.add(new WhereSet(Protocol.WhereSet.OP_BRACE_CLOSE));
+	        
+			whereSets = new WhereSet[whereSetList.size()];
+	        for(int i = 0; i < whereSetList.size(); i++){
+	               whereSets[i] = whereSetList.get(i);
+	        }
+			
+			query.setSelect(selectSets);
+			query.setWhere(whereSets);
+			query.setFrom(getCollection(params));
+			query.setResult(0, 1);
+			query.setFaultless(true);
+			query.setSearchOption(Protocol.SearchOption.CACHE);
+			query.setLogKeyword(parseQ(params).toCharArray());
+			query.setLoggable(getLoggable("sb", parseQ(params)));
+			query.setPrintQuery(false); // 실제 사용시 false
+			parseTrigger(params, query, getCollection(params));
+			query.setResultModifier("typo");
+
+			querySet.addQuery(query);
+
+			String queryStr = parser.queryToString(query);
+
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 5000, 50, 50);
+			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
+
+			int returnCode = commandSearchRequest.request(querySet);
+
+			if (returnCode <= -100) {
+				ErrorMessageService.getInstance().minusReturnCodeLog(returnCode, commandSearchRequest.getException(),req);
+				logMessageService.receiveEnd(reqHeader, request);
+				return commandSearchRequestErrorResponse(commandSearchRequest.getException().getErrorMessage());
+			} else {
+				logMessageService.messageReceived(reqHeader, request);
+			}
+
+			ret = Integer.toString(returnCode);
+
+			logMessageService.receiveEnd(reqHeader, request);
+
+		} catch (InvalidParameterException e) {
+			ErrorMessageService.getInstance().invalidParameterLog(req, e);
+			logMessageService.receiveEnd(reqHeader, request);
+			return invalidParameterResponse(e);
+		} catch (Exception e) {
+			ErrorMessageService.getInstance().InternalServerErrorLog(req, e);
+			logMessageService.receiveEnd(reqHeader, request);
+			return internalServerResponse(e);
+		}
+
+		return ret;
+
+	}
 
 	// 구매한 곡 검색 API
 	public String purchasedSearch(Map<String, Object> params, Map<String, Object> document, Map<String, Object> reqHeader, HttpServletRequest request) {

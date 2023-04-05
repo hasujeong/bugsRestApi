@@ -43,6 +43,7 @@ public class BugsRestController {
 	public static String APP_KEY_AUTOTAG = "MjYxYTg2ZDEwMWN";
 	public static String APP_KEY_AUTOTOTAL = "YTgxMDkyMzlkNjJ";
 	public static String APP_KEY_HOT = "ZTRiMDhlNWM1NTh";
+	public static String APP_KEY_TOTKWD = "NGRkZDhhM2JiZjg";
 
 	public BugsRestController(BugsRestService bugsRestService) {
 		this.bugsRestService = bugsRestService;
@@ -220,6 +221,25 @@ public class BugsRestController {
 			params.put("collection",Collections.HOTKEYWORD);
 			
 			return bugsRestService.hotKeyword(params, requestHeader, request);
+		} else {
+			return unknownRequest(params, time);
+		}
+	}
+	
+	/*
+	 * 검색어 통합 집계 API 
+	 */
+	@GetMapping("/{appKey}/v1/totkeyword")
+	public String TotKwdSearch(@PathVariable("appKey") String appKey, @RequestParam Map<String, String> params, @RequestHeader Map<String, Object> requestHeader, HttpServletRequest request) {
+		
+		params.put("requestHeader.sid", (requestHeader.get("sid")==null?"":requestHeader.get("sid").toString()));
+		
+		long time = System.currentTimeMillis();
+		
+		if (appKey.equals(APP_KEY_TOTKWD)) {
+			params.put("collection",Collections.TOTAL_KEYWORD);
+			
+			return bugsRestService.totKeyword(params, requestHeader, request);
 		} else {
 			return unknownRequest(params, time);
 		}
