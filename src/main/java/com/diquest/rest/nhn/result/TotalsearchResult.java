@@ -105,7 +105,7 @@ public class TotalsearchResult {
 			// 검색어 통합 집계 api 요청
 			if (totalCnt > 0) {
 				try {
-					String keyword = URLEncoder.encode(this.query, "UTF-8");
+					String keyword = URLEncoder.encode(query, "UTF-8");
 					String url = "http://api-etc-kr-tcc.qpit.ai/NGRkZDhhM2JiZjg/v1/totkeyword?q=" + keyword;
 					
 					HttpURLConnection totalConnection = (HttpURLConnection) new URL(url).openConnection();
