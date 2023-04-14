@@ -7,11 +7,11 @@ import com.diquest.rest.nhn.filter.result.FilterFieldParseResult;
 import com.diquest.rest.nhn.filter.result.FilterNormalValueResult;
 import com.diquest.rest.nhn.filter.result.FilterRangeValueResult;
 
-public class SayclubFilterValue {
+public class SayclubNewFilterValue {
 	private FilterFieldParseResult filterFieldParseResult;
 	private Map<String, String> params;
 
-	public SayclubFilterValue(Map<String, String> params) {
+	public SayclubNewFilterValue(Map<String, String> params) {
 		this.params = params;
 		this.filterFieldParseResult = new FilterFieldParseResult();
 	}
@@ -54,7 +54,7 @@ public class SayclubFilterValue {
 	}
 
 	private boolean isFilterField(String key) {
-		return key.startsWith("filter=");
+		return key.startsWith("filter.");
 	}
 
 	protected String removeFilterPrefixAndUpperCase(String field) {

@@ -1460,7 +1460,7 @@ public class BugsRestService {
 				query = new Query();
 				query.setSelect(parsePurchaseSelect(returns));
 				query.setWhere(similarWhere(index, collection, num));
-				query.setFilter(parseTotalFilter(params, filterFieldParseResult, collection));
+				query.setFilter(parseFilter(params, filterFieldParseResult, collection));
 				query.setOrderby(purchaseOrderBy(collection));
 				query.setFrom(collection);
 				query.setResult(start - 1, (start + size) - 2);
@@ -1470,8 +1470,8 @@ public class BugsRestService {
 				query.setSearchOption((byte) (Protocol.SearchOption.BANNED | Protocol.SearchOption.STOPWORD	| Protocol.SearchOption.CACHE));
 				query.setRankingOption((byte) (Protocol.RankingOption.CATEGORY_RANKING | Protocol.RankingOption.DOCUMENT_RANKING));
 				query.setCategoryRankingOption((byte) (Protocol.CategoryRankingOption.EQUIV_SYNONYM	| Protocol.CategoryRankingOption.QUASI_SYNONYM));
-				query.setLoggable(false);
-				query.setPrintQuery(false); // 실제 사용시 false
+				query.setLoggable(true);
+				query.setPrintQuery(true); // 실제 사용시 false
 				query.setResultModifier("typo");
 
 				querySet.addQuery(query);
@@ -1481,7 +1481,7 @@ public class BugsRestService {
 				num++;
 			}
 
-			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 5000, 50, 50);
+			CommandSearchRequest.setProps(Connection.IP, Connection.PORT, 10000, 50, 50);
 			CommandSearchRequest commandSearchRequest = new CommandSearchRequest(Connection.IP, Connection.PORT);
 
 			int returnCode = commandSearchRequest.request(querySet);

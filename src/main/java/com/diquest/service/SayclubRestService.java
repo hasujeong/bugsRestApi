@@ -35,7 +35,9 @@ import com.diquest.mapper.AdminMapper;
 import com.diquest.rest.nhn.common.SayclubCollections;
 import com.diquest.rest.nhn.common.Collections;
 import com.diquest.rest.nhn.common.Connection;
+import com.diquest.rest.nhn.filter.parse.FilterValueParser;
 import com.diquest.rest.nhn.filter.parse.SayclubFilterValue;
+import com.diquest.rest.nhn.filter.parse.SayclubNewFilterValue;
 import com.diquest.rest.nhn.filter.result.FilterFieldParseResult;
 import com.diquest.rest.nhn.result.NhnError;
 import com.diquest.rest.nhn.result.NhnResult;
@@ -45,7 +47,9 @@ import com.diquest.rest.nhn.result.SayclubNewResult;
 import com.diquest.rest.nhn.result.SayclubResult;
 import com.diquest.rest.nhn.service.error.ErrorMessageService;
 import com.diquest.rest.nhn.service.error.logMessageService;
+import com.diquest.rest.nhn.service.filter.FilterSetService;
 import com.diquest.rest.nhn.service.filter.SayclubFilterSetService;
+import com.diquest.rest.nhn.service.filter.SayclubNewFilterSetService;
 import com.diquest.rest.nhn.service.orderby.SayclubOrderBySet;
 import com.diquest.rest.nhn.service.select.SayclubNewSelectSet;
 import com.diquest.rest.nhn.service.select.SayclubSelectSet;
@@ -115,11 +119,9 @@ public class SayclubRestService {
 		
 		try {
 			
-			FilterFieldParseResult filterFieldParseResult = parseFilterParams(params);
+			FilterFieldParseResult filterFieldParseResult = parseNewFilterParams(params);
 			query.setSelect(parseNewSelect(params));
-//			if(!RangeFilter.equalsIgnoreCase("")) {
-//				query.setFilter(parseFilter(collection, RangeFilter, RangeKey));
-//			}
+			query.setFilter(parseNewFilter(params, filterFieldParseResult, collection));
 			query.setWhere(parseNewWhere(params, filterFieldParseResult, collection, OriginKwd));
 //			query.setGroupBy(parseNewGroupBy(params));
 			query.setOrderby(parseNewOrderBy(params, collection));
@@ -178,9 +180,10 @@ public class SayclubRestService {
     					querySet = new QuerySet(1);
     					
 						query = new Query();
-						    						
-						filterFieldParseResult = parseFilterParams(params);
+						
+						filterFieldParseResult = parseNewFilterParams(params);
 						query.setSelect(parseNewSelect(params));
+						query.setFilter(parseNewFilter(params, filterFieldParseResult, collection));
 						query.setWhere(parseNewWhere(params, filterFieldParseResult, collection, parseQ(params)));
 //						query.setGroupBy(parseNewGroupBy(params));
 						query.setOrderby(parseNewOrderBy(params, getCollection(params)));
@@ -653,6 +656,10 @@ public class SayclubRestService {
 	
 	private FilterFieldParseResult parseFilterParams(Map<String, String> params) {
 		return new SayclubFilterValue(params).parseAll();
+	}
+	
+	private FilterFieldParseResult parseNewFilterParams(Map<String, String> params) {
+		return new SayclubNewFilterValue(params).parseAll();
 	}
 	
 	// 리뉴얼 버전
@@ -1132,6 +1139,10 @@ public class SayclubRestService {
 	
 	protected FilterSet[] parseFilter(String collection, String RangeFilter, String RangeKey) throws InvalidParameterException {
 		return SayclubFilterSetService.getInstance().parseFilter(collection,RangeFilter,RangeKey);
+	}
+	
+	protected FilterSet[] parseNewFilter(Map<String, String> params, FilterFieldParseResult filterFieldParseResult, String collection) throws InvalidParameterException {
+		return SayclubNewFilterSetService.getInstance().parseFilter(params, filterFieldParseResult, collection);
 	}
 	
 	private void parseTrigger(Map<String, String> req, Query query, String collection) throws InvalidParameterException {
