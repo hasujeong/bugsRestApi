@@ -1,6 +1,7 @@
 package com.diquest.rest.nhn.service.select;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,6 +133,24 @@ public class SayclubNewSelectSet {
 	private List<SelectSet> getSayArtSelectList(Map<String, String> params) {
 		String pass_field = "";
 		int passage = 200;
+		int highlight_chk = 0;
+		
+		String field_key = RestUtils.getParam(params, "q_option");
+		String[] OptValues = {};
+		Map<String, Double> fieldOpt = new HashMap<String, Double>();
+		
+		if(!field_key.equalsIgnoreCase("")) {
+			OptValues = field_key.split(",");
+			for(int i=0 ; i < OptValues.length ; i++) {
+				if(!OptValues[i].equalsIgnoreCase("and") && !OptValues[i].equalsIgnoreCase("or") && !OptValues[i].equalsIgnoreCase("boolean")) {
+					if(!OptValues[i].split("\\*").equals("")) {
+						fieldOpt.put(OptValues[i].split("\\*")[0], Double.parseDouble(OptValues[i].split("\\*")[1]));
+					} else {
+						fieldOpt.put(OptValues[i], 0.0);
+					}
+				} 
+			}
+		}
 		
 		List<SelectSet> sets = new ArrayList<SelectSet>();
 		for (Entry<String, Integer> entry : sayCast_ArticleMap.entrySet()) {
@@ -145,7 +164,18 @@ public class SayclubNewSelectSet {
 					
 					sets.add(new SelectSet(entry.getKey(), (byte) (Protocol.SelectSet.SUMMARIZE | Protocol.SelectSet.HIGHLIGHT), passage));
 				} else {
-					sets.add(new SelectSet(entry.getKey(), Protocol.SelectSet.HIGHLIGHT));
+					for (Entry<String, Double> field : fieldOpt.entrySet()) {
+						String whereField = field.getKey().toUpperCase();
+						
+						if(whereField.equalsIgnoreCase(entry.getKey())) {
+							highlight_chk = 1;
+							sets.add(new SelectSet(entry.getKey(), Protocol.SelectSet.HIGHLIGHT));
+						} 
+					}
+					if(highlight_chk == 0) {
+						sets.add(new SelectSet(entry.getKey()));
+					}
+					highlight_chk = 0;
 				}
 			} else {
 				sets.add(new SelectSet(entry.getKey()));
